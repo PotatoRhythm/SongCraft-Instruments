@@ -4,6 +4,7 @@ import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.config.enumType.ControlModeType;
 import com.stump.songcraft_instruments.client.config.enumType.NoteGridLabel;
+import com.stump.songcraft_instruments.client.config.enumType.NoteIconStyle;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.GridInstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.INoteLabel;
 import com.stump.songcraft_instruments.client.gui.options.partial.InstrumentOptionsScreen;
@@ -59,7 +60,23 @@ public class GridInstrumentOptionsScreen extends InstrumentOptionsScreen {
                 Component.translatable("button.songcraft_instruments.render_background"), this::onRenderBackgroundChanged
             );
         rowHelper.addChild(renderBackground);
+
+        final CycleButton<NoteIconStyle> noteIconStyle = CycleButton.<NoteIconStyle>builder((style) -> Component.translatable(style.getKey()))
+            .withValues(NoteIconStyle.values())
+            .withInitialValue(ModClientConfigs.NOTE_ICON_STYLE.get())
+            .withTooltip((value) -> Tooltip.create(Component.translatable(value.getKey()+".description")))
+            .create(0, 0,
+                getSmallButtonWidth(), getButtonHeight(),
+                Component.translatable("button.songcraft_instruments.note_icon_style"), this::onNoteIconStyleChanged
+            );
+        rowHelper.addChild(noteIconStyle);
+
         super.initVisualsSection(grid, rowHelper);
+    }
+
+    // Note symbols are resolved from the config on every render, so just save it
+    protected void onNoteIconStyleChanged(final CycleButton<NoteIconStyle> button, final NoteIconStyle value) {
+        ModClientConfigs.NOTE_ICON_STYLE.set(value);
     }
 
     @Override

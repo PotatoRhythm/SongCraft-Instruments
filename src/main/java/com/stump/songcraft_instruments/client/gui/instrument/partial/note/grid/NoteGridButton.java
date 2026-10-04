@@ -1,6 +1,7 @@
 package com.stump.songcraft_instruments.client.gui.instrument.partial.note.grid;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
+import com.stump.songcraft_instruments.client.config.enumType.NoteIconStyle;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.GridInstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.NoteGrid;
@@ -24,6 +25,22 @@ public class NoteGridButton extends NoteButton {
             GRID_LABELS[i] = InstrumentScreen.getInternalResourceFromGlob(
                 "note/label/grid/" + Character.toLowerCase(LabelUtil.ABC[i]) + ".png"
             );
+        }
+    }
+    /**
+     * Jianpu labels, indexed by [octave][note].
+     * Octaves are ordered low, middle, high.
+     */
+    private static final ResourceLocation[][] JIANPU_LABELS = new ResourceLocation[3][LabelUtil.ABC.length];
+    private static final String[] JIANPU_OCTAVE_SUFFIXES = {"_low", "", "_high"};
+    static {
+        for (int octave = 0; octave < JIANPU_LABELS.length; octave++) {
+            for (int i = 0; i < LabelUtil.ABC.length; i++) {
+                JIANPU_LABELS[octave][i] = InstrumentScreen.getInternalResourceFromGlob(
+                    "note/label/grid_generic/" + Character.toLowerCase(LabelUtil.ABC[i])
+                        + JIANPU_OCTAVE_SUFFIXES[octave] + ".png"
+                );
+            }
         }
     }
 
@@ -108,7 +125,20 @@ public class NoteGridButton extends NoteButton {
         return GRID_LABELS[row];
     }
     protected ResourceLocation getLabelTexture() {
+        if (gridInstrument().getNoteIconStyle() == NoteIconStyle.JIANPU)
+            return JIANPU_LABELS[getJianpuOctave()][getLabelTextureRow()];
+
         return getLabelTextureAt(getLabelTextureRow());
+    }
+
+    /**
+     * @return The Jianpu octave index of this button's column:
+     * 0 for columns below the middle one, 1 for the middle column, and 2 for columns above it
+     */
+    protected int getJianpuOctave() {
+        final int columns = gridInstrument().columns();
+        final int soundColumn = NoteGrid.getFlippedColumn(column, columns);
+        return Integer.signum(soundColumn - columns / 2) + 1;
     }
 
 

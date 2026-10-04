@@ -2,6 +2,7 @@ package com.stump.songcraft_instruments.client.gui.instrument.partial.grid;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.config.enumType.ControlModeType;
+import com.stump.songcraft_instruments.client.config.enumType.NoteIconStyle;
 import com.stump.songcraft_instruments.client.gui.instrument.LooperOverlayInjector;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.*;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.*;
@@ -190,6 +191,22 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      */
     public static NoteLabelSupplier getInitLabelSupplier() {
         return ModClientConfigs.GRID_LABEL_TYPE.get().getLabelSupplier();
+    }
+
+    /**
+     * Override this method to change the note symbols this instrument uses
+     * when {@link ModClientConfigs#NOTE_ICON_STYLE} is set to {@link NoteIconStyle#INSTRUMENT_DEFAULT}.
+     * Must not return {@link NoteIconStyle#INSTRUMENT_DEFAULT}.
+     */
+    public NoteIconStyle getDefaultNoteIconStyle() {
+        return NoteIconStyle.GENSHIN;
+    }
+    /**
+     * @return The note symbol style to render, as resolved from the configs and this instrument's default
+     */
+    public NoteIconStyle getNoteIconStyle() {
+        final NoteIconStyle style = ModClientConfigs.NOTE_ICON_STYLE.get();
+        return (style == NoteIconStyle.INSTRUMENT_DEFAULT) ? getDefaultNoteIconStyle() : style;
     }
 
     @Override

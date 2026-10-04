@@ -34,6 +34,7 @@ public class ModClientConfigs {
     public static final DoubleValue VOLUME, MIDI_IN_SENSITIVITY;
 
     public static final EnumValue<NoteGridLabel> GRID_LABEL_TYPE;
+    public static final EnumValue<NoteIconStyle> NOTE_ICON_STYLE;
     public static final EnumValue<InstrumentChannelType> CHANNEL_TYPE;
     public static final EnumValue<ControlModeType> CONTROL_MODE;
 
@@ -75,6 +76,8 @@ public class ModClientConfigs {
         );
 
         GRID_LABEL_TYPE = configBuilder.defineEnum("label_type", NoteGridLabel.KEYBOARD_LAYOUT);
+        NOTE_ICON_STYLE = configBuilder.comment("Selects the note symbols drawn on grid instruments. INSTRUMENT_DEFAULT uses each instrument's own style")
+            .defineEnum("note_icon_style", NoteIconStyle.INSTRUMENT_DEFAULT);
         CHANNEL_TYPE = configBuilder.defineEnum("channel_type", InstrumentChannelType.MIXED);
         CONTROL_MODE = configBuilder.comment("Selects the instrument control mode").defineEnum("control_mode", ControlModeType.GENSHIN);
 
