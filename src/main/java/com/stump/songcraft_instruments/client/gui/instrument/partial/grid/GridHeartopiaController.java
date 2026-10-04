@@ -38,11 +38,6 @@ public class GridHeartopiaController {
         if (pitchOffset == null)
             return false;
 
-        // Limit max note if extended range is off
-        if (!ModClientConfigs.EXTEND_RANGE.get() && pitchOffset >= screen.columns() * 12 + 1) {
-            return true;
-        }
-
         NoteGridButton visualButton = null;
         int visualPitch = Integer.MIN_VALUE;
 

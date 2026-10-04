@@ -1,7 +1,6 @@
 package com.stump.songcraft_instruments.item;
 
 import com.stump.songcraft_instruments.SCInstrumentMod;
-import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
 import com.stump.songcraft_instruments.util.CommonUtil;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import com.stump.songcraft_instruments.networking.OpenInstrumentPacketSender;
@@ -22,16 +21,15 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
  * An instrument that requires the usage of a {@link InstrumentAccessoryItem}
  */
 @EventBusSubscriber(modid = SCInstrumentMod.MODID, bus = Bus.FORGE)
-public class AccessoryInstrumentItem extends CreditableInstrumentItem {
+public class AccessoryInstrumentItem extends InstrumentItem {
     private final InstrumentAccessoryItem accessory;
 
-    public AccessoryInstrumentItem(OpenInstrumentPacketSender onOpenRequest, InstrumentAccessoryItem accessory, String credit) {
-        super(onOpenRequest, credit);
+    public AccessoryInstrumentItem(OpenInstrumentPacketSender onOpenRequest, InstrumentAccessoryItem accessory) {
+        super(onOpenRequest);
         this.accessory = accessory;
     }
-    public AccessoryInstrumentItem(OpenInstrumentPacketSender onOpenRequest, Properties properties, InstrumentAccessoryItem accessory,
-                                   String credit) {
-        super(onOpenRequest, properties, credit);
+    public AccessoryInstrumentItem(OpenInstrumentPacketSender onOpenRequest, Properties properties, InstrumentAccessoryItem accessory) {
+        super(onOpenRequest, properties);
         this.accessory = accessory;
     }
 

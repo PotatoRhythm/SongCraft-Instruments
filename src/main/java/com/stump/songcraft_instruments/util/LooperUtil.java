@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import com.stump.songcraft_instruments.networking.packet.SyncModTagPacket;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -24,6 +25,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -31,7 +34,7 @@ import java.util.function.Consumer;
 import static java.util.Map.entry;
 
 public class LooperUtil {
-    public static final String LOOPER_TAG = "looper", POS_TAG = "pos", CONNECTION_TAG = "connection";
+    public static final String LOOPER_TAG = "looper", POS_TAG = "pos", CONNECTIONS_TAG = "connections";
     
 
     // Handle instrument's looper tag
@@ -52,22 +55,52 @@ public class LooperUtil {
         SCInstrumentMod.modTag(instrument).remove(LOOPER_TAG);
     }
 
+    /**
+     * Connects an item instrument; it belongs to a single player, and so holds a single connection.
+     */
     public static void createLooperTag(final ItemStack instrument, final BlockPos looperPos, final UUID connectionId) {
         SCInstrumentMod.modTag(instrument).put(LOOPER_TAG, new CompoundTag());
-        constructLooperTag(looperTag(instrument), looperPos, connectionId);
+        constructLooperTag(looperTag(instrument), looperPos, List.of(connectionId));
     }
+    /**
+     * Adds a connection to a block instrument. Block instruments are shared, so multiple players may connect them
+     * to the same looper. Connecting to a different looper replaces all connections to the previous one.
+     */
     public static void createLooperTag(final BlockEntity instrument, final BlockPos looperPos, final UUID connectionId) {
+        final CompoundTag oldTag = looperTag(instrument);
+        final Level level = instrument.getLevel();
+        final List<UUID> connectionIds = new ArrayList<>();
+
+        if (!oldTag.isEmpty() && (level != null)) {
+            if (looperPos.equals(getLooperPos(oldTag))) {
+                // Keep the connections the looper still holds; e.g. not the connecting player's previous one
+                final LooperBlockEntity lbe = getFromPos(level, looperPos);
+                if (lbe != null)
+                    getConnectionIds(oldTag).stream().filter(lbe.connections()::has).forEach(connectionIds::add);
+            } else {
+                removeFromLooper(level, oldTag);
+            }
+        }
+        connectionIds.add(connectionId);
+
         SCInstrumentMod.modTag(instrument).put(LOOPER_TAG, new CompoundTag());
-        constructLooperTag(looperTag(instrument), looperPos, connectionId);
+        constructLooperTag(looperTag(instrument), looperPos, connectionIds);
     }
-    private static void constructLooperTag(final CompoundTag looperTag, final BlockPos looperPos, final UUID connectionId) {
+    private static void constructLooperTag(final CompoundTag looperTag, final BlockPos looperPos, final List<UUID> connectionIds) {
         looperTag.put(POS_TAG, NbtUtils.writeBlockPos(looperPos));
-        looperTag.putUUID(CONNECTION_TAG, connectionId);
+
+        final ListTag connections = new ListTag();
+        connectionIds.forEach((connectionId) -> connections.add(NbtUtils.createUUID(connectionId)));
+        looperTag.put(CONNECTIONS_TAG, connections);
     }
 
-    @Nullable
-    public static UUID getConnectionId(final CompoundTag looperTag) {
-        return looperTag.hasUUID(CONNECTION_TAG) ? looperTag.getUUID(CONNECTION_TAG) : null;
+    /**
+     * @return The IDs of the connections made with this instrument; one for each player that connected it
+     */
+    public static List<UUID> getConnectionIds(final CompoundTag looperTag) {
+        return looperTag.getList(CONNECTIONS_TAG, Tag.TAG_INT_ARRAY).stream()
+            .map(NbtUtils::loadUUID)
+            .toList();
     }
 
     public static CompoundTag looperTag(final ItemStack instrument) {
@@ -140,7 +173,7 @@ public class LooperUtil {
 
         final LooperBlockEntity looperBE = getFromPos(level, LooperUtil.getLooperPos(looperData));
 
-        if (looperBE == null || !looperBE.connections().has(getConnectionId(looperData))) {
+        if (looperBE == null || getConnectionIds(looperData).stream().noneMatch(looperBE.connections()::has)) {
             onInvalid.run();
             return null;
         }
@@ -150,10 +183,11 @@ public class LooperUtil {
 
     /**
      * @return Whether the instrument holding {@code looperTag} is the player's current connection to the looper.
-     * False for players using an instrument connected by someone else (e.g. a shared block instrument).
+     * False for players using a block instrument only other players connected.
      */
     public static boolean isConnectedBy(final LooperBlockEntity lbe, final CompoundTag looperTag, final Player player) {
-        return lbe.connections().isConnectedBy(player, getConnectionId(looperTag));
+        return getConnectionIds(looperTag).stream()
+            .anyMatch((connectionId) -> lbe.connections().isConnectedBy(player, connectionId));
     }
 
     /**
@@ -164,14 +198,7 @@ public class LooperUtil {
         if (looperTag.isEmpty())
             return;
 
-        final BlockPos looperPos = getLooperPos(looperTag);
-        final UUID connectionId = getConnectionId(looperTag);
-        if (looperPos != null && connectionId != null && level.isLoaded(looperPos)) {
-            final LooperBlockEntity lbe = getFromPos(level, looperPos);
-            // Group participants stay in the session until it ends, recording on any instrument they play
-            if (lbe != null && !lbe.session().isGroupSession())
-                lbe.connections().removeByConnectionId(connectionId);
-        }
+        removeFromLooper(level, looperTag);
 
         remLooperTag(instrument);
         instrument.setChanged();
@@ -182,6 +209,20 @@ public class LooperUtil {
                 serverLevel, instrument.getBlockPos()
             );
         }
+    }
+
+    /**
+     * Removes the connections made with an instrument from its looper's end.
+     */
+    private static void removeFromLooper(final Level level, final CompoundTag looperTag) {
+        final BlockPos looperPos = getLooperPos(looperTag);
+        if (looperPos == null || !level.isLoaded(looperPos))
+            return;
+
+        final LooperBlockEntity lbe = getFromPos(level, looperPos);
+        // Group participants stay in the session until it ends, recording on any instrument they play
+        if (lbe != null && !lbe.session().isGroupSession())
+            getConnectionIds(looperTag).forEach(lbe.connections()::removeByConnectionId);
     }
 
     public static LooperBlockEntity getFromPos(final Level level, final BlockPos pos) {

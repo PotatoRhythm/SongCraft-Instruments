@@ -13,6 +13,7 @@ import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.GridLayout.RowHelper;
+import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -92,16 +93,16 @@ public class GridInstrumentOptionsScreen extends InstrumentOptionsScreen {
                 );
         rowHelper.addChild(controlModeButton);
 
-        final CycleButton<Boolean> extendRange = CycleButton.booleanBuilder(CommonComponents.OPTION_ON, CommonComponents.OPTION_OFF)
-                .withInitialValue(ModClientConfigs.EXTEND_RANGE.get())
-                .withTooltip((value) -> Tooltip.create(Component.translatable("button.songcraft_instruments.extend_range.tooltip")))
-                .create(0, 0,
-                        getSmallButtonWidth(), getButtonHeight(),
-                        Component.translatable("button.songcraft_instruments.extend_range"), this::onExtendRangeChanged
-                );
-        rowHelper.addChild(extendRange);
+        super.initControlSection(grid, rowHelper);
+    }
 
-        final SliderButton transpose = new SliderButton(getSmallButtonWidth(),
+    @Override
+    protected void initBottomSection(GridLayout grid, RowHelper rowHelper) {
+        rowHelper.addChild(SpacerElement.height(7), 2);
+
+
+        // 1.4x the width of a regular button, centered across both columns
+        final SliderButton transpose = new SliderButton(getSmallButtonWidth() * 7 / 5,
                 ModClientConfigs.TRANSPOSE.get(), -12, 12) {
             @Override
             public Component getMessage() {
@@ -115,23 +116,13 @@ public class GridInstrumentOptionsScreen extends InstrumentOptionsScreen {
                 ModClientConfigs.TRANSPOSE.set(value);
             }
         };
-        rowHelper.addChild(transpose);
-
-        super.initControlSection(grid, rowHelper);
+        rowHelper.addChild(transpose, 2, rowHelper.newCellSettings().alignHorizontallyCenter());
     }
 
     protected void onRenderBackgroundChanged(final CycleButton<Boolean> button, final boolean value) {
         ModClientConfigs.RENDER_BACKGROUND.set(value);
     }
 
-    protected void onExtendRangeChanged(final CycleButton<Boolean> button, final boolean value) {
-        ModClientConfigs.EXTEND_RANGE.set(value);
-        instrumentScreen.ifPresent(screen -> {
-            if (screen instanceof GridInstrumentScreen gridScreen) {
-                gridScreen.updateOctaveRange(value);
-            }
-        });
-    }
     protected void onControlModeChanged(final CycleButton<ControlModeType> button, final ControlModeType value) {
         ModClientConfigs.CONTROL_MODE.set(value);
     }

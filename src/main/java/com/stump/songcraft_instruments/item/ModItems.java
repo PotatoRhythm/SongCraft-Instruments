@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.SCCreativeModeTabs;
 import com.stump.songcraft_instruments.block.ModBlocks;
 import com.stump.songcraft_instruments.item.emirecord.BurnedRecordItem;
 import com.stump.songcraft_instruments.item.emirecord.WritableRecordItem;
+import com.stump.songcraft_instruments.item.partial.instrument.CreditableAccessoryInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableBlockInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableWindInstrumentItem;
@@ -130,7 +131,7 @@ public class ModItems {
             )
         ),
         SHAMISEN = register("shamisen",
-            () -> new AccessoryInstrumentItem(
+            () -> new CreditableAccessoryInstrumentItem(
                 (player) -> InstrumentPacketUtil.sendOpenPacket(
                     player, loc("shamisen")
                 ),

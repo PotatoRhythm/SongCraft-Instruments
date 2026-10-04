@@ -1,14 +1,12 @@
 package com.stump.songcraft_instruments.client.gui.options.partial;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
-import com.stump.songcraft_instruments.client.config.enumType.InstrumentChannelType;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.INoteLabel;
 import com.stump.songcraft_instruments.client.gui.options.MidiOptionsScreen;
 import com.stump.songcraft_instruments.client.gui.options.ParticleEditorScreen;
 import com.stump.songcraft_instruments.client.util.ClientUtil;
-import com.stump.songcraft_instruments.sound.NoteSound;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -16,7 +14,6 @@ import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.GridLayout.RowHelper;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.LinearLayout.Orientation;
-import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -35,8 +32,7 @@ import javax.annotation.Nullable;
 public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsScreen {
     public static final MutableComponent MIDI_OPTIONS = Component.translatable("label.songcraft_instruments.midiOptions");
 
-    private static final String SOUND_CHANNEL_KEY = "button.songcraft_instruments.audioChannels",
-        STOP_MUSIC_KEY = "button.songcraft_instruments.stop_music_on_play";
+    private static final String STOP_MUSIC_KEY = "button.songcraft_instruments.stop_music_on_play";
 
 
     public abstract INoteLabel[] getLabels();
@@ -65,13 +61,10 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
         final GridLayout grid = ClientUtil.createSettingsGrid();
 
         initOptionsGrid(grid, grid.createRowHelper(2));
-        grid.arrangeElements();
 
-        ClientUtil.alignGrid(grid, width, height);
+        final int buttonsY = arrangeVertically(grid);
         grid.visitWidgets(this::addRenderableWidget);
 
-
-        final int buttonsY = ClientUtil.lowerButtonsY(grid.getY(), grid.getHeight(), height);
         final int buttonsWidth = 150;
 
         final Button doneBtn = Button.builder(CommonComponents.GUI_DONE, (btn) -> onClose())
@@ -100,23 +93,6 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
             addRenderableWidget(doneBtn);
         }
 
-    }
-
-    protected void initAudioSection(final GridLayout grid, final RowHelper rowHelper) {
-        final CycleButton<InstrumentChannelType> instrumentChannel = CycleButton.<InstrumentChannelType>builder((soundType) ->
-            Component.translatable(SOUND_CHANNEL_KEY +"."+ soundType.getKey())
-        )
-            .withValues(InstrumentChannelType.values())
-            .withInitialValue(ModClientConfigs.CHANNEL_TYPE.get())
-
-            .withTooltip((soundType) -> Tooltip.create(switch (soundType) {
-                case MIXED -> translatableArgs(SOUND_CHANNEL_KEY+".mixed.tooltip", NoteSound.STEREO_RANGE);
-                case STEREO -> Component.translatable(SOUND_CHANNEL_KEY+".stereo.tooltip");
-                default -> CommonComponents.EMPTY;
-            }))
-            .create(0, 0,
-                getBigButtonWidth(), 20, Component.translatable(SOUND_CHANNEL_KEY), this::onChannelTypeChanged);
-        rowHelper.addChild(instrumentChannel, 2);
     }
 
     protected void initVisualsSection(final GridLayout grid, final RowHelper rowHelper) {
@@ -185,17 +161,20 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
     protected void initControlSection(final GridLayout grid, final RowHelper rowHelper) { }
 
     /**
+     * Hook for subclasses to add a centered row below all other options.
+     * Subclasses that add to it should start it with a spacer, to separate it from the rest of the options.
+     */
+    protected void initBottomSection(final GridLayout grid, final RowHelper rowHelper) { }
+
+    /**
      * Fills the settings grid with all the necessary widgets, buttons and such
      * @param grid The settings grid to add the widgets to
      * @param rowHelper A row helper for the specified {@code grid}
      */
     protected void initOptionsGrid(final GridLayout grid, final RowHelper rowHelper) {
-        initAudioSection(grid, rowHelper);
-
-        rowHelper.addChild(SpacerElement.height(7), 2);
-        
         initVisualsSection(grid, rowHelper);
         initControlSection(grid, rowHelper);
+        initBottomSection(grid, rowHelper);
     }
 
     // The label enum is not cached anywhere; just save it.
@@ -206,9 +185,6 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
     protected abstract void saveLabel(final INoteLabel newLabel);
 
     // These values derive from the config directly, so just update them on-spot
-    protected void onChannelTypeChanged(CycleButton<InstrumentChannelType> button, InstrumentChannelType type) {
-        ModClientConfigs.CHANNEL_TYPE.set(type);
-    }
     protected void onMusicStopChanged(final CycleButton<Boolean> button, final boolean value) {
         ModClientConfigs.STOP_MUSIC_ON_PLAY.set(value);
     }
@@ -253,19 +229,5 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
     public void onClose() {
         super.onClose();
         instrumentScreen.ifPresent(InstrumentScreen::onOptionsClose);
-    }
-
-
-    /**
-     * Tooltip is being annoying and not replacing my args.
-     * So, fine, I'll do it myself.
-     * @param key The translation key
-     * @param arg The thing to replace with %s
-     * @return What should've been return by {@link Component#translatable(String, Object...)}
-     */
-    private static MutableComponent translatableArgs(final String key, final Object arg) {
-        return Component.literal(
-            Component.translatable(key).getString().replace("%s", arg.toString())
-        );
     }
 }

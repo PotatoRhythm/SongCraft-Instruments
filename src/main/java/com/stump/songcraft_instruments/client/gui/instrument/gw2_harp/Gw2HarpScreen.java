@@ -29,9 +29,4 @@ public class Gw2HarpScreen extends GridInstrumentScreen {
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
     }
-
-    @Override
-    public boolean isGw2Instrument() {
-        return true;
-    }
 }

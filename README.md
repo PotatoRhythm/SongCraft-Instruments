@@ -43,6 +43,7 @@ This mod is a heavily modified continuation of the Genshin Instruments and Even 
 ## Credits
 - Original [Genshin Instruments](https://github.com/StavWasPlayZ/Genshin-Instruments) mod by StavWasPlayZ
 - Original [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ
+- Full credits, including the source and licence of every sound: [CREDITS.md](CREDITS.md)
 
 ## License
 This mod is based on Genshin Instruments and Even More Instruments!, which are licensed under **GNU GPL v3**.  

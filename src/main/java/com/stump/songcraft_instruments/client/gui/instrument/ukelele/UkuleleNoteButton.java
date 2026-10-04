@@ -22,13 +22,12 @@ public class UkuleleNoteButton extends NoteGridButton {
         NOTATIONAL_LABELS = Stream.of(
             NoteGridLabel.NOTE_NAME,
             NoteGridLabel.DO_RE_MI,
-            NoteGridLabel.FIXED_ABC,
-            NoteGridLabel.FIXED_DO_RE_MI
+            NoteGridLabel.FIXED_ABC
         ).map(NoteGridLabel::getLabelSupplier).toList(),
         //TODO: This should later be determined via a simple boolean.
         FIXED_LABELS = Stream.of(
-            NoteGridLabel.FIXED_ABC,
-            NoteGridLabel.FIXED_DO_RE_MI
+            NoteGridLabel.DO_RE_MI,
+            NoteGridLabel.FIXED_ABC
         ).map(NoteGridLabel::getLabelSupplier).toList()
     ;
 

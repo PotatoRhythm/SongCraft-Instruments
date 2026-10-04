@@ -31,18 +31,18 @@ public class ModClientConfigs {
 
     public static final IntValue MIDI_DEVICE_INDEX, OCTAVE_SHIFT, MIDI_CHANNEL;
     public static final IntValue TRANSPOSE;
+    public static final IntValue OCTAVE_SWAP_MIN, OCTAVE_SWAP_MAX;
     public static final DoubleValue VOLUME, MIDI_IN_SENSITIVITY;
 
     public static final EnumValue<NoteGridLabel> GRID_LABEL_TYPE;
     public static final EnumValue<NoteIconStyle> NOTE_ICON_STYLE;
-    public static final EnumValue<InstrumentChannelType> CHANNEL_TYPE;
     public static final EnumValue<ControlModeType> CONTROL_MODE;
 
     public static final BooleanValue
         STOP_MUSIC_ON_PLAY, SHARED_INSTRUMENT,
-        RENDER_BACKGROUND, ACCEPTED_GENSHIN_CONSENT, ACCEPTED_GW2_CONSENT, ACCURATE_NOTES,
+        RENDER_BACKGROUND, ACCEPTED_DISCLAIMER, ACCURATE_NOTES,
         MIDI_ENABLED, EXTEND_OCTAVES, FIXED_TOUCH, ACCEPT_ALL_CHANNELS,
-        NORMALIZE_VINTAGE_LYRE, SERVER_AUDIO, EXTEND_RANGE
+        NORMALIZE_VINTAGE_LYRE, SERVER_AUDIO
     ;
 
     public static final EnumValue<ZitherSoundType> ZITHER_SOUND_TYPE;
@@ -57,6 +57,7 @@ public class ModClientConfigs {
     public static final EnumValue<PipaSoundType> PIPA_SOUND_TYPE;
     public static final EnumValue<KeyboardSoundType> KEYBOARD_SOUND_TYPE;
     public static final EnumValue<DrumsetSoundType> DRUMSET_SOUND_TYPE;
+    public static final EnumValue<GuitarSoundType> GUITAR_SOUND_TYPE;
     public static final EnumValue<BassGuitarSoundType> BASS_GUITAR_SOUND_TYPE;
     public static final EnumValue<ElectricGuitarSoundType> ELECTRIC_GUITAR_SOUND_TYPE;
     public static final EnumValue<ViolinSoundType> VIOLIN_SOUND_TYPE;
@@ -78,7 +79,6 @@ public class ModClientConfigs {
         GRID_LABEL_TYPE = configBuilder.defineEnum("label_type", NoteGridLabel.KEYBOARD_LAYOUT);
         NOTE_ICON_STYLE = configBuilder.comment("Selects the note symbols drawn on grid instruments. INSTRUMENT_DEFAULT uses each instrument's own style")
             .defineEnum("note_icon_style", NoteIconStyle.INSTRUMENT_DEFAULT);
-        CHANNEL_TYPE = configBuilder.defineEnum("channel_type", InstrumentChannelType.MIXED);
         CONTROL_MODE = configBuilder.comment("Selects the instrument control mode").defineEnum("control_mode", ControlModeType.GENSHIN);
 
         STOP_MUSIC_ON_PLAY = configBuilder.comment(
@@ -93,10 +93,12 @@ public class ModClientConfigs {
         NORMALIZE_VINTAGE_LYRE = configBuilder.define("normalize_vintage_lyre", true);
 
         SERVER_AUDIO = configBuilder.define("server_audio", false);
-        EXTEND_RANGE = configBuilder.comment("Extend Range to 5 octaves").define("extend_range", true);
+        OCTAVE_SWAP_MIN = configBuilder.comment("The lowest octave Octave Swap mode may shift to")
+            .defineInRange("octave_swap_min", -2, -2, 2);
+        OCTAVE_SWAP_MAX = configBuilder.comment("The highest octave Octave Swap mode may shift to")
+            .defineInRange("octave_swap_max", 2, -2, 2);
 
-        ACCEPTED_GENSHIN_CONSENT = configBuilder.define("accepted_genshin_consent", false);
-        ACCEPTED_GW2_CONSENT = configBuilder.define("accepted_gw2_consent", false);
+        ACCEPTED_DISCLAIMER = configBuilder.define("accepted_disclaimer", false);
 
         ZITHER_SOUND_TYPE = configBuilder.defineEnum("zither_sound_type", ZitherSoundType.NEW);
         GLORIOUS_DRUM_LABEL_TYPE = configBuilder.defineEnum("glorious_drum_label_type", GloriousDrumNoteLabel.KEYBOARD_LAYOUT);
@@ -106,6 +108,7 @@ public class ModClientConfigs {
         GW2_DRUMSET_LABEL_TYPE = configBuilder.defineEnum("gw2_drumset_label_type", Gw2DrumsetNoteLabel.KEYBOARD_LAYOUT);
         KEYBOARD_SOUND_TYPE = configBuilder.defineEnum("keyboard_sound_type", KeyboardSoundType.YAMAHA_C5);
         DRUMSET_SOUND_TYPE = configBuilder.defineEnum("drumset_sound_type", DrumsetSoundType.GW2);
+        GUITAR_SOUND_TYPE = configBuilder.defineEnum("guitar_sound_type", GuitarSoundType.EMI);
         BASS_GUITAR_SOUND_TYPE = configBuilder.defineEnum("bass_guitar_sound_type", BassGuitarSoundType.FINGER);
         ELECTRIC_GUITAR_SOUND_TYPE = configBuilder.defineEnum("electric_guitar_sound_type", ElectricGuitarSoundType.CLEAN);
         VIOLIN_SOUND_TYPE = configBuilder.defineEnum("violin_sound_type", ViolinSoundType.FAST);

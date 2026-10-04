@@ -9,6 +9,8 @@ import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentS
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentThemeLoader;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.options.partial.InstrumentOptionsScreen;
+import com.stump.songcraft_instruments.sound.NoteSound;
+import com.stump.songcraft_instruments.sound.SoundOption;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -41,6 +43,17 @@ public class DrumsetScreen extends InstrumentScreen {
     public SoundTypeOption<DrumsetSoundType> soundTypeOption() {
         return new SoundTypeOption<>(DrumsetSoundType.values(), ModClientConfigs.DRUMSET_SOUND_TYPE,
             "button.songcraft_instruments.drumset.soundType");
+    }
+
+    @Override
+    public void setSoundOption(SoundOption option) {
+        super.setSoundOption(option);
+
+        final NoteSound[] sounds = option.getNoteSounds();
+        for (int i = 0; i < drumsetButtons.length; i++) {
+            if (drumsetButtons[i] != null)
+                drumsetButtons[i].setSound(sounds[i]);
+        }
     }
 
 

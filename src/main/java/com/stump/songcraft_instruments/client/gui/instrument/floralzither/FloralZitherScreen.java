@@ -33,9 +33,4 @@ public class FloralZitherScreen extends GridInstrumentScreen {
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
     }
-
-    @Override
-    public boolean isGenshinInstrument() {
-        return true;
-    }
 }

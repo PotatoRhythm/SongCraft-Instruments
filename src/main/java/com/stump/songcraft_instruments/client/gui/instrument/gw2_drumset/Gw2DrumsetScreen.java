@@ -109,9 +109,4 @@ public class Gw2DrumsetScreen extends InstrumentScreen {
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
     }
-
-    @Override
-    public boolean isGw2Instrument() {
-        return true;
-    }
 }

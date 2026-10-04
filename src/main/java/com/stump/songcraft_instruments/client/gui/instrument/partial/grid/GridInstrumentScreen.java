@@ -43,7 +43,10 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
 
     private GridOctaveSwapController octaveController;
     private GridHeartopiaController heartopiaController;
+    private OctaveRangeSelector octaveRangeSelector;
     private int currentOctave = 0;
+    // The octaves the instrument can reach, and the range the player chose within them
+    private int lowestAvailableOctave, highestAvailableOctave;
     private int minOctave;
     private int maxOctave;
 
@@ -75,11 +78,37 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
 
     @Override
     protected void init() {
-        updateOctaveRange(ModClientConfigs.EXTEND_RANGE.get());
+        updateOctaveRange();
         buildGrid();
         super.init();
         octaveController = new GridOctaveSwapController(this);
         heartopiaController = new GridHeartopiaController(this);
+        octaveRangeSelector = new OctaveRangeSelector(this);
+    }
+
+    private boolean isOctaveSwapMode() {
+        return ModClientConfigs.CONTROL_MODE.get() == ControlModeType.OCTAVE_SWAP;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isOctaveSwapMode() && instrumentRenders() && octaveRangeSelector.mouseClicked(mouseX, mouseY, button))
+            return true;
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (octaveRangeSelector.mouseDragged(mouseX))
+            return true;
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (octaveRangeSelector.mouseReleased())
+            return true;
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
@@ -226,16 +255,15 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
 
         super.renderInstrument(gui, pMouseX, pMouseY, pPartialTick);
 
-        if (ModClientConfigs.CONTROL_MODE.get() == ControlModeType.OCTAVE_SWAP) {
-            int buttonWidth = 150, buttonHeight = 20;
-            int buttonX = (width - buttonWidth) / 2;
-            int buttonY = grid.getY() - 15 - buttonHeight / 2;
+        if (isOctaveSwapMode()) {
+            // Sits just above the options button
+            final int buttonHeight = 20;
+            final int buttonY = grid.getY() - 15 - buttonHeight / 2;
 
-            String text = "Octave: " + getCurrentOctave();
-            int textX = buttonX + (buttonWidth / 2) - (font.width(text) / 2);
-            int textY = buttonY - 12;
-
-            gui.drawString(font, text, textX, textY, 0xFFFFFF);
+            octaveRangeSelector.setPosition(
+                (width - OctaveRangeSelector.WIDTH) / 2, buttonY - OctaveRangeSelector.HEIGHT - 8
+            );
+            octaveRangeSelector.render(gui, font, pMouseX, pMouseY);
         }
     }
 
@@ -389,11 +417,31 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
 
     public int getMaxOctave() { return maxOctave; }
 
+    public int getLowestAvailableOctave() { return lowestAvailableOctave; }
+
+    public int getHighestAvailableOctave() { return highestAvailableOctave; }
+
     public void setCurrentOctave(int current) { currentOctave = current; }
 
-    public void updateOctaveRange(boolean extendRange) {
-        minOctave = extendRange ? -2 : -1;
-        maxOctave = extendRange ? columns() - 1 : columns() - 2;
+    /**
+     * Updates the octaves this instrument can reach, and fits the player's chosen octave range within them.
+     * The chosen range is kept in the configs as is, so that it returns once more octaves are available.
+     */
+    public void updateOctaveRange() {
+        lowestAvailableOctave = -2;
+        highestAvailableOctave = columns() - 1;
+
+        final int min = Math.max(lowestAvailableOctave, Math.min(ModClientConfigs.OCTAVE_SWAP_MIN.get(), highestAvailableOctave));
+        final int max = Math.max(min, Math.min(ModClientConfigs.OCTAVE_SWAP_MAX.get(), highestAvailableOctave));
+        setOctaveRange(min, max);
+    }
+
+    /**
+     * Sets the octaves Octave Swap mode may shift between, moving the current octave into them if needed
+     */
+    public void setOctaveRange(final int min, final int max) {
+        minOctave = min;
+        maxOctave = max;
         currentOctave = Math.max(minOctave, Math.min(currentOctave, maxOctave));
     }
 }

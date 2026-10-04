@@ -11,8 +11,7 @@ class ViolinItem extends AccessoryInstrumentItem {
         super((player) -> InstrumentPacketUtil.sendOpenPacket(
                 player, new ResourceLocation(SCInstrumentMod.MODID, "violin")
             ),
-            (InstrumentAccessoryItem) ModItems.VIOLIN_BOW.get(),
-            "Philharmonia"
+            (InstrumentAccessoryItem) ModItems.VIOLIN_BOW.get()
         );
     }
 

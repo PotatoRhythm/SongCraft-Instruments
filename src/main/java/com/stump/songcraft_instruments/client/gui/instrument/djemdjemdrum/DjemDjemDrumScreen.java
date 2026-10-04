@@ -108,9 +108,4 @@ public class DjemDjemDrumScreen extends InstrumentScreen {
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
     }
-
-    @Override
-    public boolean isGenshinInstrument() {
-        return true;
-    }
 }

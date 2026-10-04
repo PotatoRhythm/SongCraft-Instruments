@@ -93,7 +93,7 @@ public abstract class HeldNoteSounds {
             soundInstance.heldSoundContainer,
             new NoteSoundMetadata(
                 player.blockPosition(),
-                soundInstance.notePitch, (int)(soundInstance.getVolume() * 100), soundInstance.particleColor,
+                soundInstance.notePitch, (int)(soundInstance.getBaseVolume() * 100), soundInstance.particleColor,
                 soundInstance.instrumentId,
                 Optional.ofNullable(noteIdentifier)
             ),

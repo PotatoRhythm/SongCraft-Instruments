@@ -29,9 +29,4 @@ public class Gw2LuteScreen extends GridInstrumentScreen {
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
     }
-
-    @Override
-    public boolean isGw2Instrument() {
-        return true;
-    }
 }

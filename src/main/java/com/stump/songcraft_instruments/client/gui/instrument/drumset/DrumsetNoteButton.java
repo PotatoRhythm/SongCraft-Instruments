@@ -7,7 +7,6 @@ import com.stump.songcraft_instruments.client.gui.instrument.partial.note.render
 import com.stump.songcraft_instruments.client.keyMaps.InstrumentKeyMappings;
 import com.stump.songcraft_instruments.networking.buttonidentifier.DrumsetNoteIdentifier;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
-import com.stump.songcraft_instruments.sound.SCSounds;
 
 public class DrumsetNoteButton extends NoteButton {
 
@@ -15,7 +14,7 @@ public class DrumsetNoteButton extends NoteButton {
 
     public DrumsetNoteButton(DrumsetScreen screen, int index) {
         super(
-                SCSounds.DRUMSET_GW2[index],
+                screen.getSoundOption().getNoteSounds()[index],
                 ModClientConfigs.DRUMSET_LABEL_TYPE.get().getLabelSupplier(),
                 screen
         );

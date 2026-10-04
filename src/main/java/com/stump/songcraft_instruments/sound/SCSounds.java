@@ -47,12 +47,16 @@ public class SCSounds {
         SAXOPHONE = nsr(loc("saxophone")).registerGrid(),
 
         GUITAR = nsr(loc("guitar")).registerGrid(),
+        GUITAR_NYLON = nsr(loc("guitar_nylon")).stereo().registerGrid(),
+        GUITAR_STEEL = nsr(loc("guitar_steel")).stereo().registerGrid(),
 
         GUITAR_CLEAN = nsr(loc("guitar_clean")).stereo().registerGrid(),
+        GUITAR_HARMONICS = nsr(loc("guitar_harmonics")).stereo().registerGrid(),
 
         BASS_ACOUSTIC = nsr(loc("bass_acoustic")).stereo().registerGrid(),
         BASS_FINGER = nsr(loc("bass_finger")).stereo().registerGrid(),
         BASS_SLAP = nsr(loc("bass_slap")).stereo().registerGrid(),
+        BASS_PICKED = nsr(loc("bass_picked")).stereo().registerGrid(),
 
         SHAMISEN = nsr(loc("shamisen")).stereo().registerGrid(),
         KOTO = nsr(loc("koto")).registerGrid(),
@@ -93,6 +97,86 @@ public class SCSounds {
                 .chain(loc("drumset_hi-hat_closed")).stereo().add()
                 .chain(loc("drumset_hi-hat_open")).stereo().add()
                 .chain(loc("drumset_hi-hat_foot")).stereo().add()
+            .registerAll(),
+
+        DRUMSET_STANDARD = nsr(loc("drumset_standard"))
+                .chain(loc("drumset_standard_bass")).stereo().add()
+                .chain(loc("drumset_standard_snare")).stereo().add()
+                .chain(loc("drumset_standard_cross_stick")).stereo().add()
+                .chain(loc("drumset_standard_ghost")).stereo().add()
+                .chain(loc("drumset_standard_high_tom")).stereo().add()
+                .chain(loc("drumset_standard_low_tom")).stereo().add()
+
+                .chain(loc("drumset_standard_bass2")).stereo().add()
+                .chain(loc("drumset_standard_snare2")).stereo().add()
+                .chain(loc("drumset_standard_ghost2")).stereo().add()
+                .chain(loc("drumset_standard_mid_tom")).stereo().add()
+
+                .chain(loc("drumset_standard_crash_cymbal")).stereo().add()
+                .chain(loc("drumset_standard_ride_cymbal")).stereo().add()
+                .chain(loc("drumset_standard_hi-hat_closed")).stereo().add()
+                .chain(loc("drumset_standard_hi-hat_open")).stereo().add()
+                .chain(loc("drumset_standard_hi-hat_foot")).stereo().add()
+            .registerAll(),
+
+        DRUMSET_POWER = nsr(loc("drumset_power"))
+                .chain(loc("drumset_power_bass")).stereo().add()
+                .chain(loc("drumset_power_snare")).stereo().add()
+                .chain(loc("drumset_power_cross_stick")).stereo().add()
+                .chain(loc("drumset_power_ghost")).stereo().add()
+                .chain(loc("drumset_power_high_tom")).stereo().add()
+                .chain(loc("drumset_power_low_tom")).stereo().add()
+
+                .chain(loc("drumset_power_bass2")).stereo().add()
+                .chain(loc("drumset_power_snare2")).stereo().add()
+                .chain(loc("drumset_power_ghost2")).stereo().add()
+                .chain(loc("drumset_power_mid_tom")).stereo().add()
+
+                .chain(loc("drumset_power_crash_cymbal")).stereo().add()
+                .chain(loc("drumset_power_ride_cymbal")).stereo().add()
+                .chain(loc("drumset_power_hi-hat_closed")).stereo().add()
+                .chain(loc("drumset_power_hi-hat_open")).stereo().add()
+                .chain(loc("drumset_power_hi-hat_foot")).stereo().add()
+            .registerAll(),
+
+        DRUMSET_ORCHESTRAL = nsr(loc("drumset_orchestral"))
+                .chain(loc("drumset_orchestral_bass")).stereo().add()
+                .chain(loc("drumset_orchestral_snare")).stereo().add()
+                .chain(loc("drumset_orchestral_cross_stick")).stereo().add()
+                .chain(loc("drumset_orchestral_ghost")).stereo().add()
+                .chain(loc("drumset_orchestral_high_tom")).stereo().add()
+                .chain(loc("drumset_orchestral_low_tom")).stereo().add()
+
+                .chain(loc("drumset_orchestral_bass2")).stereo().add()
+                .chain(loc("drumset_orchestral_snare2")).stereo().add()
+                .chain(loc("drumset_orchestral_ghost2")).stereo().add()
+                .chain(loc("drumset_orchestral_mid_tom")).stereo().add()
+
+                .chain(loc("drumset_orchestral_crash_cymbal")).stereo().add()
+                .chain(loc("drumset_orchestral_ride_cymbal")).stereo().add()
+                .chain(loc("drumset_orchestral_hi-hat_closed")).stereo().add()
+                .chain(loc("drumset_orchestral_hi-hat_open")).stereo().add()
+                .chain(loc("drumset_orchestral_hi-hat_foot")).stereo().add()
+            .registerAll(),
+
+        DRUMSET_COZY = nsr(loc("drumset_cozy"))
+                .chain(loc("drumset_cozy_bass")).stereo().add()
+                .chain(loc("drumset_cozy_snare")).stereo().add()
+                .chain(loc("drumset_cozy_cross_stick")).stereo().add()
+                .chain(loc("drumset_cozy_ghost")).stereo().add()
+                .chain(loc("drumset_cozy_high_tom")).stereo().add()
+                .chain(loc("drumset_cozy_low_tom")).stereo().add()
+
+                .chain(loc("drumset_cozy_bass2")).stereo().add()
+                .chain(loc("drumset_cozy_snare2")).stereo().add()
+                .chain(loc("drumset_cozy_ghost2")).stereo().add()
+                .chain(loc("drumset_cozy_mid_tom")).stereo().add()
+
+                .chain(loc("drumset_cozy_crash_cymbal")).stereo().add()
+                .chain(loc("drumset_cozy_ride_cymbal")).stereo().add()
+                .chain(loc("drumset_cozy_hi-hat_closed")).stereo().add()
+                .chain(loc("drumset_cozy_hi-hat_open")).stereo().add()
+                .chain(loc("drumset_cozy_hi-hat_foot")).stereo().add()
             .registerAll()
     ;
     
@@ -266,9 +350,20 @@ public class SCSounds {
             .releaseFadeOut(FADE_TIME / 10)
             .fullHoldFadeoutTime(2)
             .decays(7)
+            .register(HOLD_DURATION),
+
+        GUITAR_DISTORTION = hnsr(loc("guitar_distortion"))
+            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            // About 1.5 s to fade out from full volume when released
+            .releaseFadeOut(FADE_TIME / 7.5f)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
             .register(HOLD_DURATION)
     ;
-    
+
     private static NoteSound[] twoOctaveSoundBuilder(final NoteSoundRegistrar builder) {
         return builder.stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2);
     }

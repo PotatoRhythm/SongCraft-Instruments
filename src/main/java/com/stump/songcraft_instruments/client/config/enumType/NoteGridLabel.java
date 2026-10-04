@@ -25,15 +25,13 @@ public enum NoteGridLabel implements INoteLabel {
     NOTE_NAME((note) -> Component.literal(
         note.getFormattedNoteName()
     )),
-    DO_RE_MI((note) ->
-        LabelUtil.toDoReMi(note.getFormattedNoteName())
-    ),
+    // Fixed: based on the note's position in the grid, unaffected by transpositions
+    DO_RE_MI((note) -> Component.translatable(
+        INoteLabel.TRANSLATABLE_PATH + LabelUtil.DO_RE_MI[noteGridIndex(note) % 7]
+    )),
 
     FIXED_ABC((note) -> Component.literal(
         String.valueOf(LabelUtil.ABC[noteGridIndex(note) % 7])
-    )),
-    FIXED_DO_RE_MI((note) -> Component.literal(
-        String.valueOf(LabelUtil.DO_RE_MI[noteGridIndex(note) % 7])
     )),
 
     NONE(NoteLabelSupplier.EMPTY);

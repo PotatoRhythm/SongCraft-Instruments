@@ -47,9 +47,4 @@ public class NightwindHornScreen extends GridInstrumentScreen implements IHeldIn
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
     }
-
-    @Override
-    public boolean isGenshinInstrument() {
-        return true;
-    }
 }

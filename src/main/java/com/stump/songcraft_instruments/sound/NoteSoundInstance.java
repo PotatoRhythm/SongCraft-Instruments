@@ -7,7 +7,9 @@ import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class NoteSoundInstance extends AbstractTickableSoundInstance
@@ -27,11 +29,14 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
     private final Optional<Integer> initiatorId;
     private final Optional<InitiatorID> oInitiatorId;
 
+    private final Vec3 sourcePos;
+    private @Nullable CrossfadeMonoSoundInstance monoCrossfade;
+
     public NoteSoundInstance(NoteSound noteSound, float pitch, NoteSoundMetadata meta, double playDistSqr,
             Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId
     ) {
         super(
-                noteSound.getByPreference(playDistSqr),
+                noteSound.getByDistance(playDistSqr),
                 SoundSource.RECORDS,
                 SoundInstance.createUnseededRandom()
         );
@@ -50,7 +55,20 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
         this.initiatorId = initiatorId;
         this.oInitiatorId = oInitiatorId;
 
-        if (playDistSqr <= NoteSound.LOCAL_RANGE * NoteSound.LOCAL_RANGE) {
+        this.sourcePos = meta.pos().getCenter();
+
+        if (noteSound.usesStereo(playDistSqr)) {
+            // Stereo plays in the listener's head, and crossfades into a positioned Mono with distance
+            this.attenuation = Attenuation.NONE;
+            this.relative = true;
+
+            this.x = 0;
+            this.y = 0;
+            this.z = 0;
+
+            this.monoCrossfade = new CrossfadeMonoSoundInstance(noteSound.getMono(), this, pitch, true);
+            updateCrossfade();
+        } else if (playDistSqr <= NoteSound.LOCAL_RANGE * NoteSound.LOCAL_RANGE) {
             this.attenuation = Attenuation.NONE;
             this.relative = true;
 
@@ -81,6 +99,24 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
 
             volume = currentVolume;
         }
+
+        updateCrossfade();
+    }
+
+    /**
+     * Fades the Stereo sound with distance, and hands the rest of the volume to the Mono crossfade
+     */
+    private void updateCrossfade() {
+        if (monoCrossfade == null)
+            return;
+
+        final double dist = NoteSound.listenerPos().distanceTo(sourcePos);
+        volume = currentVolume * NoteSound.stereoGain(dist);
+        monoCrossfade.update(sourcePos, currentVolume * NoteSound.crossfadeMonoGain(dist));
+    }
+
+    public Optional<CrossfadeMonoSoundInstance> getMonoCrossfade() {
+        return Optional.ofNullable(monoCrossfade);
     }
 
     @Override

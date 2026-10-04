@@ -27,6 +27,10 @@ public class RecordingSession {
 
     public static final int COUNTDOWN_BEEPS = 4, COUNTDOWN_BEEP_INTERVAL = 20;
     /**
+     * How long (in ticks) a group session continues without any participant on their instrument before it ends
+     */
+    public static final int GROUP_ABSENCE_TIMEOUT = 5 * 20;
+    /**
      * The maximum distance (in blocks) from the looper a player may record from
      */
     public static final int MAX_RECORD_DIST = 16;
@@ -43,6 +47,10 @@ public class RecordingSession {
      */
     private LooperSessionState groupState = LooperSessionState.IDLE;
     private int countdownTicks = 0;
+    /**
+     * The ticks since the last participant left their instrument during a group session, or -1 while someone is present
+     */
+    private int absentTicks = -1;
 
     public RecordingSession(final LooperBlockEntity looper) {
         this.looper = looper;
@@ -53,6 +61,7 @@ public class RecordingSession {
         groupState = rawGroupState.isEmpty() ? LooperSessionState.IDLE : LooperSessionState.valueOf(rawGroupState);
         // Restart an interrupted countdown from the top
         countdownTicks = 0;
+        absentTicks = -1;
     }
 
 
@@ -93,6 +102,7 @@ public class RecordingSession {
         lockedBy = null;
         // Silently end the group session; the connections' removal will sync it
         groupState = LooperSessionState.IDLE;
+        absentTicks = -1;
         looper.getPersistentData().remove(GROUP_STATE_TAG);
     }
 
@@ -178,6 +188,8 @@ public class RecordingSession {
 
     private void setGroupState(final LooperSessionState state) {
         groupState = state;
+        if (state == LooperSessionState.IDLE)
+            absentTicks = -1;
         looper.getPersistentData().putString(GROUP_STATE_TAG, state.name());
         looper.setChanged();
         looper.connections().sync();
@@ -245,7 +257,8 @@ public class RecordingSession {
 
     /**
      * Before the record button is pressed, only updates everyone on who is still present.
-     * During a group session, the session ends once no participant has any instrument open anymore.
+     * During a group session, the session ends once no participant has had any instrument open
+     * for {@link #GROUP_ABSENCE_TIMEOUT} ticks.
      * @param leavingPlayer A participant closing their instrument or logging out
      */
     public void onParticipantLeft(final UUID leavingPlayer) {
@@ -259,20 +272,48 @@ public class RecordingSession {
             return;
         }
 
+        // Give the participants a moment to come back (e.g. switching instruments) before ending the session
+        if (absentTicks < 0 && !isAnyParticipantPresent(leavingPlayer))
+            absentTicks = 0;
+    }
+
+    /**
+     * @param excludedPlayer A participant not to count, or null
+     * @return Whether any participant has an instrument open
+     */
+    private boolean isAnyParticipantPresent(final UUID excludedPlayer) {
         final PlayerList playerList = looper.getLevel().getServer().getPlayerList();
-        final boolean anyPresent = looper.connections().getPlayerIds().stream()
-            .filter((playerId) -> !playerId.equals(leavingPlayer))
+        return looper.connections().getPlayerIds().stream()
+            .filter((playerId) -> !playerId.equals(excludedPlayer))
             .map(playerList::getPlayer)
             .anyMatch((player) -> player != null && InstrumentOpenProvider.isOpen(player));
+    }
 
-        if (!anyPresent)
+    /**
+     * Ends the group session once its participants have been away for {@link #GROUP_ABSENCE_TIMEOUT} ticks,
+     * or stops counting if one of them came back.
+     */
+    private void tickAbsence() {
+        if (absentTicks < 0)
+            return;
+
+        if (!isGroupSession() || looper.getLevel().getServer() == null || isAnyParticipantPresent(null)) {
+            absentTicks = -1;
+            return;
+        }
+
+        if (++absentTicks >= GROUP_ABSENCE_TIMEOUT) {
+            absentTicks = -1;
             stopGroupSession();
+        }
     }
 
     /**
      * Plays the countdown beeps, arming the looper on the final one.
      */
     public void tick() {
+        tickAbsence();
+
         if (groupState != LooperSessionState.COUNTDOWN)
             return;
 

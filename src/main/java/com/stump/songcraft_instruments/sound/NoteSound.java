@@ -1,7 +1,6 @@
 package com.stump.songcraft_instruments.sound;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
-import com.stump.songcraft_instruments.client.config.enumType.InstrumentChannelType;
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
@@ -21,6 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,9 +36,22 @@ public class NoteSound {
     public static final SoundSource INSTRUMENT_SOUND_SOURCE = SoundSource.RECORDS;
 
     /**
-     * The range at which players with Mixed instrument sound type will start to hear Mono.
+     * The range at which Stereo starts crossfading into Mono.
+     */
+    public static final double STEREO_FADE_START = 8;
+    /**
+     * The range at which players will only hear Mono instead of Stereo.
+     * Between {@link #STEREO_FADE_START} and this range, both are heard as a crossfade.
     */
     public static final double STEREO_RANGE = 16;
+    /**
+     * The distance at which Mono sounds fully fade out (their sounds.json attenuation distance)
+     */
+    public static final int MONO_DISTANCE = 64;
+    /**
+     * A volume multiplier for Stereo sounds, for balancing them against their Mono counterparts
+     */
+    public static final float STEREO_VOLUME = 1f;
     /**
      * The range from which players will hear instruments from their local sound output rather than the level's
      */
@@ -61,15 +74,11 @@ public class NoteSound {
     }
 
     public static int getMinPitch() {
-        return ModClientConfigs.EXTEND_RANGE.get()
-                ? -LabelUtil.NOTES_PER_SCALE * 2
-                : -LabelUtil.NOTES_PER_SCALE;
+        return -LabelUtil.NOTES_PER_SCALE * 2;
     }
 
     public static int getMaxPitch() {
-        return ModClientConfigs.EXTEND_RANGE.get()
-                ? LabelUtil.NOTES_PER_SCALE * 2
-                : LabelUtil.NOTES_PER_SCALE;
+        return LabelUtil.NOTES_PER_SCALE * 2;
     }
 
     public SoundEvent getMono() {
@@ -89,41 +98,57 @@ public class NoteSound {
     }
 
     /**
+     * @param playDistSqr The distance between this player and the position of the note's sound squared
+     * @return Whether this note should play as Stereo (crossfading into Mono with distance)
+     */
+    @OnlyIn(Dist.CLIENT)
+    public boolean usesStereo(final double playDistSqr) {
+        return hasStereo() && (playDistSqr <= Mth.square(STEREO_RANGE));
+    }
+
+    /**
      * Determines which sound type should play based on this player's distance from the instrument player.
+     * Stereo is heard up close, and Mono further away, since only Mono sounds fade out with distance.
      * <p>This method is fired from the server.</p>
      * @param playDistSqr The distance between this player and the position of the note's sound squared
-     * @return Either the Mono or Stereo sound, based on the client's preference.
+     * @return Either the Mono or Stereo sound
      */
     @OnlyIn(Dist.CLIENT)
-    public SoundEvent getByPreference(final double playDistSqr) {
-        if (!hasStereo())
-            return mono;
-        
-        final InstrumentChannelType preference = ModClientConfigs.CHANNEL_TYPE.get();
-
-        return switch(preference) {
-            case MIXED -> (metInstrumentVolume() && (playDistSqr <= Mth.square(STEREO_RANGE))) ? getStereo() : mono;
-
-            case STEREO -> getStereo();
-            case MONO -> mono;
-        };
-    }
-    /**
-     * Returns the literal preference of the client. Defaults to Stereo.
-     * <p>This method is usually fired from the client.</p>
-     * <p>Shorthand for {@code getByPreference(0)}</p>
-     * @return Either the Mono or Stereo sound, based on the client's preference
-     */
-    @OnlyIn(Dist.CLIENT)
-    public SoundEvent getByPreference() {
-        return getByPreference(0);
+    public SoundEvent getByDistance(final double playDistSqr) {
+        return usesStereo(playDistSqr) ? getStereo() : mono;
     }
 
     /**
-     * @return True if the instrument volume is set to 100%
+     * @return How much of the Stereo sound should be heard at the given distance, from 0 to 1.
+     * The Mono sound should be heard at the remainder.
      */
-    private static boolean metInstrumentVolume() {
-        return Minecraft.getInstance().options.getSoundSourceVolume(INSTRUMENT_SOUND_SOURCE) == 1;
+    public static float stereoMix(final double dist) {
+        return 1 - (float) Mth.clamp((dist - STEREO_FADE_START) / (STEREO_RANGE - STEREO_FADE_START), 0, 1);
+    }
+
+    /**
+     * Stereo sounds are not attenuated by OpenAL, so we mimic the linear attenuation Mono sounds get.
+     * @return The volume multiplier of a Stereo sound at the given distance
+     */
+    public static float stereoGain(final double dist) {
+        final float attenuation = Math.max(0, 1 - (float) dist / MONO_DISTANCE);
+        return stereoMix(dist) * attenuation * STEREO_VOLUME;
+    }
+
+    /**
+     * @return The volume multiplier of the crossfading Mono sound at the given distance.
+     * OpenAL attenuates it on its own.
+     */
+    public static float crossfadeMonoGain(final double dist) {
+        return 1 - stereoMix(dist);
+    }
+
+    /**
+     * @return The position sounds are heard from
+     */
+    @OnlyIn(Dist.CLIENT)
+    public static Vec3 listenerPos() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
     }
 
 
@@ -200,7 +225,7 @@ public class NoteSound {
     public void playLocally(float pitch, NoteSoundMetadata meta, double playDistSqr,
             Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId) {
         final Minecraft minecraft = Minecraft.getInstance();
-        final SoundEvent sound = getByPreference(playDistSqr);
+        final SoundEvent sound = getByDistance(playDistSqr);
 
         if (sound == null)
             return;
@@ -215,6 +240,7 @@ public class NoteSound {
         );
 
         minecraft.getSoundManager().play(instance);
+        instance.getMonoCrossfade().ifPresent(minecraft.getSoundManager()::play);
         NoteSoundInstances.add(instance);
     }
 

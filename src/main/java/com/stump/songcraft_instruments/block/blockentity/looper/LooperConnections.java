@@ -195,7 +195,7 @@ public class LooperConnections {
             looperTag = LooperUtil.looperTag(instrumentBE);
         }
 
-        return isConnectedBy(player, LooperUtil.getConnectionId(looperTag));
+        return LooperUtil.isConnectedBy(looper, looperTag, player);
     }
 
 

@@ -5,8 +5,10 @@ import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentS
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.layouts.Layout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.slf4j.Logger;
@@ -63,11 +65,62 @@ public abstract class AbstractInstrumentOptionsScreen extends Screen {
     }
 
 
+    /*
+     * The title, options grid and lower buttons are laid out as one block, centered vertically (slightly above center).
+     * The gaps between them grow with the available space, and shrink to their minimums on small screens.
+     */
+    private static final int
+        MIN_MARGIN = 10,
+        MIN_TITLE_GAP = 8, MAX_TITLE_GAP = 20,
+        MIN_BUTTONS_GAP = 12, MAX_BUTTONS_GAP = 40;
+    /**
+     * The fraction of the leftover space placed above the block; less than half places it slightly above center
+     */
+    private static final float TOP_SPACE_RATIO = .4f;
+
+    /**
+     * Fixed, unless the screen is laid out by {@link #arrangeVertically}
+     */
+    private int titleY = 15;
+
+    /**
+     * Centers the options grid horizontally, and positions it, the title and the lower buttons vertically
+     * @param grid The options grid, already filled
+     * @return The Y position of the lower buttons
+     */
+    protected int arrangeVertically(final Layout grid) {
+        grid.arrangeElements();
+
+        final int titleHeight = font.lineHeight;
+        final int fixedHeight = titleHeight + grid.getHeight() + getButtonHeight();
+
+        // Grow the gaps from their minimums towards their maximums as space allows
+        final int minGaps = MIN_TITLE_GAP + MIN_BUTTONS_GAP, maxGaps = MAX_TITLE_GAP + MAX_BUTTONS_GAP;
+        final int spareSpace = height - 2 * MIN_MARGIN - fixedHeight - minGaps;
+        final float gapProgress = Mth.clamp((float) spareSpace / (maxGaps - minGaps), 0, 1);
+
+        final int titleGap = (int) Mth.lerp(gapProgress, MIN_TITLE_GAP, MAX_TITLE_GAP),
+            buttonsGap = (int) Mth.lerp(gapProgress, MIN_BUTTONS_GAP, MAX_BUTTONS_GAP);
+
+        final int blockHeight = fixedHeight + titleGap + buttonsGap;
+        titleY = Math.max(MIN_MARGIN, (int) ((height - blockHeight) * TOP_SPACE_RATIO));
+
+        grid.setPosition((width - grid.getWidth()) / 2, titleY + titleHeight + titleGap);
+        grid.arrangeElements();
+
+        // Keep the buttons on-screen, even if they have to overlap the options
+        return Math.min(
+            grid.getY() + grid.getHeight() + buttonsGap,
+            height - getButtonHeight() - MIN_MARGIN
+        );
+    }
+
+
     @Override
     public void render(GuiGraphics gui, int pMouseX, int pMouseY, float pPartialTick) {
         renderBackground(gui);
         super.render(gui, pMouseX, pMouseY, pPartialTick);
-        gui.drawCenteredString(font, title, width/2, 15, Color.WHITE.getRGB());
+        gui.drawCenteredString(font, title, width/2, titleY, Color.WHITE.getRGB());
     }
 
 

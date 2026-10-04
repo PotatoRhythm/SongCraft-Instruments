@@ -92,9 +92,4 @@ public class Gw2FrameDrumScreen extends InstrumentScreen {
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
     }
-
-    @Override
-    public boolean isGw2Instrument() {
-        return true;
-    }
 }

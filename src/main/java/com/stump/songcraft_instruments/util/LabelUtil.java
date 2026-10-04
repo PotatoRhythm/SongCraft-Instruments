@@ -1,18 +1,12 @@
 package com.stump.songcraft_instruments.util;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
-import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.INoteLabel;
-import com.mojang.logging.LogUtils;
-import net.minecraft.network.chat.Component;
-import org.slf4j.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Map.entry;
 
 public abstract class LabelUtil {
-    private static final Logger LOGGER = LogUtils.getLogger();
     
     public static final String[]
         DO_RE_MI = {
@@ -24,12 +18,6 @@ public abstract class LabelUtil {
             'C', 'D', 'E', 'F', 'G', 'A', 'B'
         }
     ;
-
-    private static final HashMap<Character, String> ABC_TO_DO_RE_MI = new HashMap<>();
-    static {
-        for (int i = 0; i < ABC.length; i++)
-            ABC_TO_DO_RE_MI.put(ABC[i], DO_RE_MI[i]);
-    }
 
 
     // Pitch system implementation
@@ -102,16 +90,6 @@ public abstract class LabelUtil {
                 .replaceAll("b", "\u266D");
 
         return result;
-    }
-
-    public static Component toDoReMi(final String noteName) {
-        if (noteName.isEmpty()) {
-            LOGGER.warn("Cannot convert empty note to Do Re Mi!");
-            return Component.empty();
-        }
-
-        return Component.translatable(INoteLabel.TRANSLATABLE_PATH + ABC_TO_DO_RE_MI.get(noteName.charAt(0)))
-            .append(noteName.substring(1));
     }
 
 }

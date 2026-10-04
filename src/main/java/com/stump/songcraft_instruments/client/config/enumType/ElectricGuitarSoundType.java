@@ -9,7 +9,9 @@ import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public enum ElectricGuitarSoundType implements SoundType {
-    CLEAN(() -> new SoundOption(SCSounds.GUITAR_CLEAN));
+    CLEAN(() -> new SoundOption(SCSounds.GUITAR_CLEAN)),
+    DISTORTION(() -> new SoundOption(SCSounds.GUITAR_DISTORTION)),
+    HARMONICS(() -> new SoundOption(SCSounds.GUITAR_HARMONICS));
 
     private final Supplier<SoundOption> soundArr;
     private ElectricGuitarSoundType(final Supplier<SoundOption> soundType) {

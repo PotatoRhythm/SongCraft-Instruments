@@ -19,7 +19,6 @@ import java.awt.*;
 @OnlyIn(Dist.CLIENT)
 public abstract class SingleButtonOptionsScreen extends GridInstrumentOptionsScreen {
     private final static int SPACER_HEIGHT = 5;
-    private int heightBefore;
 
     public SingleButtonOptionsScreen(final GridInstrumentScreen screen) {
         super(screen);
@@ -33,11 +32,9 @@ public abstract class SingleButtonOptionsScreen extends GridInstrumentOptionsScr
 
 
     @Override
-    protected void initOptionsGrid(GridLayout grid, GridLayout.RowHelper rowHelper) {
-        super.initOptionsGrid(grid, rowHelper);
+    protected void initControlSection(GridLayout grid, GridLayout.RowHelper rowHelper) {
+        super.initControlSection(grid, rowHelper);
         rowHelper.addChild(SpacerElement.height(SPACER_HEIGHT), 2);
-        grid.arrangeElements();
-        heightBefore = grid.getHeight();
         rowHelper.addChild(constructButton(), 2);
     }
 

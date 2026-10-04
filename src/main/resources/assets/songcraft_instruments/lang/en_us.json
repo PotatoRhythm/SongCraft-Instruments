@@ -27,6 +27,7 @@
     "label.songcraft_instruments.ukulele_options": "Ukulele Options",
     "label.songcraft_instruments.keyboard_options": "Keyboard Options",
     "label.songcraft_instruments.drumset_options": "Drumset Options",
+    "label.songcraft_instruments.guitar_options": "Guitar Options",
     "label.songcraft_instruments.electric_guitar_options": "Electric Guitar Options",
     "label.songcraft_instruments.bass_guitar_options": "Bass Guitar Options",
     "label.songcraft_instruments.violin_options": "Violin Options",
@@ -36,20 +37,11 @@
 
 
 
-    "songcraft_instruments.genshin_disclaimer.title": "Disclaimer!",
-    "songcraft_instruments.genshin_disclaimer.content": "SongCraft Instruments is an unofficial and fanmade Minecraft mod that is in no way affiliated with neither Genshin Impact nor HoYoverse.\n\nThus, all Genshin related assets used in-game, such as sounds, images, instruments etc. are of complete ownership to HoYoverse.\n\nAs the user, you have the full responsibility over your actions within the game, including (but not limited to!) playing and sharing/publishing any songs that may be protected under copyright laws.",
-    "songcraft_instruments.gw2_disclaimer.content": "SongCraft Instruments is an unofficial and fanmade Minecraft mod that is in no way affiliated with neither Guild Wars 2 nor ArenaNet.\n\nThus, all Guild Wars 2 related assets used in-game, such as sounds, images, instruments etc. are of complete ownership to ArenaNet.\n\nAs the user, you have the full responsibility over your actions within the game, including (but not limited to!) playing and sharing/publishing any songs that may be protected under copyright laws.",
+    "songcraft_instruments.disclaimer.title": "Disclaimer!",
+    "songcraft_instruments.disclaimer.content": "SongCraft Instruments is an unofficial, fan-made Minecraft mod. It is not affiliated with or endorsed by any of the games or companies whose instruments and sounds it features, including Genshin Impact (HoYoverse), Guild Wars 2 (ArenaNet) and Heartopia (XD).\n\nAll assets taken from these games, such as sounds, images and instruments, belong to their respective owners. Credits and sources for every sound used in this mod can be found on the SongCraft Instruments GitHub repository.\n\nAs the user, you are fully responsible for your actions within the game, including (but not limited to!) playing and sharing or publishing any songs that may be protected under copyright laws.",
 
 
 
-    "button.songcraft_instruments.audioChannels": "Instrument Audio Channel Type",
-    "button.songcraft_instruments.audioChannels.mono": "Mono",
-    "button.songcraft_instruments.audioChannels.stereo": "Stereo",
-    "button.songcraft_instruments.audioChannels.stereo.tooltip":
-    "NOTICE: Because of some annoying specification by OpenAL, all sounds produced on Stereo will be stuck on 100%.\nThis includes some instruments.",
-    "button.songcraft_instruments.audioChannels.mixed.tooltip":
-    "If the Instruments sound category is set to 100%, you will hear instruments on Stereo within %s blocks of range.\nOtherwise, you will hear Mono.",
-    "button.songcraft_instruments.audioChannels.mixed": "Mixed",
     "button.songcraft_instruments.stop_music_on_play.tooltip": "When you or other players within %s blocks of range play an instrument, Minecraft's background music will stop.",
     "button.songcraft_instruments.stop_music_on_play": "Stop Music On Play",
     "button.songcraft_instruments.shared_instrument.tooltip": "See what other notes players nearby are playing in your instrument's screen",
@@ -67,8 +59,7 @@
     "button.songcraft_instruments.note_icon_style.jianpu.description": "Uses Jianpu numbered notation on all grid instruments, with dots marking the low and high octaves",
     "button.songcraft_instruments.server_audio": "Server-Side Audio",
     "button.songcraft_instruments.server_audio.tooltip": "When on, hear your notes after they reach the server. Useful for syncing with high latency",
-    "button.songcraft_instruments.extend_range": "Extend Range",
-    "button.songcraft_instruments.extend_range.tooltip": "Extend playable range to 5 octaves for Octave Swap mode",
+    "button.songcraft_instruments.octave_range.tooltip": "Octave Range: %s to %s\nDrag the edges to change it",
 
 
     "button.songcraft_instruments.midiEnabled": "MIDI Enabled",
@@ -129,14 +120,26 @@
 
     "button.songcraft_instruments.drumset.soundType": "Sound",
     "button.songcraft_instruments.drumset.soundType.gw2": "Guild Wars 2",
+    "button.songcraft_instruments.drumset.soundType.standard": "Standard",
+    "button.songcraft_instruments.drumset.soundType.power": "Power",
+    "button.songcraft_instruments.drumset.soundType.orchestral": "Orchestral",
+    "button.songcraft_instruments.drumset.soundType.cozy": "Cozy",
+
+    "button.songcraft_instruments.guitar.soundType": "Sound",
+    "button.songcraft_instruments.guitar.soundType.emi": "EMI",
+    "button.songcraft_instruments.guitar.soundType.nylon": "Nylon",
+    "button.songcraft_instruments.guitar.soundType.steel": "Steel",
 
     "button.songcraft_instruments.electric_guitar.soundType": "Sound",
     "button.songcraft_instruments.electric_guitar.soundType.clean": "Clean",
+    "button.songcraft_instruments.electric_guitar.soundType.distortion": "Distortion",
+    "button.songcraft_instruments.electric_guitar.soundType.harmonics": "Harmonics",
 
     "button.songcraft_instruments.bass_guitar.soundType": "Sound",
     "button.songcraft_instruments.bass_guitar.soundType.acoustic": "Acoustic Bass",
     "button.songcraft_instruments.bass_guitar.soundType.finger": "Finger Bass",
     "button.songcraft_instruments.bass_guitar.soundType.slap": "Slap Bass",
+    "button.songcraft_instruments.bass_guitar.soundType.picked": "Picked Bass",
 
     "button.songcraft_instruments.violin.soundType": "Sound",
     "button.songcraft_instruments.violin.soundType.slow": "Slow",
@@ -161,7 +164,7 @@
     "button.songcraft_instruments.trombone.soundType.westgate": "Trumpet",
 
     "button.songcraft_instruments.label.do_re_mi": "do re mi",
-    "button.songcraft_instruments.label.do_re_mi.description": "Labels will be of the musical notation \"do re mi.\"",
+    "button.songcraft_instruments.label.do_re_mi.description": "Labels will be of the musical notation \"do re mi,\" unaffected by custom transpositions (pitch)",
 
     "button.songcraft_instruments.control_mode.genshin": "Genshin",
     "button.songcraft_instruments.control_mode.heartopia": "Heartopia",
@@ -188,8 +191,6 @@
 
     "button.songcraft_instruments.label.fixed_abc": "Fixed ABC",
     "button.songcraft_instruments.label.fixed_abc.description": "ABC labels that are not affected by custom transpositions (pitch)",
-    "button.songcraft_instruments.label.fixed_do_re_mi": "Fixed do re mi",
-    "button.songcraft_instruments.label.fixed_do_re_mi.description": "do re mi labels that are not affected by custom transpositions (pitch)",
 
     "button.songcraft_instruments.label.none": "No Label",
     "button.songcraft_instruments.label.none.description": "",

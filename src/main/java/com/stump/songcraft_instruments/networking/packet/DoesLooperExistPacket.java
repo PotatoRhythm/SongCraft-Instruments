@@ -19,6 +19,7 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class DoesLooperExistPacket implements IModPacket {
     public static final NetworkDirection NETWORK_DIRECTION = NetworkDirection.PLAY_TO_SERVER;
@@ -66,7 +67,8 @@ public class DoesLooperExistPacket implements IModPacket {
                 // For items, also check if we are too far away
                 if (!looperBE.getBlockPos().closerToCenterThan(player.position(), MAX_RECORD_DIST)) {
                     // Disconnect on the looper's end too, so it doesn't keep counting them as a participant
-                    looperBE.connections().remove(player.getUUID(), LooperUtil.getConnectionId(LooperUtil.looperTag(instrumentItem)));
+                    for (final UUID connectionId : LooperUtil.getConnectionIds(LooperUtil.looperTag(instrumentItem)))
+                        looperBE.connections().remove(player.getUUID(), connectionId);
                     looperBE = null;
                     LooperUtil.remLooperTag(instrumentItem);
                 }

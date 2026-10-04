@@ -2,6 +2,7 @@ package com.stump.songcraft_instruments.sound.held;
 
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.particle.ModParticles;
+import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.DampenableSoundInstance;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound.Phase;
@@ -43,6 +44,17 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
     private boolean dampened;
 
     /**
+     * A positioned Mono sound this Stereo sound crossfades into with distance.
+     * Null when this sound is not Stereo.
+     */
+    private @Nullable CrossfadeMonoSoundInstance monoCrossfade;
+    private Vec3 crossfadePos;
+    /**
+     * The distance-based volume multiplier of this sound, applied on top of {@link #volume}
+     */
+    private float distanceGain = 1;
+
+    /**
      * @param initiator The initiator of the sound. Empty for a non-player initiator.
      *                  Value must be present if {@code soundOrigin} is empty.
      * @param soundOrigin The block position of where the sound was originated from.
@@ -54,7 +66,7 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
                                     InitiatorID initiatorId, ResourceLocation instrumentId,
                                     int timeAlive, boolean released) {
         super(
-            heldSoundContainer.getSound(phase).getByPreference(distFromSourceSqr(soundOrigin, initiator)),
+            heldSoundContainer.getSound(phase).getByDistance(distFromSourceSqr(soundOrigin, initiator)),
             NoteSound.INSTRUMENT_SOUND_SOURCE,
             SoundInstance.createUnseededRandom()
         );
@@ -78,7 +90,17 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
         this.released = released;
 
 
-        if (distFromSourceSqr() < Mth.square(NoteSound.LOCAL_RANGE)) {
+        final NoteSound sound = heldSoundContainer.getSound(phase);
+        if (sound.usesStereo(distFromSourceSqr())) {
+            // Stereo plays in the listener's head, and crossfades into a positioned Mono with distance
+            attenuation = Attenuation.NONE;
+            relative = true;
+            x = y = z = 0;
+
+            monoCrossfade = new CrossfadeMonoSoundInstance(sound.getMono(), this, pitch, false);
+            crossfadePos = getSourcePos();
+            updateCrossfade();
+        } else if (distFromSourceSqr() < Mth.square(NoteSound.LOCAL_RANGE)) {
             // Very close; play relative
             attenuation = Attenuation.NONE;
             relative = true;
@@ -121,6 +143,8 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
 
     public void queueAndAddInstance() {
         Minecraft.getInstance().getSoundManager().queueTickingSound(this);
+        if (monoCrossfade != null)
+            Minecraft.getInstance().getSoundManager().queueTickingSound(monoCrossfade);
         ClientUtil.stopMusicIfClose(
             soundOrigin.orElseGet(initiator.map(Entity::blockPosition)::get)
         );
@@ -218,8 +242,10 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
             }
 
             volume -= heldSoundContainer.releaseFadeOut() * fadeOutMultiplier;
-            if (volume <= 0)
+            if (volume <= 0) {
                 stopHeld();
+                return;
+            }
         } else {
             if (phase == Phase.HOLD) {
                 if (++particleTimer >= 10) {
@@ -229,8 +255,26 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
             }
         }
 
+        updateCrossfade();
+
         timeAlive++;
         overallTimeAlive++;
+    }
+
+    /**
+     * Fades the Stereo sound with distance, and hands the rest of the volume to the Mono crossfade
+     */
+    protected void updateCrossfade() {
+        if (monoCrossfade == null)
+            return;
+
+        // Same as toInitiatorPos: a released sound stays where it was "blown"
+        if (!released)
+            crossfadePos = getSourcePos();
+
+        final double dist = NoteSound.listenerPos().distanceTo(crossfadePos);
+        distanceGain = NoteSound.stereoGain(dist);
+        monoCrossfade.update(crossfadePos, volume * NoteSound.crossfadeMonoGain(dist));
     }
 
     protected boolean chainedHolding = false;
@@ -292,6 +336,12 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
     // We don't want to randomly distort this stuff unlike the parent
     @Override
     public float getVolume() {
+        return volume * distanceGain;
+    }
+    /**
+     * @return The volume of this note, without any distance-based fading
+     */
+    public float getBaseVolume() {
         return volume;
     }
     @Override

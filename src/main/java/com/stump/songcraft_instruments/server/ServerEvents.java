@@ -21,7 +21,7 @@ public class ServerEvents {
         if (!event.isOpen) {
             LooperRecordStateUtil.handle((ServerPlayer) event.player, event.hand, false, true);
 
-            // A group recording ends once every participant has closed their instrument
+            // A group recording ends once every participant has had their instrument closed for a few seconds
             LooperConnections.getConnectedLooper(event.player)
                 .ifPresent((lbe) -> lbe.session().onParticipantLeft(event.player.getUUID()));
         }

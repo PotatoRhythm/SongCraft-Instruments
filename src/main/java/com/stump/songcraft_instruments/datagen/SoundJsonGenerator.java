@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.datagen;
 
+import com.stump.songcraft_instruments.sound.NoteSound;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.SoundDefinition;
@@ -55,12 +56,17 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("saxophone_tenor", 20, 0.25f, true, true);
 
         registerInstrument("guitar", 20, 0.9f, false, false);
+        registerInstrument("guitar_nylon", 20, 0.9f, false, true);
+        registerInstrument("guitar_steel", 20, 0.9f, false, true);
 
         registerInstrument("guitar_clean", 20, 0.6f, false, true);
+        registerInstrument("guitar_distortion", 20, 0.8f, true, true);
+        registerInstrument("guitar_harmonics", 20, 0.7f, false, true);
 
         registerInstrument("bass_acoustic", 20, 1.0f, false, true);
         registerInstrument("bass_finger", 20, 1.0f, false, true);
         registerInstrument("bass_slap", 20, 0.9f, false, true);
+        registerInstrument("bass_picked", 20, 1.0f, false, true);
 
         registerInstrument("violin_slow", 20, 0.8f, true, true);
         registerInstrument("violin_fast", 20, 0.5f, true, true);
@@ -106,10 +112,77 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         addSoundVariants("drumset_hi-hat_closed", "songcraft_instruments:drumset_gw2/9", drumset_gw2_V, true);
         addSoundVariants("drumset_hi-hat_open", "songcraft_instruments:drumset_gw2/10", drumset_gw2_V, true);
         addSoundVariants("drumset_hi-hat_foot", "songcraft_instruments:drumset_gw2/11", drumset_gw2_V, true);
+
+        float drumset_standard_V = 0.7f;
+        addSoundVariants("drumset_standard_bass", "songcraft_instruments:drumset_standard/0", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_bass2", "songcraft_instruments:drumset_standard/0", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_snare", "songcraft_instruments:drumset_standard/1", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_snare2", "songcraft_instruments:drumset_standard/1", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_cross_stick", "songcraft_instruments:drumset_standard/2", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_ghost", "songcraft_instruments:drumset_standard/3", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_ghost2", "songcraft_instruments:drumset_standard/3", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_high_tom", "songcraft_instruments:drumset_standard/4", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_mid_tom", "songcraft_instruments:drumset_standard/5", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_low_tom", "songcraft_instruments:drumset_standard/6", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_crash_cymbal", "songcraft_instruments:drumset_standard/7", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_ride_cymbal", "songcraft_instruments:drumset_standard/8", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_hi-hat_closed", "songcraft_instruments:drumset_standard/9", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_hi-hat_open", "songcraft_instruments:drumset_standard/10", drumset_standard_V, true);
+        addSoundVariants("drumset_standard_hi-hat_foot", "songcraft_instruments:drumset_standard/11", drumset_standard_V, true);
+
+        float drumset_power_V = 0.7f;
+        addSoundVariants("drumset_power_bass", "songcraft_instruments:drumset_power/0", drumset_power_V, true);
+        addSoundVariants("drumset_power_bass2", "songcraft_instruments:drumset_power/0", drumset_power_V, true);
+        addSoundVariants("drumset_power_snare", "songcraft_instruments:drumset_power/1", drumset_power_V, true);
+        addSoundVariants("drumset_power_snare2", "songcraft_instruments:drumset_power/1", drumset_power_V, true);
+        addSoundVariants("drumset_power_cross_stick", "songcraft_instruments:drumset_power/2", drumset_power_V, true);
+        addSoundVariants("drumset_power_ghost", "songcraft_instruments:drumset_power/3", drumset_power_V, true);
+        addSoundVariants("drumset_power_ghost2", "songcraft_instruments:drumset_power/3", drumset_power_V, true);
+        addSoundVariants("drumset_power_high_tom", "songcraft_instruments:drumset_power/4", drumset_power_V, true);
+        addSoundVariants("drumset_power_mid_tom", "songcraft_instruments:drumset_power/5", drumset_power_V, true);
+        addSoundVariants("drumset_power_low_tom", "songcraft_instruments:drumset_power/6", drumset_power_V, true);
+        addSoundVariants("drumset_power_crash_cymbal", "songcraft_instruments:drumset_power/7", drumset_power_V, true);
+        addSoundVariants("drumset_power_ride_cymbal", "songcraft_instruments:drumset_power/8", drumset_power_V, true);
+        addSoundVariants("drumset_power_hi-hat_closed", "songcraft_instruments:drumset_power/9", drumset_power_V, true);
+        addSoundVariants("drumset_power_hi-hat_open", "songcraft_instruments:drumset_power/10", drumset_power_V, true);
+        addSoundVariants("drumset_power_hi-hat_foot", "songcraft_instruments:drumset_power/11", drumset_power_V, true);
+
+        float drumset_orchestral_V = 0.7f;
+        addSoundVariants("drumset_orchestral_bass", "songcraft_instruments:drumset_orchestral/0", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_bass2", "songcraft_instruments:drumset_orchestral/0", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_snare", "songcraft_instruments:drumset_orchestral/1", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_snare2", "songcraft_instruments:drumset_orchestral/1", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_cross_stick", "songcraft_instruments:drumset_orchestral/2", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_ghost", "songcraft_instruments:drumset_orchestral/3", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_ghost2", "songcraft_instruments:drumset_orchestral/3", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_high_tom", "songcraft_instruments:drumset_orchestral/4", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_mid_tom", "songcraft_instruments:drumset_orchestral/5", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_low_tom", "songcraft_instruments:drumset_orchestral/6", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_crash_cymbal", "songcraft_instruments:drumset_orchestral/7", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_ride_cymbal", "songcraft_instruments:drumset_orchestral/8", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_hi-hat_closed", "songcraft_instruments:drumset_orchestral/9", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_hi-hat_open", "songcraft_instruments:drumset_orchestral/10", drumset_orchestral_V, true);
+        addSoundVariants("drumset_orchestral_hi-hat_foot", "songcraft_instruments:drumset_orchestral/11", drumset_orchestral_V, true);
+
+        float drumset_cozy_V = 0.7f;
+        addSoundVariants("drumset_cozy_bass", "songcraft_instruments:drumset_cozy/0", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_bass2", "songcraft_instruments:drumset_cozy/0", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_snare", "songcraft_instruments:drumset_cozy/1", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_snare2", "songcraft_instruments:drumset_cozy/1", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_cross_stick", "songcraft_instruments:drumset_cozy/2", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_ghost", "songcraft_instruments:drumset_cozy/3", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_ghost2", "songcraft_instruments:drumset_cozy/3", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_high_tom", "songcraft_instruments:drumset_cozy/4", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_mid_tom", "songcraft_instruments:drumset_cozy/5", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_low_tom", "songcraft_instruments:drumset_cozy/6", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_crash_cymbal", "songcraft_instruments:drumset_cozy/7", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_ride_cymbal", "songcraft_instruments:drumset_cozy/8", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_hi-hat_closed", "songcraft_instruments:drumset_cozy/9", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_hi-hat_open", "songcraft_instruments:drumset_cozy/10", drumset_cozy_V, true);
+        addSoundVariants("drumset_cozy_hi-hat_foot", "songcraft_instruments:drumset_cozy/11", drumset_cozy_V, true);
     }
 
-    private static final int MONO_DISTANCE = 64;
-    private static final float STEREO_VOLUME_ADJUSTMENT = 0.2f;
+    private static final int MONO_DISTANCE = NoteSound.MONO_DISTANCE;
 
     /**
      * @param instrumentName    Instrument name (gw2_quaggan_organ, nightwind_horn, etc)
@@ -135,9 +208,9 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
                     String stereoPath = "songcraft_instruments:" + instrumentName + "/" + i + ".stereo";
                     String stereoEvent = instrumentName + "_note_" + i + "_stereo";
 
-                    // STEREO (no attenuation)
+                    // STEREO (attenuated manually, see NoteSound#stereoGain)
                     add(stereoEvent, definition().with(
-                            sound(stereoPath).volume(volume - STEREO_VOLUME_ADJUSTMENT)
+                            sound(stereoPath).volume(volume)
                     ));
                 }
             }
@@ -157,7 +230,7 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
                     String holdStereoEvent = instrumentName + "_hold_note_" + i + "_stereo";
 
                     add(holdStereoEvent, definition().with(
-                            sound(holdStereoPath).volume(volume - STEREO_VOLUME_ADJUSTMENT)
+                            sound(holdStereoPath).volume(volume)
                     ));
                 }
 
@@ -176,7 +249,7 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
                     String attackStereoEvent = instrumentName + "_attack_note_" + i + "_stereo";
 
                     add(attackStereoEvent, definition().with(
-                            sound(attackStereoPath).volume(volume - STEREO_VOLUME_ADJUSTMENT)
+                            sound(attackStereoPath).volume(volume)
                     ));
                 }
             }
@@ -209,7 +282,7 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
 
                             stereoDefinition.with(
                                     sound(soundPath + "/" + soundName)
-                                            .volume(volume - STEREO_VOLUME_ADJUSTMENT)
+                                            .volume(volume)
                             );
                         }
                         else {
