@@ -141,6 +141,58 @@ public class NoteGridButton extends NoteButton {
         return Integer.signum(soundColumn - columns / 2) + 1;
     }
 
+    protected boolean isJianpu() {
+        return gridInstrument().getNoteIconStyle() == NoteIconStyle.JIANPU;
+    }
+    protected boolean hasLabel() {
+        return !getMessage().getString().isEmpty();
+    }
+
+    // Without a label, Jianpu symbols get the bigger pixel-exact look
+    @Override
+    public boolean usesPixelGridSymbol() {
+        return isJianpu() && !hasLabel();
+    }
+
+    // Balance the octave dots, so the whole symbol looks centered rather than just the number
+    @Override
+    public int getPixelGridSymbolOffsetY() {
+        return JIANPU_PIXEL_GRID_NUDGE[getJianpuOctave()];
+    }
+    /** Downward offset per Jianpu octave (low, middle, high), in button texture pixels */
+    private static final int[] JIANPU_PIXEL_GRID_NUDGE = {0, 0, 0};
+
+    /** The first and last visible rows of the Jianpu symbols per octave (low, middle, high) */
+    private static final int[][] JIANPU_VISIBLE_ROWS = {{2, 8}, {2, 6}, {0, 6}};
+    /** Where the inside of the button's inner ring begins, in button texture pixels */
+    private static final int BUTTON_INNER_TOP = 2;
+
+    /**
+     * Centers the visible Jianpu symbol (number and octave dot) between the inside of the
+     * button's ring and the top of the label, so the space above and below it is equal.
+     */
+    @Override
+    public int getSymbolOffsetY() {
+        if (!isJianpu() || !hasLabel())
+            return 0;
+
+        // The symbol is stretched over half the button; see NoteButtonRenderer#renderNoteSymbol
+        final int symbolBoxHeight = getHeight() / 2;
+        final float symbolPixel = symbolBoxHeight / (float) NoteButtonRenderer.JIANPU_SYMBOL_HEIGHT;
+        final float buttonPixel = getHeight() / (float) NoteButtonRenderer.BUTTON_TEXTURE_SIZE;
+
+        final int[] rows = JIANPU_VISIBLE_ROWS[getJianpuOctave()];
+        final float visibleHeight = (rows[1] - rows[0] + 1) * symbolPixel;
+
+        final float spaceTop = getY() + BUTTON_INNER_TOP * buttonPixel;
+        final float labelTop = getInitY() + getInitHeight() / 2 + NoteButtonRenderer.LABEL_OFFSET_Y;
+        final float visibleTop = spaceTop + (labelTop - spaceTop - visibleHeight) / 2;
+
+        final float drawY = visibleTop - rows[0] * symbolPixel;
+        final int defaultY = getY() + symbolBoxHeight / 2;
+        return Math.round(drawY - defaultY);
+    }
+
 
     @Override
     public int getNoteOffset() {
