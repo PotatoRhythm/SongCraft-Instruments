@@ -204,6 +204,43 @@ public class ModItems {
                 SCCreativeModeTabs.INSTRUMENTS_TAB.getKey()
         ),
 
+        HARP = register("harp", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("harp"))
+        )),
+        CELLO = register("cello", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("cello"))
+        )),
+        STEEL_DRUM = register("steel_drum", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("steel_drum"))
+        )),
+        CONCERTINA = register("concertina", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("concertina"))
+        )),
+        FLUTE = register("flute", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("flute"))
+        )),
+        XIAO = register("xiao", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("xiao"))
+        )),
+        DRUM = register("drum", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("drum"))
+        )),
+        KALIMBA = register("kalimba", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("kalimba"))
+        )),
+        OCARINA = register("ocarina", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("ocarina"))
+        )),
+        ANIMAL_CALL = register("animal_call", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("animal_call"))
+        )),
+        SYNTH = register("synth", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("synth"))
+        )),
+        BELL = register("bell", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("bell"))
+        )),
+
         GW2_BASS = register("gw2_bass", () ->
                 new InstrumentItem(
                             (player) -> sendOpenPacket(player, loc("gw2_bass"))

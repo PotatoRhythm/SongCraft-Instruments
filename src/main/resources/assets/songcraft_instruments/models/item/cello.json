@@ -1,0 +1,6 @@
+{
+  "parent": "songcraft_instruments:item/instrument",
+  "textures": {
+    "layer0": "songcraft_instruments:item/cello"
+  }
+}

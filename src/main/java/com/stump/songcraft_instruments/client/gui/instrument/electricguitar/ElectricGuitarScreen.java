@@ -5,13 +5,13 @@ import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.config.enumType.ElectricGuitarSoundType;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentThemeLoader;
-import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.GridInstrumentScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.partial.layout.LayoutGridInstrumentScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class ElectricGuitarScreen extends GridInstrumentScreen {
+public class ElectricGuitarScreen extends LayoutGridInstrumentScreen {
     public static final ResourceLocation INSTRUMENT_ID = new ResourceLocation(SCInstrumentMod.MODID, "electric_guitar");
 
     @Override

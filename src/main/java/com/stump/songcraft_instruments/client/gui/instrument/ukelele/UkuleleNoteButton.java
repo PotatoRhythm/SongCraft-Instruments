@@ -76,6 +76,28 @@ public class UkuleleNoteButton extends NoteGridButton {
     }
 
 
+    /**
+     * @return Whether this note plays a chord
+     */
+    public boolean isChord() {
+        return !ukuleleScreen().isTopRegular() && (column == 0);
+    }
+
+    // The chord samples sit atop the sound array, where a 3rd octave would.
+    // Only chords may be pitched from them, and chords only from them.
+    @Override
+    public boolean canTransposeTo(final int sampleIndex) {
+        final boolean chordSample = (sampleIndex / gridInstrument().rows()) == (gridInstrument().columns() - 1);
+        return chordSample == isChord();
+    }
+
+    // Chords and the extended 2nd octave are not played at their own sample's pitch
+    @Override
+    public boolean isTransposeSource() {
+        return column != 0;
+    }
+
+
     // Extending 2nd octave:
 
     @Override

@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * The abstract implementation of an Instrument screen.
@@ -728,6 +729,16 @@ public abstract class InstrumentScreen extends Screen {
         super.removed();
     }
 
+    /**
+     * Swaps this screen for another screen of the same instrument, keeping the instrument open.
+     * The new screen is made after this one's options are saved, so it starts from them.
+     */
+    public void replaceWith(final Supplier<? extends InstrumentScreen> next) {
+        optionsScreen.saveOptions();
+        closed = true;
+        minecraft.setScreen(next.get());
+    }
+
     private void notifyClosed() {
         InstrumentOpenProvider.setClosed(minecraft.player);
         SCPacketHandler.sendToServer(new CloseInstrumentPacket());
@@ -796,6 +807,14 @@ public abstract class InstrumentScreen extends Screen {
 
         return preferredSoundType;
     }
+    /**
+     * Sets the sound type this screen starts with, in place of the one saved in the configs.
+     * Call before the screen is initialized.
+     */
+    protected void initPreferredSoundType(final SoundType soundType) {
+        this.preferredSoundType = soundType;
+    }
+
     public void setPreferredSoundType(final SoundType preferredSoundType) {
         this.preferredSoundType = preferredSoundType;
         setSoundOption(preferredSoundType.getSoundArr().get());
@@ -831,6 +850,7 @@ public abstract class InstrumentScreen extends Screen {
             return;
 
         NoteSoundInstances.dampenAll(player.getId());
+        NoteSoundInstances.dampenAll(InitiatorID.fromEntity(player));
         HeldNoteSounds.dampenAll(InitiatorID.fromEntity(player));
 
         SCPacketHandler.sendToServer(

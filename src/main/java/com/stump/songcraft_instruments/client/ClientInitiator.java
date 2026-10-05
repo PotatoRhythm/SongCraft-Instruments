@@ -35,6 +35,18 @@ import com.stump.songcraft_instruments.item.clientExtensions.ModItemPredicates;
 import com.stump.songcraft_instruments.client.gui.instrument.guitar.GuitarScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.keyboard.KeyboardScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.koto.KotoScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.harp.HarpScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.cello.CelloScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.steeldrum.SteelDrumScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.concertina.ConcertinaScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.flute.FluteScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.xiao.XiaoScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.drum.DrumScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.kalimba.KalimbaScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.ocarina.OcarinaScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.animalcall.AnimalCallScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.synth.SynthScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.bell.BellScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.noteblockinstrument.NoteBlockInstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.pipa.PipaScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.shamisen.ShamisenScreen;
@@ -86,6 +98,19 @@ public class ClientInitiator {
                 Map.entry(SaxophoneScreen.INSTRUMENT_ID, SaxophoneScreen::new),
                 Map.entry(MicrophoneScreen.INSTRUMENT_ID, MicrophoneScreen::new),
                 Map.entry(MicrophoneStandScreen.INSTRUMENT_ID, MicrophoneStandScreen::new),
+
+                Map.entry(HarpScreen.INSTRUMENT_ID, HarpScreen::new),
+                Map.entry(CelloScreen.INSTRUMENT_ID, CelloScreen::new),
+                Map.entry(SteelDrumScreen.INSTRUMENT_ID, SteelDrumScreen::create),
+                Map.entry(ConcertinaScreen.INSTRUMENT_ID, ConcertinaScreen::new),
+                Map.entry(FluteScreen.INSTRUMENT_ID, FluteScreen::new),
+                Map.entry(XiaoScreen.INSTRUMENT_ID, XiaoScreen::create),
+                Map.entry(DrumScreen.INSTRUMENT_ID, DrumScreen::new),
+                Map.entry(KalimbaScreen.INSTRUMENT_ID, KalimbaScreen::new),
+                Map.entry(OcarinaScreen.INSTRUMENT_ID, OcarinaScreen::new),
+                Map.entry(AnimalCallScreen.INSTRUMENT_ID, AnimalCallScreen::new),
+                Map.entry(SynthScreen.INSTRUMENT_ID, SynthScreen::new),
+                Map.entry(BellScreen.INSTRUMENT_ID, BellScreen::create),
 
                 Map.entry(Gw2BassScreen.INSTRUMENT_ID, Gw2BassScreen::new),
                 Map.entry(Gw2BellScreen.INSTRUMENT_ID, Gw2BellScreen::new),

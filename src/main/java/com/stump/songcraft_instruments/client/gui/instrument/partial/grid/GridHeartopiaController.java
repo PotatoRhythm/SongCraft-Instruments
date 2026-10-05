@@ -70,7 +70,7 @@ public class GridHeartopiaController {
             for (int row = 0; row < screen.rows(); row++) {
                 final NoteButton button = screen.getNoteButton(row, column);
 
-                if (!(button instanceof NoteGridButton gridButton))
+                if (!(button instanceof NoteGridButton gridButton) || !gridButton.isTransposeSource())
                     continue;
 
                 final int samplePitch = gridButton.getChromaticPitch();

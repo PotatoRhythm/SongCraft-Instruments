@@ -41,7 +41,7 @@ public class ModClientConfigs {
         STOP_MUSIC_ON_PLAY, SHARED_INSTRUMENT,
         RENDER_BACKGROUND, ACCEPTED_DISCLAIMER, ACCURATE_NOTES,
         MIDI_ENABLED, EXTEND_OCTAVES, FIXED_TOUCH, ACCEPT_ALL_CHANNELS,
-        NORMALIZE_VINTAGE_LYRE, SERVER_AUDIO
+        SERVER_AUDIO
     ;
 
     public static final EnumValue<ZitherSoundType> ZITHER_SOUND_TYPE;
@@ -63,6 +63,19 @@ public class ModClientConfigs {
     public static final EnumValue<MicrophoneSoundType> MICROPHONE_SOUND_TYPE;
     public static final EnumValue<SaxophoneSoundType> SAXOPHONE_SOUND_TYPE;
     public static final EnumValue<TromboneSoundType> TROMBONE_SOUND_TYPE;
+    public static final EnumValue<KotoSoundType> KOTO_SOUND_TYPE;
+    public static final EnumValue<HarpSoundType> HARP_SOUND_TYPE;
+    public static final EnumValue<CelloSoundType> CELLO_SOUND_TYPE;
+    public static final EnumValue<SteelDrumSoundType> STEEL_DRUM_SOUND_TYPE;
+    public static final EnumValue<ConcertinaSoundType> CONCERTINA_SOUND_TYPE;
+    public static final EnumValue<FluteSoundType> FLUTE_SOUND_TYPE;
+    public static final EnumValue<XiaoSoundType> XIAO_SOUND_TYPE;
+    public static final EnumValue<DrumSoundType> DRUM_SOUND_TYPE;
+    public static final EnumValue<KalimbaSoundType> KALIMBA_SOUND_TYPE;
+    public static final EnumValue<OcarinaSoundType> OCARINA_SOUND_TYPE;
+    public static final EnumValue<AnimalCallSoundType> ANIMAL_CALL_SOUND_TYPE;
+    public static final EnumValue<SynthSoundType> SYNTH_SOUND_TYPE;
+    public static final EnumValue<BellSoundType> BELL_SOUND_TYPE;
 
     static {
         final ForgeConfigSpec.Builder configBuilder = new Builder();
@@ -87,8 +100,6 @@ public class ModClientConfigs {
         RENDER_BACKGROUND = configBuilder.define("render_background", true);
         ACCURATE_NOTES = configBuilder.define("accurate_notes", true);
 
-        NORMALIZE_VINTAGE_LYRE = configBuilder.define("normalize_vintage_lyre", true);
-
         SERVER_AUDIO = configBuilder.define("server_audio", false);
         OCTAVE_SWAP_MIN = configBuilder.comment("The lowest octave Octave Swap mode may shift to")
             .defineInRange("octave_swap_min", -2, -2, 2);
@@ -104,15 +115,28 @@ public class ModClientConfigs {
         DRUMSET_LABEL_TYPE = configBuilder.defineEnum("drumset_label_type", DrumsetNoteLabel.KEYBOARD_LAYOUT);
         GW2_DRUMSET_LABEL_TYPE = configBuilder.defineEnum("gw2_drumset_label_type", Gw2DrumsetNoteLabel.KEYBOARD_LAYOUT);
         KEYBOARD_SOUND_TYPE = configBuilder.defineEnum("keyboard_sound_type", KeyboardSoundType.YAMAHA_C5);
-        DRUMSET_SOUND_TYPE = configBuilder.defineEnum("drumset_sound_type", DrumsetSoundType.GW2);
+        DRUMSET_SOUND_TYPE = configBuilder.defineEnum("drumset_sound_type", DrumsetSoundType.STANDARD);
         GUITAR_SOUND_TYPE = configBuilder.defineEnum("guitar_sound_type", GuitarSoundType.EMI);
-        BASS_GUITAR_SOUND_TYPE = configBuilder.defineEnum("bass_guitar_sound_type", BassGuitarSoundType.FINGER);
+        BASS_GUITAR_SOUND_TYPE = configBuilder.defineEnum("bass_guitar_sound_type", BassGuitarSoundType.PICKED);
         ELECTRIC_GUITAR_SOUND_TYPE = configBuilder.defineEnum("electric_guitar_sound_type", ElectricGuitarSoundType.CLEAN);
         VIOLIN_SOUND_TYPE = configBuilder.defineEnum("violin_sound_type", ViolinSoundType.FAST);
         PIPA_SOUND_TYPE = configBuilder.defineEnum("pipa_sound_type", PipaSoundType.REGULAR);
         MICROPHONE_SOUND_TYPE = configBuilder.defineEnum("microphone_sound_type", MicrophoneSoundType.MIKU);
         SAXOPHONE_SOUND_TYPE = configBuilder.defineEnum("saxophone_sound_type", SaxophoneSoundType.TENOR);
         TROMBONE_SOUND_TYPE = configBuilder.defineEnum("trombone_sound_type", TromboneSoundType.PHGM);
+        KOTO_SOUND_TYPE = configBuilder.defineEnum("koto_sound_type", KotoSoundType.EMI);
+        HARP_SOUND_TYPE = configBuilder.defineEnum("harp_sound_type", HarpSoundType.HATO_HARP);
+        CELLO_SOUND_TYPE = configBuilder.defineEnum("cello_sound_type", CelloSoundType.HATO_CELLO);
+        STEEL_DRUM_SOUND_TYPE = configBuilder.defineEnum("steel_drum_sound_type", SteelDrumSoundType.HATO_HANG_DRUM);
+        CONCERTINA_SOUND_TYPE = configBuilder.defineEnum("concertina_sound_type", ConcertinaSoundType.HATO_CONCERTINA);
+        FLUTE_SOUND_TYPE = configBuilder.defineEnum("flute_sound_type", FluteSoundType.SKY_FLUTE);
+        XIAO_SOUND_TYPE = configBuilder.defineEnum("xiao_sound_type", XiaoSoundType.HATO_XIAO);
+        DRUM_SOUND_TYPE = configBuilder.defineEnum("drum_sound_type", DrumSoundType.HATO_CAJON);
+        KALIMBA_SOUND_TYPE = configBuilder.defineEnum("kalimba_sound_type", KalimbaSoundType.HATO_KALIMBA);
+        OCARINA_SOUND_TYPE = configBuilder.defineEnum("ocarina_sound_type", OcarinaSoundType.HATO_OCARINA);
+        ANIMAL_CALL_SOUND_TYPE = configBuilder.defineEnum("animal_call_sound_type", AnimalCallSoundType.SKY_BIRD_CALL);
+        SYNTH_SOUND_TYPE = configBuilder.defineEnum("synth_sound_type", SynthSoundType.SKY_BASS_SYNTH);
+        BELL_SOUND_TYPE = configBuilder.defineEnum("bell_sound_type", BellSoundType.SKY_BELLS);
 
 
         MIDI_ENABLED = configBuilder.define("midi_enabled", false);

@@ -116,11 +116,14 @@ public class GridInstrumentMidiReceiver extends InstrumentMidiReceiver {
                         + ModClientConfigs.TRANSPOSE.get();
 
         // Find the available sample closest to the desired pitch.
-        NoteSound closestSound = sounds[0];
-        int closestPitch = getSampleChromaticPitch(0);
-        int closestDistance = Math.abs(targetPitch - closestPitch);
+        NoteSound closestSound = null;
+        int closestPitch = 0;
+        int closestDistance = Integer.MAX_VALUE;
 
-        for (int i = 1; i < sounds.length; i++) {
+        for (int i = 0; i < sounds.length; i++) {
+            if ((noteBtn instanceof NoteGridButton gridButton) && !gridButton.canTransposeTo(i))
+                continue;
+
             final int samplePitch = getSampleChromaticPitch(i);
             final int distance = Math.abs(targetPitch - samplePitch);
 
@@ -130,6 +133,9 @@ public class GridInstrumentMidiReceiver extends InstrumentMidiReceiver {
                 closestDistance = distance;
             }
         }
+
+        if (closestSound == null)
+            return null;
 
         int newPitch = targetPitch - closestPitch;
         newPitch = NoteSound.clampPitch(newPitch);

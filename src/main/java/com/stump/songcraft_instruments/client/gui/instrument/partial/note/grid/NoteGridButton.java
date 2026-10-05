@@ -141,7 +141,7 @@ public class NoteGridButton extends NoteButton {
 
         final int transpose = screen.getPitch() + ModClientConfigs.TRANSPOSE.get();
 
-        if (transpose == 0) {
+        if ((transpose == 0) && canTransposeTo(posToIndex())) {
             return new TransposedSound(getSound(), 0);
         }
 
@@ -152,11 +152,14 @@ public class NoteGridButton extends NoteButton {
         if (sounds == null || sounds.length == 0)
             return new TransposedSound(getSound(), getPitch() + transpose);
 
-        NoteSound closestSound = sounds[0];
-        int closestPitch = getSampleChromaticPitch(0);
-        int closestDistance = Math.abs(targetPitch - closestPitch);
+        NoteSound closestSound = null;
+        int closestPitch = 0;
+        int closestDistance = Integer.MAX_VALUE;
 
-        for (int i = 1; i < sounds.length; i++) {
+        for (int i = 0; i < sounds.length; i++) {
+            if (!canTransposeTo(i))
+                continue;
+
             final int samplePitch = getSampleChromaticPitch(i);
             final int distance = Math.abs(targetPitch - samplePitch);
 
@@ -167,7 +170,26 @@ public class NoteGridButton extends NoteButton {
             }
         }
 
+        if (closestSound == null)
+            return new TransposedSound(getSound(), getPitch() + transpose);
+
         return new TransposedSound(closestSound, targetPitch - closestPitch);
+    }
+
+    /**
+     * @param sampleIndex An index of the instrument's sound array
+     * @return Whether this note may play the given sample, pitched to its own note.
+     * For instruments whose sound array holds more than one octave of single notes, such as the Ukulele's chords.
+     */
+    public boolean canTransposeTo(final int sampleIndex) {
+        return true;
+    }
+    /**
+     * @return Whether this note's sound is a plain note at its {@link #getChromaticPitch() chromatic pitch},
+     * that other notes may be pitched from
+     */
+    public boolean isTransposeSource() {
+        return true;
     }
 
     private int getSampleChromaticPitch(int index) {

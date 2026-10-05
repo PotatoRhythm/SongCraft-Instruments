@@ -6,14 +6,14 @@ import com.stump.songcraft_instruments.client.config.enumType.SaxophoneSoundType
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.IHeldInstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentThemeLoader;
-import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.GridInstrumentScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.partial.layout.LayoutGridInstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.trombone.TromboneScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class SaxophoneScreen extends GridInstrumentScreen implements IHeldInstrumentScreen {
+public class SaxophoneScreen extends LayoutGridInstrumentScreen implements IHeldInstrumentScreen {
     public static final ResourceLocation INSTRUMENT_ID = new ResourceLocation(SCInstrumentMod.MODID, "saxophone");
 
     @Override

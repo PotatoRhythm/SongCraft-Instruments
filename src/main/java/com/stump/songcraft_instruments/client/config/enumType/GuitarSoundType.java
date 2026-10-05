@@ -8,18 +8,29 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public enum GuitarSoundType implements SoundType {
-    EMI(() -> new SoundOption(SCSounds.GUITAR)),
-    NYLON(() -> new SoundOption(SCSounds.GUITAR_NYLON)),
-    STEEL(() -> new SoundOption(SCSounds.GUITAR_STEEL));
+public enum GuitarSoundType implements LayoutSoundType {
+    EMI(3, () -> new SoundOption(SCSounds.GUITAR)),
+    NYLON(3, () -> new SoundOption(SCSounds.GUITAR_NYLON)),
+    STEEL(3, () -> new SoundOption(SCSounds.GUITAR_STEEL)),
+    SKY_GUITAR(2, () -> new SoundOption(SCSounds.SKY_GUITAR)),
+    SKY_TOY_UKULELE(2, () -> new SoundOption(SCSounds.SKY_TOY_UKULELE)),
+    HATO_LUNGHE(2, () -> new SoundOption(SCSounds.HEARTOPIA_LUNGHE)),
+    FF14_LUTE(3, () -> new SoundOption(SCSounds.FF14_LUTE));
 
+    private final int columns;
     private final Supplier<SoundOption> soundArr;
-    private GuitarSoundType(final Supplier<SoundOption> soundType) {
+    private GuitarSoundType(final int columns, final Supplier<SoundOption> soundType) {
+        this.columns = columns;
         this.soundArr = soundType;
     }
 
     @Override
     public Supplier<SoundOption> getSoundArr() {
         return soundArr;
+    }
+
+    @Override
+    public int columns() {
+        return columns;
     }
 }

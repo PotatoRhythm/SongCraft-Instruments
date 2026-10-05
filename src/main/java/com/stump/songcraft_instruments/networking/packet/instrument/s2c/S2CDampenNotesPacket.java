@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.networking.packet.instrument.s2c;
 
+import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.networking.IModPacket;
 import com.stump.songcraft_instruments.sound.NoteSoundInstances;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSounds;
@@ -41,6 +42,11 @@ public class S2CDampenNotesPacket implements IModPacket {
         final var entity = minecraft.level.getEntity(initiatorId);
 
         if (entity == null)
+            return;
+
+        // Without server audio, the player's own notes play locally and were already dampened when they sent this.
+        // Dampening again here would cut off any note they started since, like a single-note instrument's next note.
+        if ((entity == minecraft.player) && !ModClientConfigs.SERVER_AUDIO.get())
             return;
 
         final InitiatorID source = InitiatorID.fromEntity(entity);

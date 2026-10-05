@@ -8,20 +8,28 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public enum MicrophoneSoundType implements SoundType {
-    IRINA(() -> new SoundOption(SCSounds.IRINA_BROCHIN)),
-    BASS(() -> new SoundOption(SCSounds.BASS_CHOIR)),
-    MIKU(() -> new SoundOption(SCSounds.NOT_MIKU)),
-    TETO(() -> new SoundOption(SCSounds.NOT_TETO)),
-    TETO_SNEAKY(() -> new SoundOption(SCSounds.NOT_TETO_SNEAKY));
+public enum MicrophoneSoundType implements LayoutSoundType {
+    IRINA(3, () -> new SoundOption(SCSounds.IRINA_BROCHIN)),
+    BASS(3, () -> new SoundOption(SCSounds.BASS_CHOIR)),
+    MIKU(3, () -> new SoundOption(SCSounds.NOT_MIKU)),
+    TETO(3, () -> new SoundOption(SCSounds.NOT_TETO)),
+    TETO_SNEAKY(3, () -> new SoundOption(SCSounds.NOT_TETO_SNEAKY)),
+    SKY_AURORA(2, () -> new SoundOption(SCSounds.SKY_AURORA));
 
+    private final int columns;
     private final Supplier<SoundOption> soundArr;
-    private MicrophoneSoundType(final Supplier<SoundOption> soundType) {
+    private MicrophoneSoundType(final int columns, final Supplier<SoundOption> soundType) {
+        this.columns = columns;
         this.soundArr = soundType;
     }
 
     @Override
     public Supplier<SoundOption> getSoundArr() {
         return soundArr;
+    }
+
+    @Override
+    public int columns() {
+        return columns;
     }
 }
