@@ -1,13 +1,10 @@
 package com.stump.songcraft_instruments.client.gui.instrument.partial.grid;
 
-import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.grid.NoteGridButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.held.IHoldableNoteButton;
 import com.stump.songcraft_instruments.client.keyMaps.InstrumentKeyMappings;
 import com.stump.songcraft_instruments.client.midi.PressedMIDINote;
-import com.stump.songcraft_instruments.sound.NoteSound;
-import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import org.jetbrains.annotations.Nullable;
@@ -67,65 +64,13 @@ public class GridHeartopiaController {
         if (visualButton == null)
             return true;
 
-        // Follow the transposition keys as well as the transpose setting
-        final int targetPitch = pitchOffset + screen.getPitch() + ModClientConfigs.TRANSPOSE.get();
-        NoteGridButton closestButton = null;
-        int closestDistance = Integer.MAX_VALUE;
-        int closestSamplePitch = 0;
-
-        for (int row = 0; row < screen.rows(); row++) {
-            for (int column = 0; column < screen.columns(); column++) {
-                final NoteButton button = screen.getNoteButton(column, row);
-
-                if (!(button instanceof NoteGridButton gridButton)
-                        || !gridButton.hasChromaticPitch() || !gridButton.isTransposeSource())
-                    continue;
-
-                final int samplePitch = gridButton.getChromaticPitch();
-                final int distance = Math.abs(targetPitch - samplePitch);
-
-                if (distance < closestDistance) {
-                    closestButton = gridButton;
-                    closestDistance = distance;
-                    closestSamplePitch = samplePitch;
-                }
-            }
-        }
-
-        if (closestButton == null)
-            return true;
-
-        final int newPitch = NoteSound.clampPitch(
-                targetPitch - closestSamplePitch
-        );
-
-        final NoteSound sound = closestButton.getSound();
-
-        if (visualButton instanceof IHoldableNoteButton heldButton) {
-            final HeldNoteSound[] heldSounds =
-                    screen.getHeldNoteSounds();
-
-            if (heldSounds != null) {
-                for (HeldNoteSound heldSound : heldSounds) {
-
-                    if (heldSound != null
-                            && sound.equals(heldSound.attack())) {
-
-                        heldButton.setHeldNoteSound(heldSound);
-                        break;
-                    }
-                }
-            }
-        }
-
+        // Sharps are played on the natural note below them, raised a semitone.
+        // The button picks its own sample, so the Ukulele's chords stay chords.
         visualButton.unlockInput();
-        final boolean played = visualButton.play(sound, newPitch);
-
-        if (!played)
-            return true;
-
-        pressedNotes.put(keyCode, new PressedMIDINote(newPitch, visualButton, sound)
-        );
+        if (visualButton.play(pitchOffset - visualPitch))
+            pressedNotes.put(keyCode, new PressedMIDINote(
+                visualButton.getLastPlayedPitch(), visualButton, visualButton.getLastPlayedSound()
+            ));
 
         return true;
     }

@@ -196,7 +196,10 @@ public class NoteGridButton extends NoteButton {
 
     private record TransposedSound(NoteSound sound, int pitch) {}
 
-    private TransposedSound getTransposedSound() {
+    /**
+     * @param semitones How many semitones above this note to play, on top of the transposition
+     */
+    private TransposedSound getTransposedSound(final int semitones) {
         final GridInstrumentScreen screen = gridInstrument();
 
         /*
@@ -204,10 +207,10 @@ public class NoteGridButton extends NoteButton {
          * so do not calculate their pitch from column/row.
          */
         if (screen.isSSTI()) {
-            return new TransposedSound(getSound(), getPitch() + ModClientConfigs.TRANSPOSE.get());
+            return new TransposedSound(getSound(), getPitch() + semitones + ModClientConfigs.TRANSPOSE.get());
         }
 
-        final int transpose = screen.getPitch() + ModClientConfigs.TRANSPOSE.get();
+        final int transpose = screen.getPitch() + ModClientConfigs.TRANSPOSE.get() + semitones;
 
         if ((transpose == 0) && canTransposeTo(posToIndex())) {
             return new TransposedSound(getSound(), 0);
@@ -252,14 +255,6 @@ public class NoteGridButton extends NoteButton {
     public boolean canTransposeTo(final int sampleIndex) {
         return true;
     }
-    /**
-     * @return Whether this note's sound is a plain note at its {@link #getChromaticPitch() chromatic pitch},
-     * that other notes may be pitched from
-     */
-    public boolean isTransposeSource() {
-        return true;
-    }
-
     private int getSampleChromaticPitch(int index) {
         final int column = index % gridInstrument().columns();
         final int row = index / gridInstrument().columns();
@@ -269,7 +264,16 @@ public class NoteGridButton extends NoteButton {
 
     @Override
     public boolean play() {
-        final TransposedSound transposedSound = getTransposedSound();
+        return play(0);
+    }
+
+    /**
+     * Plays this note raised by the given semitones, as its own sound would be transposed;
+     * used by keys that play a sharp on a natural note's button
+     * @param semitones How many semitones above this note to play
+     */
+    public boolean play(final int semitones) {
+        final TransposedSound transposedSound = getTransposedSound(semitones);
 
         if (this instanceof HeldGridNoteButton heldButton) {
             HeldNoteSound[] heldSounds = gridInstrument().getHeldNoteSounds();

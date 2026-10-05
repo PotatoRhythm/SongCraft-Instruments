@@ -65,8 +65,11 @@ public class UkuleleNoteButton extends NoteGridButton {
         return super.getMessage();
     }
 
+    /**
+     * @return The chord this button plays, following the transposition keys and the transpose setting
+     */
     public String getChordNameOfColumn() {
-        return getNoteName();
+        return getTransposedNoteName();
     }
 
 
@@ -79,16 +82,30 @@ public class UkuleleNoteButton extends NoteGridButton {
 
     // The chord samples sit atop the sound array, where a 3rd octave would.
     // Only chords may be pitched from them, and chords only from them.
+    // A chord is only pitched from a chord of its own type, so a minor chord never borrows a major one.
     @Override
     public boolean canTransposeTo(final int sampleIndex) {
-        final boolean chordSample = (sampleIndex / gridInstrument().columns()) == (gridInstrument().rows() - 1);
-        return chordSample == isChord();
+        final int columns = gridInstrument().columns();
+        final boolean chordSample = (sampleIndex / columns) == (gridInstrument().rows() - 1);
+        if (chordSample != isChord())
+            return false;
+        if (!isChord())
+            return true;
+
+        // The chord row is the top row of the layout, so its columns match the chord samples'
+        final String[] layout = ukuleleScreen().noteLayout();
+        return getChordType(layout[sampleIndex % columns]).equals(getChordType(layout[column]));
     }
 
-    // Chords and the extended 2nd octave are not played at their own sample's pitch
-    @Override
-    public boolean isTransposeSource() {
-        return row != 0;
+    /**
+     * @return The chord's type, without its root: empty for major, {@code m} for minor, {@code 7} for dominant 7th
+     */
+    private static String getChordType(final String chord) {
+        int i = 1;
+        while (i < chord.length() && (chord.charAt(i) == '#' || chord.charAt(i) == 'b'))
+            i++;
+
+        return chord.substring(i);
     }
 
 

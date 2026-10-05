@@ -10,11 +10,14 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -49,8 +52,10 @@ public class NoteButtonRenderer {
     protected ResourceLocation gw2AccidentalsLocation;
     protected ResourceLocation gw2PressedLocation, gw2ReleasedLocation, gw2HoverLocation;
 
-    /** The space between the bottom of a low-octave Jianpu dot and the top of the label, in screen pixels */
-    protected static final int LABEL_GAP = 2;
+    /** The size of the button texture the label is placed against, centered on the pixel grid */
+    protected static final int LABEL_BUTTON_SIZE = 15;
+    /** How far above the bottom of the button the top of the label is drawn, in GUI pixels (the size of a font pixel) */
+    protected static final int LABEL_RISE = 5;
 
     // Genshin and Jianpu styles; drawn 1:1 on the button's texture pixel grid
     /** The size of the default button texture, which defines the pixel grid */
@@ -327,34 +332,55 @@ public class NoteButtonRenderer {
     }
 
     /**
-     * Places the label below a low-octave Jianpu dot, so the two never overlap.
+     * Places the label a set number of GUI pixels above the bottom of a 15x15 button,
+     * snapped to whole GUI pixels so the font's pixels stay even.
      * Used for every note style, so the label stays put when switching between them.
-     * @return How far below the button's center the top of the label is drawn, in GUI units
+     * @return The y of the top of the label, in GUI units
      */
-    protected float getLabelOffsetY() {
-        // The Jianpu symbol is centered on the button, and its low dot sits on its bottom row
+    protected int getLabelY() {
         final float pixelHeight = noteButton.getInitHeight() / (float) BUTTON_TEXTURE_SIZE;
-        final float dotBottom = (JIANPU_SYMBOL_HEIGHT / 2f - JIANPU_DOT_INSET) * JIANPU_SYMBOL_SCALE * pixelHeight;
+        final float buttonBottom = noteButton.getInitY() + noteButton.getInitHeight() / 2f
+            + LABEL_BUTTON_SIZE / 2f * pixelHeight;
 
-        return dotBottom + LABEL_GAP / (float) MINECRAFT.getWindow().getGuiScale();
+        return Math.round(buttonBottom) - LABEL_RISE;
     }
 
     protected void renderLabel(final GuiGraphics gui, final InstrumentThemeLoader themeLoader) {
-        // Positioned in between GUI units, so the gap below the dot can be a single screen pixel
-        gui.pose().pushPose();
-        gui.pose().translate(0, noteButton.getInitY() + noteButton.getInitHeight() / 2f + getLabelOffsetY(), 0);
+        final Color labelColor = (noteButton.isPlaying() && !foreignPlaying)
+            ? themeLoader.labelPressed(noteButton)
+            : themeLoader.labelReleased(noteButton);
 
-        gui.drawCenteredString(
-            MINECRAFT.font, noteButton.getMessage(),
-            noteButton.getInitX() + noteButton.getInitWidth()/2, 0,
-
-            ((noteButton.isPlaying() && !foreignPlaying)
-                ? themeLoader.labelPressed(noteButton)
-                : themeLoader.labelReleased(noteButton)
-            ).getRGB()
+        // Outlined like glow ink sign text, so the label stays readable over the ring and outside the button
+        final FormattedCharSequence label = noteButton.getMessage().getVisualOrderText();
+        MINECRAFT.font.drawInBatch8xOutline(
+            label,
+            Math.round(noteButton.getInitX() + noteButton.getInitWidth() / 2f - MINECRAFT.font.width(label) / 2f),
+            getLabelY(),
+            labelColor.getRGB(), getLabelHaloColor(labelColor).getRGB(),
+            gui.pose().last().pose(), gui.bufferSource(), LightTexture.FULL_BRIGHT
         );
+        gui.flush();
+    }
 
-        gui.pose().popPose();
+    /** The light color of a released button's face, used to halo dark labels */
+    private static final Color LABEL_HALO_LIGHT = new Color(255, 249, 239);
+    /** How dark the halo of a light label is, relative to the label */
+    private static final float LABEL_HALO_DARKNESS = .25f;
+
+    /**
+     * @return A halo that contrasts with the label: the button's light face for dark labels,
+     * and a deep shade of the label itself for light ones
+     */
+    protected static Color getLabelHaloColor(final Color labelColor) {
+        final float luminance = (.299f * labelColor.getRed() + .587f * labelColor.getGreen() + .114f * labelColor.getBlue()) / 255;
+        if (luminance < .7f)
+            return LABEL_HALO_LIGHT;
+
+        return new Color(
+            (int) (labelColor.getRed() * LABEL_HALO_DARKNESS),
+            (int) (labelColor.getGreen() * LABEL_HALO_DARKNESS),
+            (int) (labelColor.getBlue() * LABEL_HALO_DARKNESS)
+        );
     }
 
 

@@ -72,7 +72,8 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            jvmArg "-XX:+AllowEnhancedClassRedefinition"
+            // Only the JetBrains Runtime understands this flag; other JDKs refuse to start with it
+            // jvmArg "-XX:+AllowEnhancedClassRedefinition"
 
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
