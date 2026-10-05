@@ -17,10 +17,10 @@ public enum TromboneSoundType implements LayoutSoundType {
     FF14_TRUMPET(3, () -> new SoundOption(SCSounds.FF14_TRUMPET)),
     FF14_TUBA(3, () -> new SoundOption(SCSounds.FF14_TUBA));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private TromboneSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private TromboneSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -30,7 +30,7 @@ public enum TromboneSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

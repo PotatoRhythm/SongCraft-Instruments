@@ -10,6 +10,7 @@ import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
 import com.stump.songcraft_instruments.networking.packet.instrument.c2s.C2SNoteSoundPacket;
 import com.stump.songcraft_instruments.sound.NoteSound;
+import com.stump.songcraft_instruments.util.CommonUtil;
 import com.stump.songcraft_instruments.util.LabelUtil;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
@@ -178,6 +179,18 @@ public abstract class NoteButton extends AbstractButton {
         return LabelUtil.getNoteName(instrumentScreen.getPitch(), instrumentScreen.noteLayout(), getNoteOffset());
     }
     /**
+     * @return The note this button plays, named for the key it is transposed to, following both the instrument's pitch
+     * (as transposed with the transposition keys) and the {@link ModClientConfigs#TRANSPOSE transpose} setting
+     */
+    public String getTransposedNoteName() {
+        if (instrumentScreen.noteLayout() == null)
+            return "";
+
+        final String[] layout = instrumentScreen.noteLayout();
+        final String baseNote = layout[CommonUtil.wrapAround(getNoteOffset(), layout.length)];
+        return LabelUtil.transposeNote(baseNote, instrumentScreen.getPitch() + ModClientConfigs.TRANSPOSE.get());
+    }
+    /**
      * Defines the offset of this note relative to the this screen's {@link InstrumentScreen#noteLayout() note layout}
      */
     public abstract int getNoteOffset();
@@ -191,10 +204,25 @@ public abstract class NoteButton extends AbstractButton {
     }
 
     /**
+     * @return Whether this note is drawn with Guild Wars 2 buttons,
+     * which have their note letters built in instead of a separate symbol
+     */
+    public boolean usesGw2Buttons() {
+        return instrumentScreen.isGuildWarsInstrument();
+    }
+
+    /**
      * @return Whether this note's button and symbol are rendered pixel-for-pixel
-     * on the button's texture grid (as with unlabeled Jianpu symbols) instead of being stretched
+     * on the button's texture grid (as with Jianpu symbols) instead of being stretched
      */
     public boolean usesPixelGridSymbol() {
+        return false;
+    }
+    /**
+     * @return Whether this note's {@link #usesPixelGridSymbol() pixel grid symbol} is a Jianpu number,
+     * which is centered along with its octave dot
+     */
+    public boolean usesJianpuSymbol() {
         return false;
     }
     /**

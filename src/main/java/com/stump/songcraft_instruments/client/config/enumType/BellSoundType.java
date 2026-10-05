@@ -16,10 +16,10 @@ public enum BellSoundType implements LayoutSoundType {
     SKY_SMALL_BELL(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_SMALL_BELL)),
     WWM_FANGXIANG_CHIMES(3, () -> new SoundOption(SCSounds.WWM_2));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private BellSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private BellSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -29,7 +29,7 @@ public enum BellSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

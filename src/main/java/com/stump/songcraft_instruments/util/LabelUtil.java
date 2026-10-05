@@ -74,6 +74,63 @@ public abstract class LabelUtil {
     }
 
     /**
+     * The 12 notes of an octave from C, named with sharps or with flats
+     */
+    public static final String[]
+        SHARP_NOTES = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"},
+        FLAT_NOTES = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"},
+        // F# major's 7th is E#, so that its scale names every letter once
+        F_SHARP_MAJOR_NOTES = {"C", "C#", "D", "D#", "E", "E#", "F#", "G", "G#", "A", "A#", "B"};
+    private static final int[] NATURAL_SEMITONES = {9, 11, 0, 2, 4, 5, 7}; // A to G
+
+    /**
+     * @param transpose The semitones C major is transposed by
+     * @return Whether the major key it lands on is written with flats:
+     * Db, Eb, F, Ab and Bb. The rest, including F# over Gb, are written with sharps.
+     */
+    public static boolean isFlatKey(final int transpose) {
+        return switch (Math.floorMod(transpose, 12)) {
+            case 1, 3, 5, 8, 10 -> true;
+            default -> false;
+        };
+    }
+    /**
+     * @return The common name of the major key C major is transposed to, such as Db rather than C#
+     */
+    public static String getKeyName(final int transpose) {
+        return getNotesOfKey(transpose)[Math.floorMod(transpose, 12)];
+    }
+    private static String[] getNotesOfKey(final int transpose) {
+        if (Math.floorMod(transpose, 12) == 6)
+            return F_SHARP_MAJOR_NOTES;
+
+        return isFlatKey(transpose) ? FLAT_NOTES : SHARP_NOTES;
+    }
+
+    /**
+     * @param noteName A note or chord name such as {@code C}, {@code F#}, {@code Bb} or {@code Dm}
+     * @param pitch The semitones to transpose the note by
+     * @return The transposed note, named with the sharps or flats of the key it is transposed to,
+     * keeping any chord suffix
+     * @see #isFlatKey
+     */
+    public static String transposeNote(final String noteName, final int pitch) {
+        int semitone = NATURAL_SEMITONES[noteName.charAt(0) - 'A'];
+
+        int i = 1;
+        for (; i < noteName.length(); i++) {
+            if (noteName.charAt(i) == '#')
+                semitone++;
+            else if (noteName.charAt(i) == 'b')
+                semitone--;
+            else
+                break;
+        }
+
+        return getNotesOfKey(pitch)[Math.floorMod(semitone + pitch, 12)] + noteName.substring(i);
+    }
+
+    /**
      * @param omitIfAccurate If the {@link ModClientConfigs#ACCURATE_NOTES} setting is enabled,
      * get the natural version of the note only
      * @return The given note, replaced with accurate accidentals unicodes

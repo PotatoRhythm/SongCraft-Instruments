@@ -25,6 +25,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.AbstractLayout;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -34,7 +35,7 @@ import java.util.function.Consumer;
 public abstract class GridInstrumentScreen extends InstrumentScreen implements IHeldInstrumentScreen {
     public static final String[] NOTE_LAYOUT = {"C", "D", "E", "F", "G", "A", "B"};
 
-    public static final int DEF_ROWS = 7, DEF_COLUMNS = 3;
+    public static final int DEF_COLUMNS = 7, DEF_ROWS = 3;
     public static final int CLEF_WIDTH = 26, CLEF_HEIGHT = 52;
 
     protected AbstractLayout grid;
@@ -54,8 +55,8 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      *  Note Grid Generation
      * ============================================================ */
 
-    public int columns() { return DEF_COLUMNS; }
     public int rows() { return DEF_ROWS; }
+    public int columns() { return DEF_COLUMNS; }
 
     public NoteGrid initNoteGrid() {
         if (isHeldInstrument())
@@ -78,11 +79,12 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
 
     @Override
     protected void init() {
+        // The controllers tell the notes' keyboard labels which keys play them, so they come before the grid
+        octaveController = new GridOctaveSwapController(this);
+        heartopiaController = new GridHeartopiaController(this);
         updateOctaveRange();
         buildGrid();
         super.init();
-        octaveController = new GridOctaveSwapController(this);
-        heartopiaController = new GridHeartopiaController(this);
         octaveRangeSelector = new OctaveRangeSelector(this);
     }
 
@@ -131,6 +133,10 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        // The controllers below take every released key, so let go of the transposition keys first
+        if ((ModClientConfigs.CONTROL_MODE.get() != ControlModeType.GENSHIN) && checkTransposeDown(keyCode, scanCode))
+            return true;
+
         if (ModClientConfigs.CONTROL_MODE.get() == ControlModeType.HEARTOPIA) {
             heartopiaController.handleKeyRelease(keyCode);
             return true;
@@ -149,14 +155,14 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
     /**
      * Creates a note for a singular sound type (SSTI) instrument
      */
-    public NoteGridButton createNoteButton(int row, int column, int pitch) {
-        return new NoteGridButton(row, column, this, pitch);
+    public NoteGridButton createNoteButton(int column, int row, int pitch) {
+        return new NoteGridButton(column, row, this, pitch);
     }
-    public NoteGridButton createNoteButton(int row, int column) {
+    public NoteGridButton createNoteButton(int column, int row) {
         if (isHeldInstrument()) {
-            return new HeldGridNoteButton(row, column, this, getHeldNoteSounds());
+            return new HeldGridNoteButton(column, row, this, getHeldNoteSounds());
         }
-        return new NoteGridButton(row, column, this);
+        return new NoteGridButton(column, row, this);
     }
 
     /**
@@ -178,10 +184,10 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      * Gets a {@link NoteButton} based on the location of the note as described by the given identifier.
      */
     public NoteButton getNoteButton(final NoteGridButtonIdentifier noteIdentifier) throws IndexOutOfBoundsException {
-        return getNoteButton(noteIdentifier.row, noteGrid.getFlippedColumn(noteIdentifier.column));
+        return getNoteButton(noteIdentifier.column, noteGrid.getFlippedRow(noteIdentifier.row));
     }
-    public NoteButton getNoteButton(final int row, final int column) throws IndexOutOfBoundsException {
-        return noteGrid.getNoteButton(row, column);
+    public NoteButton getNoteButton(final int column, final int row) throws IndexOutOfBoundsException {
+        return noteGrid.getNoteButton(column, row);
     }
 
     /**
@@ -192,13 +198,13 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      * @return The corresponding note button
      */
     public NoteButton getNoteButtonByMIDINote(final int note) {
-        final int row = note % rows();
-        final int column = note / rows();
+        final int column = note % columns();
+        final int row = note / columns();
 
-        if (column < 0 || column >= columns())
+        if (row < 0 || row >= rows())
             return null;
 
-        return getNoteButton(row, column);
+        return getNoteButton(column, row);
     }
 
     @Override
@@ -228,7 +234,12 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      * Must not return {@link NoteIconStyle#INSTRUMENT_DEFAULT}.
      */
     public NoteIconStyle getDefaultNoteIconStyle() {
-        return NoteIconStyle.GENSHIN;
+        if (isGuildWarsInstrument())
+            return NoteIconStyle.GW2;
+        if (isGenshinInstrument())
+            return NoteIconStyle.GENSHIN;
+
+        return NoteIconStyle.JIANPU;
     }
     /**
      * @return The note symbol style to render, as resolved from the configs and this instrument's default
@@ -274,13 +285,13 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
         final int clefX = grid.getX() - getNoteSize() + 8;
 
         // Implement your own otherwise, idk
-        if (columns() == 3) {
+        if (rows() == 3) {
             renderClef(gui, 0, clefX, "treble");
             renderClef(gui, 1, clefX, "alto");
             renderClef(gui, 2, clefX, "bass");
         }
 
-        for (int i = 0; i < columns(); i++)
+        for (int i = 0; i < rows(); i++)
             renderStaff(gui, i);
     }
 
@@ -327,6 +338,10 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      * This behaviour can be changed by overriding {@link GridInstrumentScreen#initNoteGrid}.
      */
     public boolean isSSTI() { return false; }
+    /**
+     * @return For {@link #isSSTI() SSTI} instruments, how many semitones above C their lowest note is
+     */
+    public int getSSTILowestNote() { return 0; }
 
     @Override
     public void setPitch(int pitch) {
@@ -388,7 +403,7 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
 
     @Override
     public InstrumentMidiReceiver initMidiReceiver() {
-        return ((rows() != 7) || isSSTI()) ? null : new GridInstrumentMidiReceiver(this);
+        return ((columns() != 7) || isSSTI()) ? null : new GridInstrumentMidiReceiver(this);
     }
 
     @Override
@@ -429,7 +444,7 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      */
     public void updateOctaveRange() {
         lowestAvailableOctave = -2;
-        highestAvailableOctave = columns() - 1;
+        highestAvailableOctave = rows() - 1;
 
         final int min = Math.max(lowestAvailableOctave, Math.min(ModClientConfigs.OCTAVE_SWAP_MIN.get(), highestAvailableOctave));
         final int max = Math.max(min, Math.min(ModClientConfigs.OCTAVE_SWAP_MAX.get(), highestAvailableOctave));
@@ -443,5 +458,21 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
         minOctave = min;
         maxOctave = max;
         currentOctave = Math.max(minOctave, Math.min(currentOctave, maxOctave));
+    }
+
+    /* ============================================================
+     *  Keyboard Labels
+     * ============================================================ */
+
+    /**
+     * @return The key that plays the given note in the current control mode,
+     * or null if no key plays it as is
+     */
+    public @Nullable Key getControlKey(final NoteGridButton button) {
+        return switch (ModClientConfigs.CONTROL_MODE.get()) {
+            case GENSHIN -> InstrumentKeyMappings.GENSHIN_INSTRUMENT_MAPPINGS[button.row][button.column];
+            case HEARTOPIA -> heartopiaController.getKey(button);
+            case OCTAVE_SWAP -> octaveController.getKey(button);
+        };
     }
 }

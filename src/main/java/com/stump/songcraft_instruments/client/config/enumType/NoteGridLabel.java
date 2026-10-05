@@ -15,23 +15,21 @@ import net.minecraft.network.chat.Component;
  * an instance of {@code NoteGridButton}.
  */
 public enum NoteGridLabel implements INoteLabel {
-    KEYBOARD_LAYOUT((note) -> INoteLabel.upperComponent(
+    // Shows the keys of the current control mode; notes no key plays as is go unlabeled
+    KEYBOARD_LAYOUT((note) -> (ng(note).getKey() == null) ? Component.empty() : INoteLabel.upperComponent(
         ng(note).getKey().getDisplayName()
     )),
-    QWERTY((note) ->
+    QWERTY((note) -> (ng(note).getKey() == null) ? Component.empty() :
         INoteLabel.getQwerty(ng(note).getKey())
     ),
     
+    // The note actually played, following both the transposition keys and the transpose setting
     NOTE_NAME((note) -> Component.literal(
-        note.getFormattedNoteName()
+        note.getTransposedNoteName()
     )),
     // Fixed: based on the note's position in the grid, unaffected by transpositions
     DO_RE_MI((note) -> Component.translatable(
         INoteLabel.TRANSLATABLE_PATH + LabelUtil.DO_RE_MI[noteGridIndex(note) % 7]
-    )),
-
-    FIXED_ABC((note) -> Component.literal(
-        String.valueOf(LabelUtil.ABC[noteGridIndex(note) % 7])
     )),
 
     NONE(NoteLabelSupplier.EMPTY);
@@ -41,7 +39,7 @@ public enum NoteGridLabel implements INoteLabel {
      * @return The note button's grid index
      */
     private static int noteGridIndex(final NoteButton note) {
-        return ng(note).row + ng(note).column * gs(note).rows();
+        return ng(note).column + ng(note).row * gs(note).columns();
     }
     
 

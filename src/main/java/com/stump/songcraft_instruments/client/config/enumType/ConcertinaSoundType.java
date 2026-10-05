@@ -16,10 +16,10 @@ public enum ConcertinaSoundType implements LayoutSoundType {
     SKY_HARMONICA(2, () -> new SoundOption(SCSounds.SKY_HARMONICA)),
     HATO_BAGPIPES(2, () -> new SoundOption(SCSounds.HEARTOPIA_BAGPIPES));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private ConcertinaSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private ConcertinaSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -29,7 +29,7 @@ public enum ConcertinaSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

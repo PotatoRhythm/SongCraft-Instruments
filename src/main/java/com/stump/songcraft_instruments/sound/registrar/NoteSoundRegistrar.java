@@ -65,8 +65,8 @@ public class NoteSoundRegistrar extends ChainableNoteSoundRegistrar<NoteSound, N
     /**
      * Registers a matrix of sounds for a grid instrument.
      */
-    public NoteSound[] registerGrid(final int rows, final int columns) {
-        final NoteSound[] sounds = new NoteSound[rows * columns];
+    public NoteSound[] registerGrid(final int columns, final int rows) {
+        final NoteSound[] sounds = new NoteSound[columns * rows];
 
         for (int i = 0; i < sounds.length; i++)
             sounds[i] = createNote(i);
@@ -75,10 +75,10 @@ public class NoteSoundRegistrar extends ChainableNoteSoundRegistrar<NoteSound, N
     }
     /**
      * Registers a matrix of sounds for a grid instrument, with the
-     * default amount of {@link GridInstrumentScreen#DEF_ROWS rows} and {@link GridInstrumentScreen#DEF_COLUMNS columns}.
+     * default amount of {@link GridInstrumentScreen#DEF_COLUMNS columns} and {@link GridInstrumentScreen#DEF_ROWS rows}.
      */
     public NoteSound[] registerGrid() {
-        return registerGrid(GridInstrumentScreen.DEF_ROWS, GridInstrumentScreen.DEF_COLUMNS);
+        return registerGrid(GridInstrumentScreen.DEF_COLUMNS, GridInstrumentScreen.DEF_ROWS);
     }
 
     protected NoteSound createNote(ResourceLocation soundLocation, int index, Map<String, Object> paramMap) {

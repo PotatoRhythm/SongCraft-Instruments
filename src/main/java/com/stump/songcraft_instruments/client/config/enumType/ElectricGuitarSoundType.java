@@ -19,10 +19,10 @@ public enum ElectricGuitarSoundType implements LayoutSoundType {
     HARMONICS(3, () -> new SoundOption(SCSounds.GUITAR_HARMONICS)),
     FF14_SPECIAL_GUITAR(3, () -> new SoundOption(SCSounds.FF14_SPECIAL_GUITAR));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private ElectricGuitarSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private ElectricGuitarSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -32,7 +32,7 @@ public enum ElectricGuitarSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

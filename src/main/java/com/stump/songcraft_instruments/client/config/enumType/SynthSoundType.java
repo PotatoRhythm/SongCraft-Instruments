@@ -16,10 +16,10 @@ public enum SynthSoundType implements LayoutSoundType {
     SKY_CHIME_SYNTH(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_CHIME_SYNTH)),
     SKY_SINE_SYNTH(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_SINE_SYNTH));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private SynthSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private SynthSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -29,7 +29,7 @@ public enum SynthSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

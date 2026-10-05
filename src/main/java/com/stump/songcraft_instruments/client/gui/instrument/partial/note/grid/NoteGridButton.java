@@ -7,7 +7,6 @@ import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.GridIn
 import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.NoteGrid;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.render.NoteButtonRenderer;
-import com.stump.songcraft_instruments.client.keyMaps.InstrumentKeyMappings;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteGridButtonIdentifier;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
@@ -16,6 +15,7 @@ import com.mojang.blaze3d.platform.InputConstants.Key;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 @OnlyIn(Dist.CLIENT)
 public class NoteGridButton extends NoteButton {
@@ -41,28 +41,28 @@ public class NoteGridButton extends NoteButton {
     }
 
 
-    public final int row, column;
+    public final int column, row;
     private NoteSound lastPlayedSound;
     private int lastPlayedPitch;
 
-    public NoteGridButton(int row, int column, GridInstrumentScreen instrumentScreen) {
+    public NoteGridButton(int column, int row, GridInstrumentScreen instrumentScreen) {
         super(
-            getSoundFromArr(instrumentScreen, instrumentScreen.getInitSounds(), row, column),
+            getSoundFromArr(instrumentScreen, instrumentScreen.getInitSounds(), column, row),
             GridInstrumentScreen.getInitLabelSupplier(), instrumentScreen
         );
         
-        this.row = row;
         this.column = column;
+        this.row = row;
     }
     /**
      * Creates a button for an SSTI-type instrument
      */
-    public NoteGridButton(int row, int column, GridInstrumentScreen instrumentScreen,
+    public NoteGridButton(int column, int row, GridInstrumentScreen instrumentScreen,
             int pitch) {
         super(instrumentScreen.getInitSounds()[0], instrumentScreen.getInitLabelSupplier(), instrumentScreen, pitch);
 
-        this.row = row;
         this.column = column;
+        this.row = row;
     }
 
     public GridInstrumentScreen gridInstrument() {
@@ -80,11 +80,11 @@ public class NoteGridButton extends NoteButton {
     }
 
     /**
-     * @return The position of this button ({@link NoteGridButton#row}, {@link NoteGridButton#column})
+     * @return The position of this button ({@link NoteGridButton#column}, {@link NoteGridButton#row})
      * as an array index
      */
     public int posToIndex() {
-        return row + NoteGrid.getFlippedColumn(column, gridInstrument().columns()) * gridInstrument().rows();
+        return column + NoteGrid.getFlippedRow(row, gridInstrument().rows()) * gridInstrument().columns();
     }
     /**
      * Evaluates the sound at the current position.
@@ -92,13 +92,16 @@ public class NoteGridButton extends NoteButton {
      * @param sounds The sound array of the instrument
      * @see NoteGridButton#posToIndex
      */
-    protected static NoteSound getSoundFromArr(GridInstrumentScreen gridInstrument, NoteSound[] sounds, int row, int column) {
-        return sounds[row + NoteGrid.getFlippedColumn(column, gridInstrument.columns()) * gridInstrument.rows()];
+    protected static NoteSound getSoundFromArr(GridInstrumentScreen gridInstrument, NoteSound[] sounds, int column, int row) {
+        return sounds[column + NoteGrid.getFlippedRow(row, gridInstrument.rows()) * gridInstrument.columns()];
     }
 
 
-    public Key getKey() {
-        return InstrumentKeyMappings.GENSHIN_INSTRUMENT_MAPPINGS[column][row];
+    /**
+     * @return The key that plays this note in the current control mode, or null if none plays it as is
+     */
+    public @Nullable Key getKey() {
+        return gridInstrument().getControlKey(this);
     }
 
 
@@ -113,28 +116,28 @@ public class NoteGridButton extends NoteButton {
         return new NoteButtonRenderer(this, this::getLabelTexture);
     }
 
-    protected int getLabelTextureRow() {
-        return ModClientConfigs.ACCURATE_NOTES.get() ? getABCOffset() : (row % GRID_LABELS.length);
+    protected int getLabelTextureColumn() {
+        return ModClientConfigs.ACCURATE_NOTES.get() ? getABCOffset() : (column % GRID_LABELS.length);
     }
 
-    protected ResourceLocation getLabelTextureAt(final int row) {
-        return GRID_LABELS[row];
+    protected ResourceLocation getLabelTextureAt(final int column) {
+        return GRID_LABELS[column];
     }
     protected ResourceLocation getLabelTexture() {
         if (gridInstrument().getNoteIconStyle() == NoteIconStyle.JIANPU)
-            return JIANPU_LABELS[getLabelTextureRow()];
+            return JIANPU_LABELS[getLabelTextureColumn()];
 
-        return getLabelTextureAt(getLabelTextureRow());
+        return getLabelTextureAt(getLabelTextureColumn());
     }
 
     /**
-     * @return The Jianpu octave index of this button's column:
-     * 0 for columns below the middle one, 1 for the middle column, and 2 for columns above it
+     * @return The Jianpu octave index of this button's row:
+     * 0 for rows below the middle one, 1 for the middle row, and 2 for rows above it
      */
     protected int getJianpuOctave() {
-        final int columns = gridInstrument().columns();
-        final int soundColumn = NoteGrid.getFlippedColumn(column, columns);
-        return Integer.signum(soundColumn - columns / 2) + 1;
+        final int rows = gridInstrument().rows();
+        final int soundRow = NoteGrid.getFlippedRow(row, rows);
+        return Integer.signum(soundRow - rows / 2) + 1;
     }
 
     @Override
@@ -145,14 +148,19 @@ public class NoteGridButton extends NoteButton {
     protected boolean isJianpu() {
         return gridInstrument().getNoteIconStyle() == NoteIconStyle.JIANPU;
     }
-    protected boolean hasLabel() {
-        return !getMessage().getString().isEmpty();
-    }
 
-    // Without a label, Jianpu symbols get the bigger pixel-exact look
+    @Override
+    public boolean usesGw2Buttons() {
+        return gridInstrument().getNoteIconStyle() == NoteIconStyle.GW2;
+    }
+    // Genshin and Jianpu symbols are drawn pixel-exact and centered on the 15x15 buttons
     @Override
     public boolean usesPixelGridSymbol() {
-        return isJianpu() && !hasLabel();
+        return !usesGw2Buttons();
+    }
+    @Override
+    public boolean usesJianpuSymbol() {
+        return isJianpu();
     }
 
     // Balance the octave dots, so the whole symbol looks centered rather than just the number
@@ -163,50 +171,27 @@ public class NoteGridButton extends NoteButton {
     /** Downward offset per Jianpu octave (low, middle, high), in button texture pixels */
     private static final int[] JIANPU_PIXEL_GRID_NUDGE = {0, 0, 0};
 
-    /** The first and last visible rows of the Jianpu symbols per octave (low, middle, high) */
-    private static final int[][] JIANPU_VISIBLE_ROWS = {{2, 8}, {2, 6}, {0, 6}};
-    /** Where the inside of the button's inner ring begins, in button texture pixels */
-    private static final int BUTTON_INNER_TOP = 2;
-
-    /**
-     * Centers the visible Jianpu symbol (number and octave dot) between the inside of the
-     * button's ring and the top of the label, so the space above and below it is equal.
-     */
-    @Override
-    public int getSymbolOffsetY() {
-        if (!isJianpu() || !hasLabel())
-            return 0;
-
-        // The symbol is stretched over half the button; see NoteButtonRenderer#renderNoteSymbol
-        final int symbolBoxHeight = getHeight() / 2;
-        final float symbolPixel = symbolBoxHeight / (float) NoteButtonRenderer.JIANPU_SYMBOL_HEIGHT;
-        final float buttonPixel = getHeight() / (float) NoteButtonRenderer.BUTTON_TEXTURE_SIZE;
-
-        final int[] rows = JIANPU_VISIBLE_ROWS[getJianpuOctave()];
-        final float visibleHeight = (rows[1] - rows[0] + 1) * symbolPixel;
-
-        final float spaceTop = getY() + BUTTON_INNER_TOP * buttonPixel;
-        final float labelTop = getInitY() + getInitHeight() / 2 + NoteButtonRenderer.LABEL_OFFSET_Y;
-        final float visibleTop = spaceTop + (labelTop - spaceTop - visibleHeight) / 2;
-
-        final float drawY = visibleTop - rows[0] * symbolPixel;
-        final int defaultY = getY() + symbolBoxHeight / 2;
-        return Math.round(drawY - defaultY);
-    }
-
 
     @Override
     public int getNoteOffset() {
-        return row + column * gridInstrument().rows();
+        return column + row * gridInstrument().columns();
     }
 
     private static final int[] NATURAL_NOTE_PITCHES = {
             0, 2, 4, 5, 7, 9, 11
     };
 
+    /**
+     * @return Whether this note has a {@link #getChromaticPitch() chromatic pitch};
+     * notes past the 7 natural notes of a row, as on the Note Block Instrument, do not
+     */
+    public boolean hasChromaticPitch() {
+        return column < NATURAL_NOTE_PITCHES.length;
+    }
+
     public int getChromaticPitch() {
-        int soundColumn = NoteGrid.getFlippedColumn(column, gridInstrument().columns());
-        return soundColumn * 12 + NATURAL_NOTE_PITCHES[row];
+        int soundRow = NoteGrid.getFlippedRow(row, gridInstrument().rows());
+        return soundRow * 12 + NATURAL_NOTE_PITCHES[column];
     }
 
     private record TransposedSound(NoteSound sound, int pitch) {}
@@ -216,7 +201,7 @@ public class NoteGridButton extends NoteButton {
 
         /*
          * SSTI instruments do not use the standard C-major grid layout,
-         * so do not calculate their pitch from row/column.
+         * so do not calculate their pitch from column/row.
          */
         if (screen.isSSTI()) {
             return new TransposedSound(getSound(), getPitch() + ModClientConfigs.TRANSPOSE.get());
@@ -276,10 +261,10 @@ public class NoteGridButton extends NoteButton {
     }
 
     private int getSampleChromaticPitch(int index) {
-        final int row = index % gridInstrument().rows();
-        final int column = index / gridInstrument().rows();
+        final int column = index % gridInstrument().columns();
+        final int row = index / gridInstrument().columns();
 
-        return column * 12 + NATURAL_NOTE_PITCHES[row];
+        return row * 12 + NATURAL_NOTE_PITCHES[column];
     }
 
     @Override

@@ -16,10 +16,10 @@ public enum SaxophoneSoundType implements LayoutSoundType {
     TENOR(3, () -> new SoundOption(SCSounds.SAXOPHONE_TENOR)),
     BARITONE(3, () -> new SoundOption(SCSounds.SAXOPHONE_BARITONE));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private SaxophoneSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private SaxophoneSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -29,7 +29,7 @@ public enum SaxophoneSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

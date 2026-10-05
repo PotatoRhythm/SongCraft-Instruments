@@ -54,8 +54,8 @@ public class UkuleleScreen extends GridInstrumentScreen {
 
 
     @Override
-    public NoteGridButton createNoteButton(int row, int column) {
-        return new UkuleleNoteButton(row, column, this);
+    public NoteGridButton createNoteButton(int column, int row) {
+        return new UkuleleNoteButton(column, row, this);
     }
 
     @Override

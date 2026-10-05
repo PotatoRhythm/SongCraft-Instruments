@@ -12,10 +12,10 @@ public enum KotoSoundType implements LayoutSoundType {
     EMI(3, () -> new SoundOption(SCSounds.KOTO)),
     WWM_GUQIN(3, () -> new SoundOption(SCSounds.WWM_6));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private KotoSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private KotoSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -25,7 +25,7 @@ public enum KotoSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

@@ -20,10 +20,10 @@ public enum XiaoSoundType implements LayoutSoundType {
     FF14_HORN(3, () -> new SoundOption(SCSounds.FF14_HORN)),
     SKY_KRILL_HORN(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_KRILL_HORN));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private XiaoSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private XiaoSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -33,7 +33,7 @@ public enum XiaoSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

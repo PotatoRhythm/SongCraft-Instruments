@@ -19,10 +19,10 @@ public enum KeyboardSoundType implements LayoutSoundType {
     ELECTRIC(3, () -> new SoundOption(SCSounds.KEYBOARD_ELECTRIC)),
     HARPSICHORD(3, () -> new SoundOption(SCSounds.KEYBOARD_HARPSICHORD));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private KeyboardSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private KeyboardSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -32,7 +32,7 @@ public enum KeyboardSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

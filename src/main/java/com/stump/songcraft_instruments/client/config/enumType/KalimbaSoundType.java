@@ -16,10 +16,10 @@ public enum KalimbaSoundType implements LayoutSoundType {
     SKY_KALIMBA(2, () -> new SoundOption(SCSounds.SKY_KALIMBA)),
     SKY_XYLOPHONE(2, () -> new SoundOption(SCSounds.SKY_XYLOPHONE));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private KalimbaSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private KalimbaSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -29,7 +29,7 @@ public enum KalimbaSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

@@ -277,11 +277,11 @@ public class InstrumentKeyMappings {
      * @return A 2D key array as described in {@code keyCodes}.
      */
     public static Key[][] createInstrumentMaps(final int[][] keyCodes) {
-        final int rows = keyCodes[0].length, columns = keyCodes.length;
+        final int columns = keyCodes[0].length, rows = keyCodes.length;
 
-        final Key[][] result = new Key[columns][rows];
-        for (int i = 0; i < columns; i++)
-            for (int j = 0; j < rows; j++)
+        final Key[][] result = new Key[rows][columns];
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < columns; j++)
                 result[i][j] = create(keyCodes[i][j]);
 
         return result;

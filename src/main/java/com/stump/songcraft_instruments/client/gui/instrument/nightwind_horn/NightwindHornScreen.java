@@ -26,7 +26,7 @@ public class NightwindHornScreen extends GridInstrumentScreen implements IHeldIn
     }
 
     @Override
-    public int columns() {
+    public int rows() {
         return 2;
     }
 
@@ -37,7 +37,7 @@ public class NightwindHornScreen extends GridInstrumentScreen implements IHeldIn
         renderClef(gui, 0, clefX, "treble");
         renderClef(gui, 1, clefX, "bass");
 
-        for (int i = 0; i < columns(); i++)
+        for (int i = 0; i < rows(); i++)
             renderStaff(gui, i);
     }
 

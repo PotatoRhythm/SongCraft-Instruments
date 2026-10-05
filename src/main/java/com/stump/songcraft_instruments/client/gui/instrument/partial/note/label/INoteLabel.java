@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * An interface holding {@link NoteLabelSupplier}s for note buttons to cycle thorugh.
@@ -21,11 +22,31 @@ public interface INoteLabel {
     }
 
 
+    /**
+     * The QWERTY symbols of the keys whose names are spelled out, as in {@code key.keyboard.left.bracket}
+     */
+    Map<String, String> QWERTY_SYMBOLS = Map.ofEntries(
+        Map.entry("key.keyboard.comma", ","),
+        Map.entry("key.keyboard.period", "."),
+        Map.entry("key.keyboard.slash", "/"),
+        Map.entry("key.keyboard.semicolon", ";"),
+        Map.entry("key.keyboard.apostrophe", "'"),
+        Map.entry("key.keyboard.left.bracket", "["),
+        Map.entry("key.keyboard.right.bracket", "]"),
+        Map.entry("key.keyboard.backslash", "\\"),
+        Map.entry("key.keyboard.minus", "-"),
+        Map.entry("key.keyboard.equal", "="),
+        Map.entry("key.keyboard.grave.accent", "`")
+    );
+
     public static MutableComponent getQwerty(final Key key) {
         final String keyName = key.getName();
-        return Component.literal(
-            // The QWERTY key is the last letter of the key name
-            String.valueOf(keyName.charAt(keyName.length() - 1)).toUpperCase()
+        final String symbol = QWERTY_SYMBOLS.get(keyName);
+
+        return Component.literal((symbol != null)
+            ? symbol
+            // Otherwise, the QWERTY key is the last letter of the key name
+            : String.valueOf(keyName.charAt(keyName.length() - 1)).toUpperCase()
         );
     }
 

@@ -18,10 +18,10 @@ public enum HarpSoundType implements LayoutSoundType {
     WWM_KONGHOU(3, () -> new SoundOption(SCSounds.WWM_1)),
     HATO_LYRE(2, () -> new SoundOption(SCSounds.HEARTOPIA_LYRE));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private HarpSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private HarpSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -31,7 +31,7 @@ public enum HarpSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

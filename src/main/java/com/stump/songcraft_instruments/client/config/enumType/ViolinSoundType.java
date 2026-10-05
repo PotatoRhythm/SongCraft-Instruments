@@ -19,10 +19,10 @@ public enum ViolinSoundType implements LayoutSoundType {
     FF14_VIOLA(3, () -> new SoundOption(SCSounds.FF14_VIOLA)),
     WWM_ERHU(3, () -> new SoundOption(SCSounds.WWM_5));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private ViolinSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private ViolinSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -32,7 +32,7 @@ public enum ViolinSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

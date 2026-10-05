@@ -25,7 +25,7 @@ public class Gw2BassScreen extends GridInstrumentScreen {
     }
 
     @Override
-    public int columns() {
+    public int rows() {
         return 2;
     }
 
@@ -36,7 +36,7 @@ public class Gw2BassScreen extends GridInstrumentScreen {
         renderClef(gui, 0, clefX, "treble");
         renderClef(gui, 1, clefX, "bass");
 
-        for (int i = 0; i < columns(); i++)
+        for (int i = 0; i < rows(); i++)
             renderStaff(gui, i);
     }
 

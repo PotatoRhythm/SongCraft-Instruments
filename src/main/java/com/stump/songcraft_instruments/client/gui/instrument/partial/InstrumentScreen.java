@@ -33,6 +33,8 @@ import com.stump.songcraft_instruments.util.SpeakerUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -154,7 +156,7 @@ public abstract class InstrumentScreen extends Screen {
 
 
     /**
-     * @return The layout of the note names across the instrument's rows.
+     * @return The layout of the note names across the instrument's columns.
      * Null for when this instrument does not support note names.
      * @implNote Genshin built-in instruments' layouts are derived from
      * <a href=https://github.com/Specy/genshin-music/blob/19dfe0e2fb8081508bd61dd47289dcb2d89ad5e3/src/Config.ts#L114>
@@ -837,8 +839,14 @@ public abstract class InstrumentScreen extends Screen {
     //#endregion
 
     public boolean isGuildWarsInstrument() {
+        return isInstrumentTagged(ModItemTags.GUILD_WARS_INSTRUMENTS);
+    }
+    public boolean isGenshinInstrument() {
+        return isInstrumentTagged(ModItemTags.GENSHIN_INSTRUMENTS);
+    }
+    private boolean isInstrumentTagged(final TagKey<Item> tag) {
         return ForgeRegistries.ITEMS.tags()
-                .getTag(ModItemTags.GUILD_WARS_INSTRUMENTS)
+                .getTag(tag)
                 .contains(ForgeRegistries.ITEMS.getValue(getInstrumentId()));
     }
 

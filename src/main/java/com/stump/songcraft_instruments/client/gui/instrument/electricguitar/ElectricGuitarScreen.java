@@ -3,7 +3,6 @@ package com.stump.songcraft_instruments.client.gui.instrument.electricguitar;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.SoundTypeOption;
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.config.enumType.ElectricGuitarSoundType;
-import com.stump.songcraft_instruments.client.config.enumType.NoteIconStyle;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentThemeLoader;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.layout.LayoutGridInstrumentScreen;
@@ -30,10 +29,5 @@ public class ElectricGuitarScreen extends LayoutGridInstrumentScreen {
     @Override
     public InstrumentThemeLoader getThemeLoader() {
         return THEME_LOADER;
-    }
-
-    @Override
-    public NoteIconStyle getDefaultNoteIconStyle() {
-        return NoteIconStyle.JIANPU;
     }
 }

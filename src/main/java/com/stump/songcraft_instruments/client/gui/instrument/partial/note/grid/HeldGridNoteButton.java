@@ -19,12 +19,12 @@ public class HeldGridNoteButton extends NoteGridButton implements IHoldableNoteB
      */
     private int pressedCounter = 0;
 
-    public HeldGridNoteButton(int row, int column, GridInstrumentScreen instrumentScreen, HeldNoteSound[] heldNoteSounds) {
-        super(row, column, instrumentScreen);
+    public HeldGridNoteButton(int column, int row, GridInstrumentScreen instrumentScreen, HeldNoteSound[] heldNoteSounds) {
+        super(column, row, instrumentScreen);
         this.heldNoteSound = heldNoteSounds[posToIndex()];
     }
-    public HeldGridNoteButton(int row, int column, GridInstrumentScreen instrumentScreen, int pitch, HeldNoteSound[] heldNoteSounds) {
-        super(row, column, instrumentScreen, pitch);
+    public HeldGridNoteButton(int column, int row, GridInstrumentScreen instrumentScreen, int pitch, HeldNoteSound[] heldNoteSounds) {
+        super(column, row, instrumentScreen, pitch);
         this.heldNoteSound = heldNoteSounds[posToIndex()];
     }
 

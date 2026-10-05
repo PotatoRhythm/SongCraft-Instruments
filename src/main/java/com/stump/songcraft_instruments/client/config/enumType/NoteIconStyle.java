@@ -4,7 +4,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
- * The style of the note symbols drawn on grid instrument buttons.
+ * The style of the buttons and note symbols drawn on grid instruments.
  */
 @OnlyIn(Dist.CLIENT)
 public enum NoteIconStyle {
@@ -12,6 +12,8 @@ public enum NoteIconStyle {
     INSTRUMENT_DEFAULT,
     /** The original Genshin note symbols */
     GENSHIN,
+    /** Guild Wars 2 buttons, which have their note letters built in */
+    GW2,
     /** Jianpu-style numbered notation, with dots marking the lower/higher octaves */
     JIANPU;
 

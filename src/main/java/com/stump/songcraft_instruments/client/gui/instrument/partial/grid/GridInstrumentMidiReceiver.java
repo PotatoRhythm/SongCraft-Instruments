@@ -27,12 +27,12 @@ public class GridInstrumentMidiReceiver extends InstrumentMidiReceiver {
     }
 
     protected int maxMidiNote() {
-        return LabelUtil.NOTES_PER_SCALE * gridInstrument().columns();
+        return LabelUtil.NOTES_PER_SCALE * gridInstrument().rows();
     }
 
     @Override
     protected NoteButton getHighestNote() {
-        return gridInstrument().getNoteButton(gridInstrument().rows() - 1, gridInstrument().columns() - 1);
+        return gridInstrument().getNoteButton(gridInstrument().columns() - 1, gridInstrument().rows() - 1);
     }
     @Override
     protected NoteButton getLowestNote() {
@@ -59,7 +59,7 @@ public class GridInstrumentMidiReceiver extends InstrumentMidiReceiver {
         int playedNote = note + (shouldFlatten ? 1 : shouldSharpen ? -1 : 0);
 
         playedNote = ((playedNote + (higherThan3 ? 1 : 0)) / 2)
-            // 12th note should go to the next column
+            // 12th note should go to the next row
             + playedNote / (12 + key);
 
         return instrumentScreen.getNoteButtonByMIDINote(playedNote);
@@ -150,9 +150,9 @@ public class GridInstrumentMidiReceiver extends InstrumentMidiReceiver {
                 0, 2, 4, 5, 7, 9, 11
         };
 
-        final int row = index % gridInstrument().rows();
-        final int column = index / gridInstrument().rows();
+        final int column = index % gridInstrument().columns();
+        final int row = index / gridInstrument().columns();
 
-        return column * 12 + naturalNotePitches[row];
+        return row * 12 + naturalNotePitches[column];
     }
 }

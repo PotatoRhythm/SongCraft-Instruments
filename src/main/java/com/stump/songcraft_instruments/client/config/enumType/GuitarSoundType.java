@@ -17,10 +17,10 @@ public enum GuitarSoundType implements LayoutSoundType {
     HATO_LUNGHE(2, () -> new SoundOption(SCSounds.HEARTOPIA_LUNGHE)),
     FF14_LUTE(3, () -> new SoundOption(SCSounds.FF14_LUTE));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private GuitarSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private GuitarSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -30,7 +30,7 @@ public enum GuitarSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

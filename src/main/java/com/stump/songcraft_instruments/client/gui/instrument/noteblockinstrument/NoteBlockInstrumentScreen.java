@@ -38,7 +38,7 @@ public class NoteBlockInstrumentScreen extends GridInstrumentScreen {
 
 
     @Override
-    public int rows() {
+    public int columns() {
         return 8;
     }
 
@@ -46,8 +46,8 @@ public class NoteBlockInstrumentScreen extends GridInstrumentScreen {
         return (int)(super.getNoteSize() * .85f);
     }
     @Override
-    public NoteGridButton createNoteButton(int row, int column, int pitch) {
-        return new NoteBlockInstrumentNote(row, column, this, pitch);
+    public NoteGridButton createNoteButton(int column, int row, int pitch) {
+        return new NoteBlockInstrumentNote(column, row, this, pitch);
     }
 
 
@@ -70,6 +70,11 @@ public class NoteBlockInstrumentScreen extends GridInstrumentScreen {
     @Override
     public boolean isSSTI() {
         return true;
+    }
+    // Starts at F#
+    @Override
+    public int getSSTILowestNote() {
+        return 6;
     }
 
 

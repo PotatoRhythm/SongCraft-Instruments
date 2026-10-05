@@ -20,10 +20,10 @@ public enum AnimalCallSoundType implements LayoutSoundType {
     SKY_SPIRIT_MANTA_CALL(2, () -> new SoundOption(SCSounds.SKY_SPIRIT_MANTA_CALL)),
     SKY_MOTH_CALL(2, () -> new SoundOption(SCSounds.SKY_MOTH_CALL));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private AnimalCallSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private AnimalCallSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -33,7 +33,7 @@ public enum AnimalCallSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

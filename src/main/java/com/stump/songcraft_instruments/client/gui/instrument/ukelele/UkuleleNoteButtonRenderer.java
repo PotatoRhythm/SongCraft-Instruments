@@ -13,17 +13,17 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public class UkuleleNoteButtonRenderer extends NoteButtonRenderer {
     protected final ResourceLocation
-        topColumnNotePressedLocation,
-        topColumnNoteReleasedLocation,
-        topColumnNoteHoverLocation
+        topRowNotePressedLocation,
+        topRowNoteReleasedLocation,
+        topRowNoteHoverLocation
     ;
 
     public UkuleleNoteButtonRenderer(NoteButton noteButton, Supplier<ResourceLocation> labelTextureProvider) {
         super(noteButton, labelTextureProvider);
 
-        topColumnNotePressedLocation = getResourceFromRoot("note/top_pressed.png");
-        topColumnNoteReleasedLocation = getResourceFromRoot("note/top_released.png");
-        topColumnNoteHoverLocation = getResourceFromRoot("note/top_hovered.png");
+        topRowNotePressedLocation = getResourceFromRoot("note/top_pressed.png");
+        topRowNoteReleasedLocation = getResourceFromRoot("note/top_released.png");
+        topRowNoteHoverLocation = getResourceFromRoot("note/top_hovered.png");
     }
 
 
@@ -34,22 +34,23 @@ public class UkuleleNoteButtonRenderer extends NoteButtonRenderer {
 
     @Override
     protected ResourceLocation getNoteReleasedLocation() {
-        return getTopColumnOverride(topColumnNoteReleasedLocation, super.getNoteReleasedLocation());
+        return getTopRowOverride(topRowNoteReleasedLocation, super.getNoteReleasedLocation());
     }
     @Override
     protected ResourceLocation getNotePressedLocation() {
-        return getTopColumnOverride(topColumnNotePressedLocation, super.getNotePressedLocation());
+        return getTopRowOverride(topRowNotePressedLocation, super.getNotePressedLocation());
     }
     @Override
     protected ResourceLocation getNoteHoverLocation() {
-        return getTopColumnOverride(topColumnNoteHoverLocation, super.getNoteHoverLocation());
+        return getTopRowOverride(topRowNoteHoverLocation, super.getNoteHoverLocation());
     }
 
-    private ResourceLocation getTopColumnOverride(final ResourceLocation newLocation, final ResourceLocation superLocation) {
+
+    private ResourceLocation getTopRowOverride(final ResourceLocation newLocation, final ResourceLocation superLocation) {
         if (getButton().ukuleleScreen().isTopRegular())
             return superLocation;
 
-        if (getButton().column == 0) {
+        if (getButton().row == 0) {
             return newLocation;
         }
 
@@ -64,7 +65,7 @@ public class UkuleleNoteButtonRenderer extends NoteButtonRenderer {
             return;
         }
 
-        if (getButton().column != 0) {
+        if (getButton().row != 0) {
             super.renderNoteSymbol(gui, themeLoader);
             return;
         }
@@ -78,7 +79,7 @@ public class UkuleleNoteButtonRenderer extends NoteButtonRenderer {
         gui.pose().scale(scaleMultiplier, scaleMultiplier, scaleMultiplier);
 
         gui.drawCenteredString(
-            MINECRAFT.font, getButton().getChordNameOfRow(),
+            MINECRAFT.font, getButton().getChordNameOfColumn(),
             (int)((noteX + noteWidth/2f) / scaleMultiplier),
             (int)((noteY + noteHeight/4f + 2) / scaleMultiplier),
 

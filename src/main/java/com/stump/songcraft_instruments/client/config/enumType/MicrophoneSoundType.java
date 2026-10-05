@@ -16,10 +16,10 @@ public enum MicrophoneSoundType implements LayoutSoundType {
     TETO_SNEAKY(3, () -> new SoundOption(SCSounds.NOT_TETO_SNEAKY)),
     SKY_AURORA(2, () -> new SoundOption(SCSounds.SKY_AURORA));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private MicrophoneSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private MicrophoneSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -29,7 +29,7 @@ public enum MicrophoneSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

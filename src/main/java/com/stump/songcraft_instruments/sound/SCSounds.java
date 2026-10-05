@@ -45,33 +45,33 @@ public class SCSounds {
 
         // Heartopia instrument (the piano is HEARTOPIA above)
         HEARTOPIA_HARP = nsr(loc("heartopia_harp")).stereo().registerGrid(),
-        HEARTOPIA_KALIMBA = nsr(loc("heartopia_kalimba")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        HEARTOPIA_LYRE = nsr(loc("heartopia_lyre")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        HEARTOPIA_HANG = nsr(loc("heartopia_hang")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        HEARTOPIA_ACOUSTIC_BASS = nsr(loc("heartopia_acoustic_bass")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        HEARTOPIA_LUNGHE = nsr(loc("heartopia_lunghe")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        HEARTOPIA_BOOMWHACKERS = nsr(loc("heartopia_boomwhackers")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 1),
+        HEARTOPIA_KALIMBA = nsr(loc("heartopia_kalimba")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        HEARTOPIA_LYRE = nsr(loc("heartopia_lyre")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        HEARTOPIA_HANG = nsr(loc("heartopia_hang")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        HEARTOPIA_ACOUSTIC_BASS = nsr(loc("heartopia_acoustic_bass")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        HEARTOPIA_LUNGHE = nsr(loc("heartopia_lunghe")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        HEARTOPIA_BOOMWHACKERS = nsr(loc("heartopia_boomwhackers")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 1),
         HEARTOPIA_CAJON = nsr(loc("heartopia_cajon")).stereo().registerGrid(2, 4),
         HEARTOPIA_CONGA_BONGOS = nsr(loc("heartopia_conga_bongos")).stereo().registerGrid(2, 4),
 
         // Sky instrument
-        SKY_PIANO = nsr(loc("sky_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_GRAND_PIANO = nsr(loc("sky_grand_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_WINTER_PIANO = nsr(loc("sky_winter_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_HARP = nsr(loc("sky_harp")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_GUITAR = nsr(loc("sky_guitar")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_TOY_UKULELE = nsr(loc("sky_toy_ukulele")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_PIPA = nsr(loc("sky_pipa")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_KALIMBA = nsr(loc("sky_kalimba")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_XYLOPHONE = nsr(loc("sky_xylophone")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_CONTRABASS = nsr(loc("sky_contrabass")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_BIRD_CALL = nsr(loc("sky_bird_call")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_CRAB_CALL = nsr(loc("sky_crab_call")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_FISH_CALL = nsr(loc("sky_fish_call")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_JELLY_CALL = nsr(loc("sky_jelly_call")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_MANTA_CALL = nsr(loc("sky_manta_call")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_SPIRIT_MANTA_CALL = nsr(loc("sky_spirit_manta_call")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        SKY_MOTH_CALL = nsr(loc("sky_moth_call")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
+        SKY_PIANO = nsr(loc("sky_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_GRAND_PIANO = nsr(loc("sky_grand_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_WINTER_PIANO = nsr(loc("sky_winter_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_HARP = nsr(loc("sky_harp")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_GUITAR = nsr(loc("sky_guitar")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_TOY_UKULELE = nsr(loc("sky_toy_ukulele")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_PIPA = nsr(loc("sky_pipa")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_KALIMBA = nsr(loc("sky_kalimba")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_XYLOPHONE = nsr(loc("sky_xylophone")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_CONTRABASS = nsr(loc("sky_contrabass")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_BIRD_CALL = nsr(loc("sky_bird_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_CRAB_CALL = nsr(loc("sky_crab_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_FISH_CALL = nsr(loc("sky_fish_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_JELLY_CALL = nsr(loc("sky_jelly_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_MANTA_CALL = nsr(loc("sky_manta_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_SPIRIT_MANTA_CALL = nsr(loc("sky_spirit_manta_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_MOTH_CALL = nsr(loc("sky_moth_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_BELLS = nsr(loc("sky_bells")).stereo().registerGrid(2, 4),
         SKY_SMALL_BELL = nsr(loc("sky_small_bell")).stereo().registerGrid(2, 4),
         SKY_HANDPAN = nsr(loc("sky_handpan")).stereo().registerGrid(2, 4),
@@ -104,7 +104,7 @@ public class SCSounds {
         WWM_2 = nsr(loc("wwm_2")).stereo().registerGrid(),
         WWM_3 = nsr(loc("wwm_3")).stereo().registerGrid(),
         WWM_6 = nsr(loc("wwm_6")).stereo().registerGrid(),
-        WWM_7 = nsr(loc("wwm_7")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
+        WWM_7 = nsr(loc("wwm_7")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
 
         TROMBONE = nsr(loc("trombone")).registerGrid(),
         SAXOPHONE = nsr(loc("saxophone")).registerGrid(),
@@ -129,8 +129,8 @@ public class SCSounds {
 
         VIOLIN_PIZZICATO = nsr(loc("violin_pizzicato")).stereo().registerGrid(),
 
-        GW2_BASS = nsr(loc("gw2_bass")).stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
-        GW2_BELL = nsr(loc("gw2_bell")).registerGrid(GridInstrumentScreen.DEF_ROWS, 2),
+        GW2_BASS = nsr(loc("gw2_bass")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        GW2_BELL = nsr(loc("gw2_bell")).registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         GW2_HARP = nsr(loc("gw2_harp")).stereo().registerGrid(),
         GW2_LUTE = nsr(loc("gw2_lute")).stereo().registerGrid(),
         GW2_MINSTREL = nsr(loc("gw2_minstrel")).stereo().registerGrid(),
@@ -257,7 +257,7 @@ public class SCSounds {
 //            .releaseBuilder((builder) -> builder
 //                .chain(SoundEvents.COW_DEATH.getLocation())
 //                .alreadyRegistered()
-//                .add(GridInstrumentScreen.DEF_ROWS * 2)
+//                .add(GridInstrumentScreen.DEF_COLUMNS * 2)
 //                .registerAll()
 //            )
 
@@ -827,21 +827,21 @@ public class SCSounds {
     ;
 
     private static NoteSound[] oneOctaveSoundBuilder(final NoteSoundRegistrar builder) {
-        return builder.stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 1);
+        return builder.stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 1);
     }
 
     private static NoteSound[] twoOctaveSoundBuilder(final NoteSoundRegistrar builder) {
-        return builder.stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 2);
+        return builder.stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2);
     }
 
     private static NoteSound[] threeOctaveSoundBuilder(final NoteSoundRegistrar builder) {
-        return builder.stereo().registerGrid(GridInstrumentScreen.DEF_ROWS, 3);
+        return builder.stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 3);
     }
     /**
      * For sounds that only come in mono, such as the FF14 instrument's
      */
     private static NoteSound[] threeOctaveMonoSoundBuilder(final NoteSoundRegistrar builder) {
-        return builder.registerGrid(GridInstrumentScreen.DEF_ROWS, 3);
+        return builder.registerGrid(GridInstrumentScreen.DEF_COLUMNS, 3);
     }
 
     /**

@@ -20,10 +20,10 @@ public enum CelloSoundType implements LayoutSoundType {
     ACOUSTIC_BASS(3, () -> new SoundOption(SCSounds.BASS_ACOUSTIC, true)),
     HATO_ACOUSTIC_BASS(2, () -> new SoundOption(SCSounds.HEARTOPIA_ACOUSTIC_BASS));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private CelloSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private CelloSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -33,7 +33,7 @@ public enum CelloSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

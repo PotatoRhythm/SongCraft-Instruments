@@ -16,9 +16,9 @@ public class Gw2DrumsetNoteButtonRenderer extends NoteButtonRenderer {
         int index = noteButton.index;
         String noteLetter = NOTE_LETTERS[index];
 
-        accidentalsLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "accidentals_" + noteLetter + ".png");
-        noteReleasedLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "released_" + noteLetter + ".png");
-        notePressedLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "pressed_" + noteLetter + ".png");
-        noteHoverLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "hovered_" + noteLetter + ".png");
+        gw2AccidentalsLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "accidentals_" + noteLetter + ".png");
+        gw2ReleasedLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "released_" + noteLetter + ".png");
+        gw2PressedLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "pressed_" + noteLetter + ".png");
+        gw2HoverLocation = CommonUtil.getResourceFrom(GW2_NOTE_ROOT, "hovered_" + noteLetter + ".png");
     }
 }

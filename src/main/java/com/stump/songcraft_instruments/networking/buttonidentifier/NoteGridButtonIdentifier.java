@@ -7,22 +7,22 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class NoteGridButtonIdentifier extends NoteButtonIdentifier {
 
-    public final int row, column;
+    public final int column, row;
     @OnlyIn(Dist.CLIENT)
     public NoteGridButtonIdentifier(final NoteGridButton button) {
-        this.row = button.row;
         this.column = button.column;
+        this.row = button.row;
     }
 
     public NoteGridButtonIdentifier(FriendlyByteBuf buf) {
-        row = buf.readInt();
         column = buf.readInt();
+        row = buf.readInt();
     }
     @Override
     public void writeToNetwork(FriendlyByteBuf buf) {
         super.writeToNetwork(buf);
-        buf.writeInt(row);
         buf.writeInt(column);
+        buf.writeInt(row);
     }
 
 
@@ -31,7 +31,7 @@ public class NoteGridButtonIdentifier extends NoteButtonIdentifier {
         return MatchType.forceMatch(other, this::gridMatch);
     }
     private boolean gridMatch(final NoteGridButtonIdentifier other) {
-        return (row == other.row) && (column == other.column);
+        return (column == other.column) && (row == other.row);
     }
 
 }

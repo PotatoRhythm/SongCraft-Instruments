@@ -26,10 +26,10 @@ public enum DrumSoundType implements LayoutSoundType {
     SKY_CYMBALS(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_CYMBALS)),
     FF14_CYMBALS(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.FF14_CYMBAL));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private DrumSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private DrumSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -39,7 +39,7 @@ public enum DrumSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

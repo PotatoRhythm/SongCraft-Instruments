@@ -17,10 +17,10 @@ public enum OcarinaSoundType implements LayoutSoundType {
     SKY_MANTA_OCARINA(2, () -> new SoundOption(SCSounds.SKY_MANTA_OCARINA)),
     HATO_CONCH_SHELLS(1, () -> new SoundOption(SCSounds.HEARTOPIA_CONCH_SHELLS));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private OcarinaSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private OcarinaSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -30,7 +30,7 @@ public enum OcarinaSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

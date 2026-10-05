@@ -2,12 +2,15 @@ package com.stump.songcraft_instruments.client.gui.instrument.partial.grid;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
+import com.stump.songcraft_instruments.client.gui.instrument.partial.note.grid.NoteGridButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.held.IHoldableNoteButton;
 import com.stump.songcraft_instruments.client.keyMaps.InstrumentKeyMappings;
 import com.stump.songcraft_instruments.client.midi.MidiOverflowResult;
 import com.stump.songcraft_instruments.client.midi.PressedMIDINote;
 import com.stump.songcraft_instruments.sound.NoteSound;
+import com.mojang.blaze3d.platform.InputConstants.Key;
 import net.minecraft.client.KeyMapping;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +55,7 @@ public class GridOctaveSwapController {
         int targetNote = baseNote + (screen.getCurrentOctave() * 12) + 12;
 
         // Forbidden high 8
-        if (screen.columns() == 3 && targetNote == 48 || screen.columns() == 2 && targetNote == 36) {
+        if (screen.rows() == 3 && targetNote == 48 || screen.rows() == 2 && targetNote == 36) {
             return;
         }
 
@@ -76,6 +79,23 @@ public class GridOctaveSwapController {
                 pressedNotes.put(keyCode, pressedNoteObj);
             }
         }
+    }
+
+    /**
+     * @return The hotkey of the given note's natural, the same in every octave, or null if it has none.
+     * The high C hotkey is left out, as the C hotkey already labels every C.
+     */
+    public @Nullable Key getKey(final NoteGridButton button) {
+        if (!button.hasChromaticPitch())
+            return null;
+
+        final int pitch = button.getChromaticPitch() % 12;
+
+        for (final Map.Entry<KeyMapping, Integer> hotkey : InstrumentKeyMappings.HOTKEY_TO_PITCH.entrySet())
+            if ((hotkey.getValue() == pitch) && !hotkey.getKey().isUnbound())
+                return hotkey.getKey().getKey();
+
+        return null;
     }
 
     // ---------------------------------------------------

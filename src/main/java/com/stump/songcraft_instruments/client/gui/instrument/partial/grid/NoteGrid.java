@@ -35,34 +35,34 @@ public class NoteGrid implements Iterable<NoteGridButton> {
     protected final NoteGridButton[][] notes;
     private NoteSound[] noteSounds;
 
-    public final int rows, columns;
+    public final int columns, rows;
 
     public NoteGrid(GridInstrumentScreen instrumentScreen, SSTIPitchProvider pitchProvider) {
         this.instrumentScreen = instrumentScreen;
         
-        rows = instrumentScreen.rows();
         columns = instrumentScreen.columns();
+        rows = instrumentScreen.rows();
         
         noteSounds = instrumentScreen.getInitSounds();
 
 
         // Construct the note grid
-        notes = new NoteGridButton[columns][rows];
-        for (int i = 0; i < columns; i++) {
-            final NoteGridButton[] buttonRow = new NoteGridButton[rows];
-            // Columns should start from the bottom/lowest pitch, unlike how an array axis' structure is sorted.
+        notes = new NoteGridButton[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            final NoteGridButton[] buttonRow = new NoteGridButton[columns];
+            // Rows should start from the bottom/lowest pitch, unlike how an array axis' structure is sorted.
             // Hence, we flip the Y index:
-            final int column = getFlippedColumn(i);
+            final int row = getFlippedRow(i);
 
-            for (int j = 0; j < rows; j++)
+            for (int j = 0; j < columns; j++)
                 if (instrumentScreen.isSSTI()) {
-                    buttonRow[j] = instrumentScreen.createNoteButton(j, column,
-                        // Provide the flipped column to the provider
+                    buttonRow[j] = instrumentScreen.createNoteButton(j, row,
+                        // Provide the flipped row to the provider
                         // because the lowest pitch should be at the bottom and not vice-versa
                         pitchProvider.get(j, i)
                     );
                 } else
-                    buttonRow[j] = instrumentScreen.createNoteButton(j, column);
+                    buttonRow[j] = instrumentScreen.createNoteButton(j, row);
 
             
             notes[i] = buttonRow;
@@ -78,8 +78,8 @@ public class NoteGrid implements Iterable<NoteGridButton> {
      * @param noteSkip The amount of pitch to skip over every note in the linear pitch increment.
      */
     public NoteGrid(GridInstrumentScreen instrumentScreen, int beginningNote, int noteSkip) {
-        this(instrumentScreen, (row, column) -> beginningNote +
-                (noteSkip * (row + column * instrumentScreen.rows()))
+        this(instrumentScreen, (column, row) -> beginningNote +
+                (noteSkip * (column + row * instrumentScreen.columns()))
         );
     }
     /**
@@ -100,11 +100,11 @@ public class NoteGrid implements Iterable<NoteGridButton> {
 
 
     public HashMap<Key, NoteButton> genKeyboardMap(final Key[][] keyMap) {
-        final HashMap<Key, NoteButton> result = new HashMap<>(rows * columns);
+        final HashMap<Key, NoteButton> result = new HashMap<>(columns * rows);
 
-        for (int i = 0; i < columns; i++)
-            for (int j = 0; j < rows; j++)
-                result.put(keyMap[i][j], notes[getFlippedColumn(i)][j]);
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < columns; j++)
+                result.put(keyMap[i][j], notes[getFlippedRow(i)][j]);
                 
         return result;
     }
@@ -121,7 +121,7 @@ public class NoteGrid implements Iterable<NoteGridButton> {
         final GridLayout grid = new GridLayout();
         grid.defaultCellSetting().padding(getPaddingHorz(), getPaddingVert());
 
-        final RowHelper rowHelper = grid.createRowHelper(rows);
+        final RowHelper rowHelper = grid.createRowHelper(columns);
         forEach(rowHelper::addChild);
 
         
@@ -136,29 +136,29 @@ public class NoteGrid implements Iterable<NoteGridButton> {
     }
 
 
-    public NoteButton getNoteButton(final int row, final int column) throws IndexOutOfBoundsException {
-        return notes[column][row];
+    public NoteButton getNoteButton(final int column, final int row) throws IndexOutOfBoundsException {
+        return notes[row][column];
     }
 
     /**
-     * Maps an array column to a note grid column by flipping it
-     * @return The flipped column of {@code column}
+     * Maps an array row to a note grid row by flipping it
+     * @return The flipped row of {@code row}
      */
-    public int getFlippedColumn(final int column) {
-        return getFlippedColumn(column, columns);
+    public int getFlippedRow(final int row) {
+        return getFlippedRow(row, rows);
     }
     /**
-     * Maps an array column to a note grid column by flipping it
-     * @return The flipped column of {@code column}
+     * Maps an array row to a note grid row by flipping it
+     * @return The flipped row of {@code row}
      */
-    public static int getFlippedColumn(final int column, final int columns) {
-        return columns - 1 - column;
+    public static int getFlippedRow(final int row, final int rows) {
+        return rows - 1 - row;
     }
 
 
     @FunctionalInterface
     public static interface SSTIPitchProvider {
-        int get(final int row, final int column);
+        int get(final int column, final int row);
     }
 
     @Override
@@ -170,14 +170,14 @@ public class NoteGrid implements Iterable<NoteGridButton> {
 
             @Override
             public boolean hasNext() {
-                return i < columns;
+                return i < rows;
             }
 
             @Override
             public NoteGridButton next() {
-                final NoteGridButton btn = notes[getFlippedColumn(i)][j];
+                final NoteGridButton btn = notes[getFlippedRow(i)][j];
 
-                if (j >= (rows - 1)) {
+                if (j >= (columns - 1)) {
                     j = 0;
                     i++;
                 } else

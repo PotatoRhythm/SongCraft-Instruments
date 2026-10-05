@@ -16,5 +16,13 @@ public final class ModItemTags {
                     )
             );
 
+    public static final TagKey<Item> GENSHIN_INSTRUMENTS =
+            ItemTags.create(
+                    new ResourceLocation(
+                            SCInstrumentMod.MODID,
+                            "genshin/instruments"
+                    )
+            );
+
     private ModItemTags() {}
 }

@@ -19,10 +19,10 @@ public enum SteelDrumSoundType implements LayoutSoundType {
     WWM_SOUND_7(2, () -> new SoundOption(SCSounds.WWM_7)),
     FF14_TIMPANI(3, () -> new SoundOption(SCSounds.FF14_TIMPANI));
 
-    private final int columns;
+    private final int rows;
     private final Supplier<SoundOption> soundArr;
-    private SteelDrumSoundType(final int columns, final Supplier<SoundOption> soundType) {
-        this.columns = columns;
+    private SteelDrumSoundType(final int rows, final Supplier<SoundOption> soundType) {
+        this.rows = rows;
         this.soundArr = soundType;
     }
 
@@ -32,7 +32,7 @@ public enum SteelDrumSoundType implements LayoutSoundType {
     }
 
     @Override
-    public int columns() {
-        return columns;
+    public int rows() {
+        return rows;
     }
 }

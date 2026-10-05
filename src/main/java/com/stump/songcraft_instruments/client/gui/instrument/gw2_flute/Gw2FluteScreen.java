@@ -25,7 +25,7 @@ public class Gw2FluteScreen extends GridInstrumentScreen {
     }
 
     @Override
-    public int columns() {
+    public int rows() {
         return 2;
     }
 
@@ -36,7 +36,7 @@ public class Gw2FluteScreen extends GridInstrumentScreen {
         renderClef(gui, 0, clefX, "alto");
         renderClef(gui, 1, clefX, "treble");
 
-        for (int i = 0; i < columns(); i++)
+        for (int i = 0; i < rows(); i++)
             renderStaff(gui, i);
     }
 

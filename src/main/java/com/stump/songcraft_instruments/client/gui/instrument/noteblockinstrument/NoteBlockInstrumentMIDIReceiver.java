@@ -15,14 +15,14 @@ public class NoteBlockInstrumentMIDIReceiver extends InstrumentMidiReceiver {
 
     @Override
     protected int maxMidiNote() {
-        return self().rows() * self().columns() + 6; // Starts at F#
+        return self().columns() * self().rows() + self().getSSTILowestNote();
     }
 
     @Override
     protected @Nullable NoteButton handleMidiPress(int note, int key) {
         final NoteBlockInstrumentScreen instrumentScreen = self();
 
-        note -= 6; // Starts at F#
+        note -= instrumentScreen.getSSTILowestNote();
         if (note < 0)
             return null;
 

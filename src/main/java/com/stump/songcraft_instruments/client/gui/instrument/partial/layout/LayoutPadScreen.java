@@ -83,7 +83,7 @@ public class LayoutPadScreen extends InstrumentScreen {
 
         final NoteSound[] sounds = getSoundOption().getNoteSounds();
         final boolean drumLayout = (getPreferredSoundType() instanceof LayoutSoundType layout)
-            && (layout.columns() == LayoutSoundType.DRUM_PADS);
+            && (layout.rows() == LayoutSoundType.DRUM_PADS);
         final int columns = sounds.length / ROWS;
         final int gap = getNoteSize() / 2;
         final int rowWidth = columns * getNoteSize() + (columns - 1) * gap;

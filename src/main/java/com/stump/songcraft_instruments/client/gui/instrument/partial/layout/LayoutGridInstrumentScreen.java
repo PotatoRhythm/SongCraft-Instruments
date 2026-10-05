@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 /**
  * A note grid instrument whose sound types come in different layouts, as given by their {@link LayoutSoundType}:
- * the number of columns follows the chosen sound type, and choosing one played on pads
+ * the number of rows follows the chosen sound type, and choosing one played on pads
  * switches over to a {@link LayoutPadScreen}.
  */
 @OnlyIn(Dist.CLIENT)
@@ -72,10 +72,10 @@ public abstract class LayoutGridInstrumentScreen extends GridInstrumentScreen {
 
 
     @Override
-    public int columns() {
+    public int rows() {
         return (getPreferredSoundType() instanceof LayoutSoundType layout && !layout.isPads())
-            ? layout.columns()
-            : DEF_COLUMNS;
+            ? layout.rows()
+            : DEF_ROWS;
     }
 
     @Override
@@ -91,14 +91,14 @@ public abstract class LayoutGridInstrumentScreen extends GridInstrumentScreen {
 
     @Override
     public void setSoundOption(final SoundOption option) {
-        // The new sound type may have a different number of columns
+        // The new sound type may have a different number of rows
         updateOctaveRange();
         super.setSoundOption(option);
     }
 
     @Override
     protected void renderInstrumentBackground(final GuiGraphics gui) {
-        if (columns() == DEF_COLUMNS) {
+        if (rows() == DEF_ROWS) {
             super.renderInstrumentBackground(gui);
             return;
         }
@@ -106,10 +106,10 @@ public abstract class LayoutGridInstrumentScreen extends GridInstrumentScreen {
         final int clefX = grid.getX() - getNoteSize() + 8;
 
         renderClef(gui, 0, clefX, "treble");
-        if (columns() == 2)
+        if (rows() == 2)
             renderClef(gui, 1, clefX, "bass");
 
-        for (int i = 0; i < columns(); i++)
+        for (int i = 0; i < rows(); i++)
             renderStaff(gui, i);
     }
 }

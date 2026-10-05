@@ -6,9 +6,11 @@ import com.stump.songcraft_instruments.client.config.enumType.ControlModeType;
 import com.stump.songcraft_instruments.client.config.enumType.NoteGridLabel;
 import com.stump.songcraft_instruments.client.config.enumType.NoteIconStyle;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.grid.GridInstrumentScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.INoteLabel;
 import com.stump.songcraft_instruments.client.gui.options.partial.InstrumentOptionsScreen;
 import com.stump.songcraft_instruments.client.gui.widget.SliderButton;
+import com.stump.songcraft_instruments.util.LabelUtil;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -114,6 +116,11 @@ public class GridInstrumentOptionsScreen extends InstrumentOptionsScreen {
             protected void applyValue() {
                 int value = (int) Math.round(getValueClamped());
                 ModClientConfigs.TRANSPOSE.set(value);
+
+                // The ABC labels show the transposed notes
+                instrumentScreen.ifPresent((screen) ->
+                    screen.notesIterable().forEach(NoteButton::updateNoteLabel)
+                );
             }
         };
         rowHelper.addChild(transpose, 2, rowHelper.newCellSettings().alignHorizontallyCenter());
@@ -125,6 +132,11 @@ public class GridInstrumentOptionsScreen extends InstrumentOptionsScreen {
 
     protected void onControlModeChanged(final CycleButton<ControlModeType> button, final ControlModeType value) {
         ModClientConfigs.CONTROL_MODE.set(value);
+
+        // Each control mode plays the notes with different keys
+        instrumentScreen.ifPresent((screen) ->
+            screen.notesIterable().forEach(NoteButton::updateNoteLabel)
+        );
     }
 
     // Register this options type as the main configs
@@ -135,14 +147,9 @@ public class GridInstrumentOptionsScreen extends InstrumentOptionsScreen {
         );
     }
 
-    private static final String[] TRANSPOSE_NOTE_NAMES = {
-            "C", "C#", "D", "D#", "E", "F",
-            "F#", "G", "G#", "A", "A#", "B"
-    };
-
     private static String getTransposeDisplay(int transpose) {
         String sign = transpose > 0 ? "+" : "";
-        String note = TRANSPOSE_NOTE_NAMES[Math.floorMod(transpose, 12)];
+        String note = LabelUtil.getKeyName(transpose);
 
         return sign + transpose + "  [" + note + "]";
     }

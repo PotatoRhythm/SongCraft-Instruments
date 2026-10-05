@@ -12,10 +12,10 @@ import java.awt.*;
 @OnlyIn(Dist.CLIENT)
 public class UkuleleThemeLoader extends InstrumentThemeLoader {
     private Color
-        topColumnNoteReleasedColor = Color.BLACK,
-        topColumnLabelReleasedColor = Color.BLACK,
-        topColumnNotePressedColor = Color.BLACK,
-        topColumnLabelPressedColor = Color.BLACK
+        topRowNoteReleasedColor = Color.BLACK,
+        topRowLabelReleasedColor = Color.BLACK,
+        topRowNotePressedColor = Color.BLACK,
+        topRowLabelPressedColor = Color.BLACK
     ;
 
     public UkuleleThemeLoader(ResourceLocation instrumentId) {
@@ -24,10 +24,10 @@ public class UkuleleThemeLoader extends InstrumentThemeLoader {
     }
 
     private void loadColorTheme(final JsonObject theme) {
-        topColumnNoteReleasedColor = getRawNotePressed();
-        topColumnNotePressedColor = getRawNotePressed();
-        topColumnLabelPressedColor = getRawLabelPressed();
-        topColumnLabelReleasedColor = getRawLabelPressed();
+        topRowNoteReleasedColor = getRawNotePressed();
+        topRowNotePressedColor = getRawNotePressed();
+        topRowLabelPressedColor = getRawLabelPressed();
+        topRowLabelReleasedColor = getRawLabelPressed();
 
         if (!theme.has("ukulele"))
             return;
@@ -36,69 +36,69 @@ public class UkuleleThemeLoader extends InstrumentThemeLoader {
         final JsonObject ukuleleMeta = theme.getAsJsonObject("ukulele");
 
         final JsonObject noteMeta = ukuleleMeta.getAsJsonObject("note");
-        topColumnNoteReleasedColor = getTheme(noteMeta, "released", topColumnNoteReleasedColor);
-        topColumnNotePressedColor = getTheme(noteMeta, "pressed", topColumnNotePressedColor);
+        topRowNoteReleasedColor = getTheme(noteMeta, "released", topRowNoteReleasedColor);
+        topRowNotePressedColor = getTheme(noteMeta, "pressed", topRowNotePressedColor);
 
         final JsonObject labelMeta = ukuleleMeta.getAsJsonObject("label");
-        topColumnLabelReleasedColor = getTheme(labelMeta, "released", topColumnLabelReleasedColor);
-        topColumnLabelPressedColor = getTheme(labelMeta, "pressed", topColumnLabelPressedColor);
+        topRowLabelReleasedColor = getTheme(labelMeta, "released", topRowLabelReleasedColor);
+        topRowLabelPressedColor = getTheme(labelMeta, "pressed", topRowLabelPressedColor);
     }
 
 
-    public Color topColumnNoteReleasedColor(final NoteButton noteButton) {
-        return topColumnNoteReleasedColor;
+    public Color topRowNoteReleasedColor(final NoteButton noteButton) {
+        return topRowNoteReleasedColor;
     }
-    public Color topColumnLabelReleasedColor(final NoteButton noteButton) {
-        return topColumnLabelReleasedColor;
+    public Color topRowLabelReleasedColor(final NoteButton noteButton) {
+        return topRowLabelReleasedColor;
     }
-    public Color topColumnNotePressedColor(final NoteButton noteButton) {
-        return topColumnNotePressedColor;
+    public Color topRowNotePressedColor(final NoteButton noteButton) {
+        return topRowNotePressedColor;
     }
-    public Color topColumnLabelPressedColor(final NoteButton noteButton) {
-        return topColumnLabelPressedColor;
+    public Color topRowLabelPressedColor(final NoteButton noteButton) {
+        return topRowLabelPressedColor;
     }
 
-    // Override all defaults for top column
+    // Override all defaults for top row
     @Override
     public Color noteReleased(NoteButton noteButton) {
-        return overrideTopColumn(
+        return overrideTopRow(
             noteButton,
-            topColumnNoteReleasedColor(noteButton),
+            topRowNoteReleasedColor(noteButton),
             super.noteReleased(noteButton)
         );
     }
     @Override
     public Color notePressed(NoteButton noteButton) {
-        return overrideTopColumn(
+        return overrideTopRow(
             noteButton,
-            topColumnNotePressedColor(noteButton),
+            topRowNotePressedColor(noteButton),
             super.notePressed(noteButton)
         );
     }
     @Override
     public Color labelReleased(NoteButton noteButton) {
-        return overrideTopColumn(
+        return overrideTopRow(
             noteButton,
-            topColumnLabelReleasedColor(noteButton),
+            topRowLabelReleasedColor(noteButton),
             super.labelReleased(noteButton)
         );
     }
     @Override
     public Color labelPressed(NoteButton noteButton) {
-        return overrideTopColumn(
+        return overrideTopRow(
             noteButton,
-            topColumnLabelPressedColor(noteButton),
+            topRowLabelPressedColor(noteButton),
             super.labelPressed(noteButton)
         );
     }
 
-    private Color overrideTopColumn(final NoteButton noteButton, final Color newColor, final Color superColor) {
+    private Color overrideTopRow(final NoteButton noteButton, final Color newColor, final Color superColor) {
         final UkuleleNoteButton unb = (UkuleleNoteButton) noteButton;
 
         if (unb.ukuleleScreen().isTopRegular())
             return superColor;
 
-        if (unb.column == 0) {
+        if (unb.row == 0) {
             return newColor;
         }
 
