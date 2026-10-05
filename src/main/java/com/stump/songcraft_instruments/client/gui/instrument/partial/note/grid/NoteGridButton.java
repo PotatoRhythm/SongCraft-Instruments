@@ -28,19 +28,15 @@ public class NoteGridButton extends NoteButton {
         }
     }
     /**
-     * Jianpu labels, indexed by [octave][note].
-     * Octaves are ordered low, middle, high.
+     * Jianpu labels, indexed by note.
+     * Their octave dots are drawn separately; see {@link #getOctaveDot()}.
      */
-    private static final ResourceLocation[][] JIANPU_LABELS = new ResourceLocation[3][LabelUtil.ABC.length];
-    private static final String[] JIANPU_OCTAVE_SUFFIXES = {"_low", "", "_high"};
+    private static final ResourceLocation[] JIANPU_LABELS = new ResourceLocation[LabelUtil.ABC.length];
     static {
-        for (int octave = 0; octave < JIANPU_LABELS.length; octave++) {
-            for (int i = 0; i < LabelUtil.ABC.length; i++) {
-                JIANPU_LABELS[octave][i] = InstrumentScreen.getInternalResourceFromGlob(
-                    "note/label/grid_generic/" + Character.toLowerCase(LabelUtil.ABC[i])
-                        + JIANPU_OCTAVE_SUFFIXES[octave] + ".png"
-                );
-            }
+        for (int i = 0; i < LabelUtil.ABC.length; i++) {
+            JIANPU_LABELS[i] = InstrumentScreen.getInternalResourceFromGlob(
+                "note/label/grid_generic/" + Character.toLowerCase(LabelUtil.ABC[i]) + ".png"
+            );
         }
     }
 
@@ -126,7 +122,7 @@ public class NoteGridButton extends NoteButton {
     }
     protected ResourceLocation getLabelTexture() {
         if (gridInstrument().getNoteIconStyle() == NoteIconStyle.JIANPU)
-            return JIANPU_LABELS[getJianpuOctave()][getLabelTextureRow()];
+            return JIANPU_LABELS[getLabelTextureRow()];
 
         return getLabelTextureAt(getLabelTextureRow());
     }
@@ -139,6 +135,11 @@ public class NoteGridButton extends NoteButton {
         final int columns = gridInstrument().columns();
         final int soundColumn = NoteGrid.getFlippedColumn(column, columns);
         return Integer.signum(soundColumn - columns / 2) + 1;
+    }
+
+    @Override
+    public int getOctaveDot() {
+        return isJianpu() ? (getJianpuOctave() - 1) : 0;
     }
 
     protected boolean isJianpu() {

@@ -204,6 +204,13 @@ public abstract class NoteButton extends AbstractButton {
     public int getPixelGridSymbolOffsetY() {
         return 0;
     }
+    /**
+     * @return Where to draw the symbol's octave dot:
+     * 1 above it, -1 below it, or 0 for no dot
+     */
+    public int getOctaveDot() {
+        return 0;
+    }
 
 
     public void init() {

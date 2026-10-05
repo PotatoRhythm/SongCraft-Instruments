@@ -43,6 +43,9 @@ public class NoteButtonRenderer {
     public static final int JIANPU_SYMBOL_WIDTH = 7, JIANPU_SYMBOL_HEIGHT = 9;
     /** Odd-sized so that the 1-pixel-wide symbols have a true center */
     protected static final int JIANPU_BUTTON_SIZE = 15;
+    /** A single pixel, drawn above or below a Jianpu symbol to mark its octave */
+    protected static final ResourceLocation OCTAVE_DOT_LOCATION =
+        InstrumentScreen.getInternalResourceFromGlob("note/label/grid_generic/dot.png");
 
     protected ResourceLocation jianpuPressedLocation, jianpuReleasedLocation, jianpuHoverLocation;
     protected int jianpuButtonSize;
@@ -179,15 +182,34 @@ public class NoteButtonRenderer {
             return;
         }
 
+        final int symbolX = noteButton.getX() + noteWidth/2,
+            symbolY = noteButton.getY() + noteHeight/2 + noteButton.getSymbolOffsetY();
+
         gui.blit(labelTextureProvider.get(),
-            noteButton.getX() + noteWidth/2, noteButton.getY() + noteHeight/2 + noteButton.getSymbolOffsetY(),
+            symbolX, symbolY,
             0, 0,
 
             noteWidth, noteHeight,
             noteWidth, noteButton.getHeight()/2
         );
 
+        // The symbol is stretched over its box, so stretch the dot along with it
+        if (noteButton.getOctaveDot() != 0) {
+            gui.pose().pushPose();
+            gui.pose().translate(symbolX, symbolY, 0);
+            gui.pose().scale(noteWidth / (float) JIANPU_SYMBOL_WIDTH, noteHeight / (float) JIANPU_SYMBOL_HEIGHT, 1);
+            gui.blit(OCTAVE_DOT_LOCATION, JIANPU_SYMBOL_WIDTH / 2, getOctaveDotRow(), 0, 0, 1, 1, 1, 1);
+            gui.pose().popPose();
+        }
+
         ClientUtil.resetShaderColor();
+    }
+
+    /**
+     * @return The row of the symbol's texture that its octave dot sits on
+     */
+    protected int getOctaveDotRow() {
+        return (noteButton.getOctaveDot() > 0) ? 0 : (JIANPU_SYMBOL_HEIGHT - 1);
     }
 
     protected void renderJianpuNoteButton(final GuiGraphics gui) {
@@ -213,6 +235,9 @@ public class NoteButtonRenderer {
             + noteButton.getPixelGridSymbolOffsetY();
 
         blitOnPixelGrid(gui, labelTextureProvider.get(), x, y, JIANPU_SYMBOL_WIDTH, JIANPU_SYMBOL_HEIGHT);
+
+        if (noteButton.getOctaveDot() != 0)
+            blitOnPixelGrid(gui, OCTAVE_DOT_LOCATION, x + JIANPU_SYMBOL_WIDTH / 2, y + getOctaveDotRow(), 1, 1);
     }
 
     /**
