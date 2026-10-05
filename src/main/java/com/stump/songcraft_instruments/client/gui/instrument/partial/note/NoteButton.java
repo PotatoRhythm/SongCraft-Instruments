@@ -182,6 +182,29 @@ public abstract class NoteButton extends AbstractButton {
      */
     public abstract int getNoteOffset();
 
+    /**
+     * @return The vertical offset, in pixels, to draw this note's symbol at.
+     * Negative values move the symbol up, away from the label.
+     */
+    public int getSymbolOffsetY() {
+        return 0;
+    }
+
+    /**
+     * @return Whether this note's button and symbol are rendered pixel-for-pixel
+     * on the button's texture grid (as with unlabeled Jianpu symbols) instead of being stretched
+     */
+    public boolean usesPixelGridSymbol() {
+        return false;
+    }
+    /**
+     * @return The vertical offset of the symbol when {@link #usesPixelGridSymbol() drawn on the pixel grid},
+     * in button texture pixels. Positive values move the symbol down.
+     */
+    public int getPixelGridSymbolOffsetY() {
+        return 0;
+    }
+
 
     public void init() {
         noteRenderer = initNoteRenderer();

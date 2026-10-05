@@ -34,6 +34,19 @@ public class NoteButtonRenderer {
             "textures/gui/songcraft_instruments/instrument/gw2"
     );
 
+    /** How far below the button's center the top of the label is drawn */
+    public static final int LABEL_OFFSET_Y = 7;
+
+    // Jianpu style; drawn 1:1 on the button's texture pixel grid
+    /** The size of the default button texture, which defines the pixel grid */
+    public static final int BUTTON_TEXTURE_SIZE = 16;
+    public static final int JIANPU_SYMBOL_WIDTH = 7, JIANPU_SYMBOL_HEIGHT = 9;
+    /** Odd-sized so that the 1-pixel-wide symbols have a true center */
+    protected static final int JIANPU_BUTTON_SIZE = 15;
+
+    protected ResourceLocation jianpuPressedLocation, jianpuReleasedLocation, jianpuHoverLocation;
+    protected int jianpuButtonSize;
+
     protected Supplier<ResourceLocation> labelTextureProvider;
 
     // Animations
@@ -68,6 +81,28 @@ public class NoteButtonRenderer {
             notePressedLocation = getResourceFromRoot("note/pressed.png");
             noteHoverLocation = getResourceFromRoot("note/hovered.png");
         }
+
+        initJianpuLocations();
+    }
+
+    /**
+     * Uses the instrument's {@code note/note_jianpu} buttons if it has them,
+     * otherwise falls back to its regular buttons.
+     */
+    protected void initJianpuLocations() {
+        final ResourceLocation released = getResourceFromRoot("note_jianpu/released.png");
+
+        if (MINECRAFT.getResourceManager().getResource(released).isPresent()) {
+            jianpuReleasedLocation = released;
+            jianpuPressedLocation = getResourceFromRoot("note_jianpu/pressed.png");
+            jianpuHoverLocation = getResourceFromRoot("note_jianpu/hovered.png");
+            jianpuButtonSize = JIANPU_BUTTON_SIZE;
+        } else {
+            jianpuReleasedLocation = noteReleasedLocation;
+            jianpuPressedLocation = notePressedLocation;
+            jianpuHoverLocation = noteHoverLocation;
+            jianpuButtonSize = BUTTON_TEXTURE_SIZE;
+        }
     }
 
     protected ResourceLocation getNotePressedLocation() {
@@ -98,6 +133,11 @@ public class NoteButtonRenderer {
     }
 
     protected void renderNoteButton(final GuiGraphics gui, final InstrumentThemeLoader themeLoader) {
+        if (noteButton.usesPixelGridSymbol()) {
+            renderJianpuNoteButton(gui);
+            return;
+        }
+
         ResourceLocation noteLocation;
 
         if (noteButton.isPlaying()) {
@@ -127,14 +167,20 @@ public class NoteButtonRenderer {
             return;
 
         final int noteWidth = noteButton.getWidth()/2, noteHeight = noteButton.getHeight()/2;
-        
+
         ClientUtil.setShaderColor((noteButton.isPlaying() && !foreignPlaying)
             ? themeLoader.notePressed(noteButton)
             : themeLoader.noteReleased(noteButton)
         );
 
+        if (noteButton.usesPixelGridSymbol()) {
+            renderJianpuSymbol(gui);
+            ClientUtil.resetShaderColor();
+            return;
+        }
+
         gui.blit(labelTextureProvider.get(),
-            noteButton.getX() + noteWidth/2, noteButton.getY() + noteHeight/2,
+            noteButton.getX() + noteWidth/2, noteButton.getY() + noteHeight/2 + noteButton.getSymbolOffsetY(),
             0, 0,
 
             noteWidth, noteHeight,
@@ -144,11 +190,62 @@ public class NoteButtonRenderer {
         ClientUtil.resetShaderColor();
     }
 
+    protected void renderJianpuNoteButton(final GuiGraphics gui) {
+        final ResourceLocation noteLocation;
+
+        if (noteButton.isPlaying())
+            noteLocation = foreignPlaying ? jianpuHoverLocation : jianpuPressedLocation;
+        else if (noteButton.isHoveredOrFocused())
+            noteLocation = jianpuHoverLocation;
+        else
+            noteLocation = jianpuReleasedLocation;
+
+        final float offset = (BUTTON_TEXTURE_SIZE - jianpuButtonSize) / 2f;
+        blitOnPixelGrid(gui, noteLocation, offset, offset, jianpuButtonSize, jianpuButtonSize);
+    }
+
+    protected void renderJianpuSymbol(final GuiGraphics gui) {
+        final float buttonOffset = (BUTTON_TEXTURE_SIZE - jianpuButtonSize) / 2f;
+
+        // Center on whole pixels, so the symbol's pixels line up with the button's
+        final float x = buttonOffset + (jianpuButtonSize - JIANPU_SYMBOL_WIDTH) / 2;
+        final float y = buttonOffset + (jianpuButtonSize - JIANPU_SYMBOL_HEIGHT) / 2
+            + noteButton.getPixelGridSymbolOffsetY();
+
+        blitOnPixelGrid(gui, labelTextureProvider.get(), x, y, JIANPU_SYMBOL_WIDTH, JIANPU_SYMBOL_HEIGHT);
+    }
+
+    /**
+     * Draws a texture at the scale of the button's {@link #BUTTON_TEXTURE_SIZE 16x16} pixel grid,
+     * so each texture pixel covers exactly one button pixel.
+     * @param pixelX The horizontal position, in button pixels
+     * @param pixelY The vertical position, in button pixels
+     */
+    protected void blitOnPixelGrid(final GuiGraphics gui, final ResourceLocation texture,
+            final float pixelX, final float pixelY, final int textureWidth, final int textureHeight) {
+        final float pixelWidth = noteButton.getWidth() / (float) BUTTON_TEXTURE_SIZE,
+            pixelHeight = noteButton.getHeight() / (float) BUTTON_TEXTURE_SIZE;
+
+        gui.pose().pushPose();
+        gui.pose().translate(noteButton.getX() + pixelX * pixelWidth, noteButton.getY() + pixelY * pixelHeight, 0);
+        gui.pose().scale(pixelWidth, pixelHeight, 1);
+
+        gui.blit(texture,
+            0, 0,
+            0, 0,
+
+            textureWidth, textureHeight,
+            textureWidth, textureHeight
+        );
+
+        gui.pose().popPose();
+    }
+
     protected void renderLabel(final GuiGraphics gui, final InstrumentThemeLoader themeLoader) {
         gui.drawCenteredString(
             MINECRAFT.font, noteButton.getMessage(),
             noteButton.getInitX() + noteButton.getInitWidth()/2,
-            noteButton.getInitY() + noteButton.getInitHeight()/2 + 7,
+            noteButton.getInitY() + noteButton.getInitHeight()/2 + LABEL_OFFSET_Y,
 
             ((noteButton.isPlaying() && !foreignPlaying)
                 ? themeLoader.labelPressed(noteButton)
