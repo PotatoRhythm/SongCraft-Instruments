@@ -18,13 +18,11 @@ public enum DrumSoundType implements LayoutSoundType {
     SKY_DRUM(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_DRUM)),
     SKY_DUNDUN(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_DUNDUN)),
     SKY_FORTUNE_DRUM(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_FORTUNE_DRUM)),
-    FF14_BASS_DRUM(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.FF14_BASS_DRUM)),
-    FF14_SNARE_DRUM(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.FF14_SNARE_DRUM)),
+    FF14_MARCHING_DRUMS(3, () -> new SoundOption(SCSounds.FF14_MARCHING_DRUMS)),
     FF14_DRUM_KIT(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.FF14_DRUM_KIT)),
     SKY_TR_909(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_TR_909)),
     SKY_DANCE(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_DANCE)),
-    SKY_CYMBALS(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_CYMBALS)),
-    FF14_CYMBALS(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.FF14_CYMBAL));
+    SKY_CYMBALS(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_CYMBALS));
 
     private final int rows;
     private final Supplier<SoundOption> soundArr;

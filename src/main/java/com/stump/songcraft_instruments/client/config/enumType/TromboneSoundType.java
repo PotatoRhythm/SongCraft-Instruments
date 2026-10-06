@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public enum TromboneSoundType implements LayoutSoundType {
-    EMI(3, () -> new SoundOption(SCSounds.TROMBONE)),
     PHGM(3, () -> new SoundOption(SCSounds.TROMBONE_PHGM)),
     FF14_TROMBONE(3, () -> new SoundOption(SCSounds.FF14_TROMBONE)),
     WESTGATE(3, () -> new SoundOption(SCSounds.TRUMPET_WESTGATE_STUDIOS)),

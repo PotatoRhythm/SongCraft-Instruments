@@ -36,6 +36,7 @@ import com.stump.songcraft_instruments.client.gui.instrument.guitar.GuitarScreen
 import com.stump.songcraft_instruments.client.gui.instrument.keyboard.KeyboardScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.koto.KotoScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.harp.HarpScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.doublebass.DoubleBassScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.cello.CelloScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.steeldrum.SteelDrumScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.concertina.ConcertinaScreen;
@@ -101,14 +102,15 @@ public class ClientInitiator {
 
                 Map.entry(HarpScreen.INSTRUMENT_ID, HarpScreen::new),
                 Map.entry(CelloScreen.INSTRUMENT_ID, CelloScreen::new),
-                Map.entry(SteelDrumScreen.INSTRUMENT_ID, SteelDrumScreen::create),
+                Map.entry(DoubleBassScreen.INSTRUMENT_ID, DoubleBassScreen::new),
+                Map.entry(SteelDrumScreen.INSTRUMENT_ID, SteelDrumScreen::new),
                 Map.entry(ConcertinaScreen.INSTRUMENT_ID, ConcertinaScreen::new),
                 Map.entry(FluteScreen.INSTRUMENT_ID, FluteScreen::new),
-                Map.entry(XiaoScreen.INSTRUMENT_ID, XiaoScreen::create),
-                Map.entry(DrumScreen.INSTRUMENT_ID, DrumScreen::new),
+                Map.entry(XiaoScreen.INSTRUMENT_ID, XiaoScreen::new),
+                Map.entry(DrumScreen.INSTRUMENT_ID, DrumScreen::create),
                 Map.entry(KalimbaScreen.INSTRUMENT_ID, KalimbaScreen::new),
                 Map.entry(OcarinaScreen.INSTRUMENT_ID, OcarinaScreen::new),
-                Map.entry(AnimalCallScreen.INSTRUMENT_ID, AnimalCallScreen::new),
+                Map.entry(AnimalCallScreen.INSTRUMENT_ID, AnimalCallScreen::create),
                 Map.entry(SynthScreen.INSTRUMENT_ID, SynthScreen::new),
                 Map.entry(BellScreen.INSTRUMENT_ID, BellScreen::create),
 

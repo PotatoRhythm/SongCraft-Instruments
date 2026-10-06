@@ -1,9 +1,9 @@
 package com.stump.songcraft_instruments.block.blockentity.looper;
 
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
-import com.stump.songcraft_instruments.block.util.WritableNoteType;
 import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
 import com.stump.songcraft_instruments.gamerule.ModGameRules;
+import com.stump.songcraft_instruments.item.emirecord.RecordNotes;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
 import com.stump.songcraft_instruments.sound.NoteSound;
@@ -19,8 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.UUID;
-
-import static com.stump.songcraft_instruments.item.emirecord.BurnedRecordItem.*;
 
 /**
  * Writes recorded notes into the looper's inserted record.
@@ -45,13 +43,10 @@ public class LooperRecordWriter {
         if (!looper.isWritable())
             return;
 
-        final CompoundTag noteTag = serializeNoteMeta(soundMeta, timestamp, particleRgb, performer);
-        noteTag.putString(NOTE_TYPE, WritableNoteType.REGULAR.name());
-
-        noteTag.putInt(SOUND_INDEX_TAG, sound.index);
-        noteTag.putString(SOUND_TYPE_TAG, sound.baseSoundLocation.toString());
-
-        CommonUtil.getOrCreateListTag(looper.getChannel(), NOTES_TAG).add(noteTag);
+        RecordNotes.addNote(looper.getChannel(), timestamp, getPerformerIndex(performer),
+            soundMeta.pitch(), soundMeta.volume(), particleRgb,
+            soundMeta.instrumentId(), sound.baseSoundLocation, sound.index
+        );
         looper.setChanged();
     }
     /**
@@ -63,14 +58,11 @@ public class LooperRecordWriter {
         if (!looper.isWritable())
             return;
 
-        final CompoundTag noteTag = serializeNoteMeta(soundMeta, timestamp, particleRgb, performer);
-        noteTag.putString(NOTE_TYPE, WritableNoteType.HELD.name());
-
-        noteTag.putInt(SOUND_INDEX_TAG, sound.index());
-        noteTag.putString(SOUND_TYPE_TAG, sound.baseSoundLocation().toString());
-        noteTag.putString(HELD_PHASE, phase.name());
-
-        CommonUtil.getOrCreateListTag(looper.getChannel(), NOTES_TAG).add(noteTag);
+        RecordNotes.addHeldNote(looper.getChannel(), timestamp, getPerformerIndex(performer),
+            soundMeta.pitch(), soundMeta.volume(), particleRgb,
+            soundMeta.instrumentId(), sound.baseSoundLocation(), sound.index(),
+            phase
+        );
         looper.setChanged();
     }
 
@@ -78,29 +70,8 @@ public class LooperRecordWriter {
         if (!looper.isWritable())
             return;
 
-        final CompoundTag noteTag = new CompoundTag();
-
-        noteTag.putString(NOTE_TYPE, WritableNoteType.DAMPEN.name());
-        noteTag.putInt(TIMESTAMP_TAG, timestamp);
-        noteTag.putInt(PERFORMER_TAG, getPerformerIndex(performer));
-
-        CommonUtil.getOrCreateListTag(looper.getChannel(), NOTES_TAG).add(noteTag);
-
+        RecordNotes.addDampen(looper.getChannel(), timestamp, getPerformerIndex(performer));
         looper.setChanged();
-    }
-
-    private CompoundTag serializeNoteMeta(NoteSoundMetadata soundMeta, int timestamp, int particleRgb, UUID performer) {
-        final CompoundTag noteTag = new CompoundTag();
-
-        noteTag.putInt(PITCH_TAG, soundMeta.pitch());
-        noteTag.putFloat(VOLUME_TAG, soundMeta.volume() / 100f);
-        noteTag.putInt(PARTICLE_COLOR_TAG, particleRgb);
-        noteTag.putInt(TIMESTAMP_TAG, timestamp);
-        // Stored per note so records can hold multiple instruments (group recordings)
-        noteTag.putString(INSTRUMENT_ID_TAG, soundMeta.instrumentId().toString());
-        noteTag.putInt(PERFORMER_TAG, getPerformerIndex(performer));
-
-        return noteTag;
     }
 
     /**
@@ -147,7 +118,7 @@ public class LooperRecordWriter {
      * Discards everything recorded so far
      */
     public void clearRecordedNotes() {
-        looper.getChannel().remove(NOTES_TAG);
+        RecordNotes.clear(looper.getChannel());
         looper.getChannel().remove(PERFORMERS_TAG);
         looper.getChannel().remove(PERFORMER_NAMES_TAG);
         looper.getChannel().remove(PERFORMER_COLORS_TAG);
@@ -162,6 +133,6 @@ public class LooperRecordWriter {
      */
     public boolean isCapped(final Level level) {
         final int cap = level.getGameRules().getInt(ModGameRules.RULE_LOOPER_MAX_NOTES);
-        return (cap >= 0) && (looper.getChannel().getList(NOTES_TAG, Tag.TAG_COMPOUND).size() >= cap);
+        return (cap >= 0) && (RecordNotes.getNotes(looper.getChannel()).size() >= cap);
     }
 }

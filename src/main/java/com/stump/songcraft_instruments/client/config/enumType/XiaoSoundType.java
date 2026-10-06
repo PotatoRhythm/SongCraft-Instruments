@@ -17,8 +17,7 @@ public enum XiaoSoundType implements LayoutSoundType {
     SKY_PANFLUTE(2, () -> new SoundOption(SCSounds.SKY_PANFLUTE)),
     FF14_PANPIPES(3, () -> new SoundOption(SCSounds.FF14_PANPIPES)),
     SKY_HORN(2, () -> new SoundOption(SCSounds.SKY_HORN)),
-    FF14_HORN(3, () -> new SoundOption(SCSounds.FF14_HORN)),
-    SKY_KRILL_HORN(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_KRILL_HORN));
+    FF14_HORN(3, () -> new SoundOption(SCSounds.FF14_HORN));
 
     private final int rows;
     private final Supplier<SoundOption> soundArr;

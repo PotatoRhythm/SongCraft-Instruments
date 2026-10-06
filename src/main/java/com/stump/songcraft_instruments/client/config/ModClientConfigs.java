@@ -67,6 +67,7 @@ public class ModClientConfigs {
     public static final EnumValue<KotoSoundType> KOTO_SOUND_TYPE;
     public static final EnumValue<HarpSoundType> HARP_SOUND_TYPE;
     public static final EnumValue<CelloSoundType> CELLO_SOUND_TYPE;
+    public static final EnumValue<DoubleBassSoundType> DOUBLE_BASS_SOUND_TYPE;
     public static final EnumValue<SteelDrumSoundType> STEEL_DRUM_SOUND_TYPE;
     public static final EnumValue<ConcertinaSoundType> CONCERTINA_SOUND_TYPE;
     public static final EnumValue<FluteSoundType> FLUTE_SOUND_TYPE;
@@ -122,7 +123,7 @@ public class ModClientConfigs {
         GUITAR_SOUND_TYPE = configBuilder.defineEnum("guitar_sound_type", GuitarSoundType.EMI);
         BASS_GUITAR_SOUND_TYPE = configBuilder.defineEnum("bass_guitar_sound_type", BassGuitarSoundType.PICKED);
         ELECTRIC_GUITAR_SOUND_TYPE = configBuilder.defineEnum("electric_guitar_sound_type", ElectricGuitarSoundType.CLEAN);
-        VIOLIN_SOUND_TYPE = configBuilder.defineEnum("violin_sound_type", ViolinSoundType.FAST);
+        VIOLIN_SOUND_TYPE = configBuilder.defineEnum("violin_sound_type", ViolinSoundType.HATO_VIOLIN);
         PIPA_SOUND_TYPE = configBuilder.defineEnum("pipa_sound_type", PipaSoundType.REGULAR);
         MICROPHONE_SOUND_TYPE = configBuilder.defineEnum("microphone_sound_type", MicrophoneSoundType.MIKU);
         SAXOPHONE_SOUND_TYPE = configBuilder.defineEnum("saxophone_sound_type", SaxophoneSoundType.TENOR);
@@ -130,6 +131,7 @@ public class ModClientConfigs {
         KOTO_SOUND_TYPE = configBuilder.defineEnum("koto_sound_type", KotoSoundType.EMI);
         HARP_SOUND_TYPE = configBuilder.defineEnum("harp_sound_type", HarpSoundType.HATO_HARP);
         CELLO_SOUND_TYPE = configBuilder.defineEnum("cello_sound_type", CelloSoundType.HATO_CELLO);
+        DOUBLE_BASS_SOUND_TYPE = configBuilder.defineEnum("double_bass_sound_type", DoubleBassSoundType.DOUBLE_BASS);
         STEEL_DRUM_SOUND_TYPE = configBuilder.defineEnum("steel_drum_sound_type", SteelDrumSoundType.HATO_HANG_DRUM);
         CONCERTINA_SOUND_TYPE = configBuilder.defineEnum("concertina_sound_type", ConcertinaSoundType.HATO_CONCERTINA);
         FLUTE_SOUND_TYPE = configBuilder.defineEnum("flute_sound_type", FluteSoundType.SKY_FLUTE);

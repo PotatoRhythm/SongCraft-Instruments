@@ -40,7 +40,6 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("pipa_regular", 20, 0.9f, false, false);
         registerInstrument("pipa_tremolo", 20, 1f, false, false);
 
-        registerInstrument("keyboard", 20, 0.8f, false, true);
         registerInstrument("keyboard_gw2", 20, 0.60f, false, true);
         registerInstrument("keyboard_yamaha_c5", 20, 0.55f, false, true);
         registerInstrument("keyboard_heartopia", 20, 0.85f, false, true);
@@ -53,7 +52,6 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("heartopia_concertina", 13, 0.85f, true, true);
         registerInstrument("heartopia_lunghe", 13, 0.85f, false, true);
         registerInstrument("heartopia_xiao", 13, 0.85f, true, true);
-        registerInstrument("heartopia_boomwhackers", 6, 0.85f, false, true);
         registerInstrument("heartopia_bagpipes", 13, 0.85f, true, true);
         registerInstrument("heartopia_cello", 13, 0.85f, true, true);
         registerInstrument("heartopia_violin", 13, 0.85f, true, true);
@@ -64,10 +62,9 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("heartopia_cajon", 7, 0.85f, false, true);
         registerInstrument("heartopia_conga_bongos", 7, 0.85f, false, true);
 
-        registerInstrument("sky_piano", 13, 0.85f, false, true);
-        registerInstrument("sky_grand_piano", 13, 0.85f, false, true);
-        registerInstrument("sky_winter_piano", 13, 0.85f, false, true);
-        registerInstrument("sky_harp", 13, 0.85f, false, true);
+        registerInstrument("sky_piano", 20, 0.85f, false, true);
+        registerInstrument("sky_grand_piano", 20, 0.85f, false, true);
+        registerInstrument("sky_winter_piano", 20, 0.85f, false, true);
         registerInstrument("sky_guitar", 13, 0.85f, false, true);
         registerInstrument("sky_light_guitar", 13, 0.85f, true, true);
         registerInstrument("sky_toy_ukulele", 13, 0.85f, false, true);
@@ -89,8 +86,8 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("sky_aurora", 13, 0.85f, true, true);
         registerInstrument("sky_bells", 7, 0.85f, false, true);
         registerInstrument("sky_small_bell", 7, 0.85f, false, true);
-        registerInstrument("sky_handpan", 7, 0.85f, false, true);
-        registerInstrument("sky_triumph_handpan", 7, 0.85f, false, true);
+        registerInstrument("sky_handpan", 13, 0.85f, false, true);
+        registerInstrument("sky_triumph_handpan", 13, 0.85f, false, true);
         registerInstrument("sky_krill_horn", 7, 0.85f, false, true);
         registerInstrument("sky_drum", 7, 0.85f, false, true);
         registerInstrument("sky_dundun", 7, 0.85f, false, true);
@@ -103,9 +100,12 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("sky_manta_call", 13, 0.85f, false, true);
         registerInstrument("sky_spirit_manta_call", 13, 0.85f, false, true);
         registerInstrument("sky_moth_call", 13, 0.85f, false, true);
-        registerInstrument("sky_bass_synth", 7, 0.85f, false, true);
-        registerInstrument("sky_chime_synth", 7, 0.85f, false, true);
-        registerInstrument("sky_sine_synth", 7, 0.85f, false, true);
+        registerInstrument("sky_bass_synth", 13, 0.85f, false, true);
+        registerInstrument("sky_chime_synth", 13, 0.85f, false, true);
+        registerInstrument("synth_sine", 20, 0.85f, true, true);
+        registerInstrument("synth_square", 20, 0.85f, true, true);
+        registerInstrument("synth_saw", 20, 0.85f, true, true);
+        registerInstrument("synth_triangle", 20, 0.85f, true, true);
         registerInstrument("sky_tr_909", 7, 0.85f, false, true);
         registerInstrument("sky_dance", 5, 0.85f, false, true);
 
@@ -120,9 +120,7 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("ff14_panpipes", 20, 0.85f, true, false);
         registerInstrument("ff14_timpani", 20, 0.85f, false, false);
         registerInstrument("ff14_bongo", 7, 0.85f, false, false);
-        registerInstrument("ff14_bass_drum", 7, 0.85f, false, false);
-        registerInstrument("ff14_snare_drum", 7, 0.85f, false, false);
-        registerInstrument("ff14_cymbal", 7, 0.85f, false, false);
+        registerInstrument("ff14_marching_drums", 20, 0.85f, false, false);
         registerInstrument("ff14_drum_kit", 7, 0.85f, false, false);
         registerInstrument("ff14_trumpet", 20, 0.85f, true, false);
         registerInstrument("ff14_trombone", 20, 0.85f, true, false);
@@ -149,16 +147,13 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("keyboard_electric", 20, 1f, false, true);
         registerInstrument("keyboard_harpsichord", 20, 0.6f, false, true);
 
-        registerInstrument("trombone", 20, 0.85f, false, false);
         registerInstrument("trumpet_westgate_studios", 20, 0.65f, true, true);
         registerInstrument("trombone_phgm", 20, 0.85f, true, true);
 
-        registerInstrument("saxophone", 20, 1f, false, false);
         registerInstrument("saxophone_baritone", 20, 0.60f, true, true);
         registerInstrument("saxophone_tenor", 20, 0.25f, true, true);
 
         registerInstrument("guitar", 20, 0.9f, false, false);
-        registerInstrument("guitar_nylon", 20, 0.9f, false, true);
         registerInstrument("guitar_steel", 20, 0.9f, false, true);
 
         registerInstrument("guitar_clean", 20, 0.6f, false, true);
@@ -170,8 +165,6 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("bass_slap", 20, 0.9f, false, true);
         registerInstrument("bass_picked", 20, 1.0f, false, true);
 
-        registerInstrument("violin_slow", 20, 0.8f, true, true);
-        registerInstrument("violin_fast", 20, 0.5f, true, true);
         registerInstrument("violin_pizzicato", 20, 0.7f, false, true);
 
         registerInstrument("microphone_irina_brochin", 20, 0.3f, true, true);

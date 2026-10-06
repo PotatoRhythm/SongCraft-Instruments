@@ -8,7 +8,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.function.Supplier;
 
 /**
- * The Animal Call's sounds: Sky's animal calls of the games in the team's instrument plan.
+ * The Animal Call's sounds: Sky's animal calls and krill horn of the games in the team's instrument plan.
  */
 @OnlyIn(Dist.CLIENT)
 public enum AnimalCallSoundType implements LayoutSoundType {
@@ -18,7 +18,8 @@ public enum AnimalCallSoundType implements LayoutSoundType {
     SKY_JELLY_CALL(2, () -> new SoundOption(SCSounds.SKY_JELLY_CALL)),
     SKY_MANTA_CALL(2, () -> new SoundOption(SCSounds.SKY_MANTA_CALL)),
     SKY_SPIRIT_MANTA_CALL(2, () -> new SoundOption(SCSounds.SKY_SPIRIT_MANTA_CALL)),
-    SKY_MOTH_CALL(2, () -> new SoundOption(SCSounds.SKY_MOTH_CALL));
+    SKY_MOTH_CALL(2, () -> new SoundOption(SCSounds.SKY_MOTH_CALL)),
+    SKY_KRILL_HORN(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_KRILL_HORN));
 
     private final int rows;
     private final Supplier<SoundOption> soundArr;

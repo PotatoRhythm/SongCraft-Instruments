@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public enum SaxophoneSoundType implements LayoutSoundType {
-    EMI(3, () -> new SoundOption(SCSounds.SAXOPHONE)),
     HATO_SAX(2, () -> new SoundOption(SCSounds.HEARTOPIA_SAX)),
     SKY_SAXOPHONE(2, () -> new SoundOption(SCSounds.SKY_SAXOPHONE)),
     FF14_SAXOPHONE(3, () -> new SoundOption(SCSounds.FF14_SAXOPHONE)),

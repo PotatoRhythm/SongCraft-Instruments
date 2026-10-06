@@ -36,7 +36,6 @@ public class SCSounds {
         UKULELE = nsr(loc("ukulele")).registerGrid(),
         DJEM_DJEM_DRUM = nsr(loc("djem_djem_drum")).registerGrid(2, 4),
 
-        KEYBOARD = nsr(loc("keyboard")).stereo().registerGrid(),
         KEYBOARD_GW2 = nsr(loc("keyboard_gw2")).stereo().registerGrid(),
         KEYBOARD_YAMAHA_C5 = nsr(loc("keyboard_yamaha_c5")).stereo().registerGrid(),
         HEARTOPIA = nsr(loc("keyboard_heartopia")).stereo().registerGrid(),
@@ -50,15 +49,13 @@ public class SCSounds {
         HEARTOPIA_HANG = nsr(loc("heartopia_hang")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         HEARTOPIA_ACOUSTIC_BASS = nsr(loc("heartopia_acoustic_bass")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         HEARTOPIA_LUNGHE = nsr(loc("heartopia_lunghe")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
-        HEARTOPIA_BOOMWHACKERS = nsr(loc("heartopia_boomwhackers")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 1),
         HEARTOPIA_CAJON = nsr(loc("heartopia_cajon")).stereo().registerGrid(2, 4),
         HEARTOPIA_CONGA_BONGOS = nsr(loc("heartopia_conga_bongos")).stereo().registerGrid(2, 4),
 
         // Sky instrument
-        SKY_PIANO = nsr(loc("sky_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
-        SKY_GRAND_PIANO = nsr(loc("sky_grand_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
-        SKY_WINTER_PIANO = nsr(loc("sky_winter_piano")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
-        SKY_HARP = nsr(loc("sky_harp")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_PIANO = nsr(loc("sky_piano")).stereo().registerGrid(),
+        SKY_GRAND_PIANO = nsr(loc("sky_grand_piano")).stereo().registerGrid(),
+        SKY_WINTER_PIANO = nsr(loc("sky_winter_piano")).stereo().registerGrid(),
         SKY_GUITAR = nsr(loc("sky_guitar")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_TOY_UKULELE = nsr(loc("sky_toy_ukulele")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_PIPA = nsr(loc("sky_pipa")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
@@ -74,16 +71,15 @@ public class SCSounds {
         SKY_MOTH_CALL = nsr(loc("sky_moth_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_BELLS = nsr(loc("sky_bells")).stereo().registerGrid(2, 4),
         SKY_SMALL_BELL = nsr(loc("sky_small_bell")).stereo().registerGrid(2, 4),
-        SKY_HANDPAN = nsr(loc("sky_handpan")).stereo().registerGrid(2, 4),
-        SKY_TRIUMPH_HANDPAN = nsr(loc("sky_triumph_handpan")).stereo().registerGrid(2, 4),
+        SKY_HANDPAN = nsr(loc("sky_handpan")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_TRIUMPH_HANDPAN = nsr(loc("sky_triumph_handpan")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_KRILL_HORN = nsr(loc("sky_krill_horn")).stereo().registerGrid(2, 4),
         SKY_DRUM = nsr(loc("sky_drum")).stereo().registerGrid(2, 4),
         SKY_DUNDUN = nsr(loc("sky_dundun")).stereo().registerGrid(2, 4),
         SKY_FORTUNE_DRUM = nsr(loc("sky_fortune_drum")).stereo().registerGrid(2, 2),
         SKY_CYMBALS = nsr(loc("sky_cymbals")).stereo().registerGrid(2, 2),
-        SKY_BASS_SYNTH = nsr(loc("sky_bass_synth")).stereo().registerGrid(2, 4),
-        SKY_CHIME_SYNTH = nsr(loc("sky_chime_synth")).stereo().registerGrid(2, 4),
-        SKY_SINE_SYNTH = nsr(loc("sky_sine_synth")).stereo().registerGrid(2, 4),
+        SKY_BASS_SYNTH = nsr(loc("sky_bass_synth")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        SKY_CHIME_SYNTH = nsr(loc("sky_chime_synth")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_TR_909 = nsr(loc("sky_tr_909")).stereo().registerGrid(2, 4),
         SKY_DANCE = nsr(loc("sky_dance")).stereo().registerGrid(2, 3),
 
@@ -93,9 +89,8 @@ public class SCSounds {
         FF14_FIDDLE = nsr(loc("ff14_fiddle")).registerGrid(),
         FF14_TIMPANI = nsr(loc("ff14_timpani")).registerGrid(),
         FF14_BONGO = nsr(loc("ff14_bongo")).registerGrid(2, 4),
-        FF14_BASS_DRUM = nsr(loc("ff14_bass_drum")).registerGrid(2, 4),
-        FF14_SNARE_DRUM = nsr(loc("ff14_snare_drum")).registerGrid(2, 4),
-        FF14_CYMBAL = nsr(loc("ff14_cymbal")).registerGrid(2, 4),
+        // The bass drum, snare drum and cymbal, a row each from the bottom
+        FF14_MARCHING_DRUMS = nsr(loc("ff14_marching_drums")).registerGrid(),
         FF14_DRUM_KIT = nsr(loc("ff14_drum_kit")).registerGrid(2, 4),
         FF14_MUTED_GUITAR = nsr(loc("ff14_muted_guitar")).registerGrid(),
         FF14_SPECIAL_GUITAR = nsr(loc("ff14_special_guitar")).registerGrid(),
@@ -106,11 +101,8 @@ public class SCSounds {
         WWM_6 = nsr(loc("wwm_6")).stereo().registerGrid(),
         WWM_7 = nsr(loc("wwm_7")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
 
-        TROMBONE = nsr(loc("trombone")).registerGrid(),
-        SAXOPHONE = nsr(loc("saxophone")).registerGrid(),
 
         GUITAR = nsr(loc("guitar")).registerGrid(),
-        GUITAR_NYLON = nsr(loc("guitar_nylon")).stereo().registerGrid(),
         GUITAR_STEEL = nsr(loc("guitar_steel")).stereo().registerGrid(),
 
         GUITAR_CLEAN = nsr(loc("guitar_clean")).stereo().registerGrid(),
@@ -268,24 +260,6 @@ public class SCSounds {
             .decays(7)
             .register(HOLD_DURATION),
 
-        VIOLIN_SLOW = hnsr(loc("violin_slow"))
-            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
-            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
-            .holdDelay(.03f)
-            .chainedHoldDelay(-FADE_TIME * 2)
-            .releaseFadeOut(FADE_TIME / 10)
-            .fullHoldFadeoutTime(2)
-            .decays(7)
-            .register(HOLD_DURATION),
-        VIOLIN_FAST = hnsr(loc("violin_fast"))
-            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
-            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
-            .holdDelay(.03f)
-            .chainedHoldDelay(-FADE_TIME * 2)
-            .releaseFadeOut(FADE_TIME / 10)
-            .fullHoldFadeoutTime(2)
-            .decays(7)
-            .register(HOLD_DURATION),
 
         IRINA_BROCHIN = hnsr(loc("microphone_irina_brochin"))
             .holdBuilder(SCSounds::threeOctaveSoundBuilder)
@@ -632,6 +606,50 @@ public class SCSounds {
             .holdDelay(.03f)
             .chainedHoldDelay(-FADE_TIME * 2)
             .releaseFadeOut(FADE_TIME / 10)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
+            .register(HOLD_DURATION),
+
+        SYNTH_SINE = hnsr(loc("synth_sine"))
+            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            // About 0.5 s to fade out from full volume when released
+            .releaseFadeOut(FADE_TIME / 2.5f)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
+            .register(HOLD_DURATION),
+
+        SYNTH_SQUARE = hnsr(loc("synth_square"))
+            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            // About 0.5 s to fade out from full volume when released
+            .releaseFadeOut(FADE_TIME / 2.5f)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
+            .register(HOLD_DURATION),
+
+        SYNTH_SAW = hnsr(loc("synth_saw"))
+            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            // About 0.5 s to fade out from full volume when released
+            .releaseFadeOut(FADE_TIME / 2.5f)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
+            .register(HOLD_DURATION),
+
+        SYNTH_TRIANGLE = hnsr(loc("synth_triangle"))
+            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            // About 0.5 s to fade out from full volume when released
+            .releaseFadeOut(FADE_TIME / 2.5f)
             .fullHoldFadeoutTime(2)
             .decays(7)
             .register(HOLD_DURATION),

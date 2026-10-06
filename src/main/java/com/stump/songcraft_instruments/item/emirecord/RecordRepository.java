@@ -88,7 +88,9 @@ public class RecordRepository {
         pObject.forEach((loc, tag) -> loadRecord(loc, pObject.get(loc)));
     }
     private static void loadRecord(final ResourceLocation loc, final JsonElement channelObj) {
-        RECORDS.put(loc, (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, channelObj));
+        final CompoundTag channel = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, channelObj);
+        RecordNotes.pack(channel);
+        RECORDS.put(loc, channel);
         LOGGER.info("Successfully loaded burned record {}", loc);
     }
 

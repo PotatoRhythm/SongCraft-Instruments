@@ -7,6 +7,7 @@ import com.stump.songcraft_instruments.block.blockentity.looper.LooperRecordWrit
 import com.stump.songcraft_instruments.block.blockentity.looper.RecordingSession;
 import com.stump.songcraft_instruments.item.ModItems;
 import com.stump.songcraft_instruments.item.emirecord.EMIRecordItem;
+import com.stump.songcraft_instruments.item.emirecord.RecordNotes;
 import com.stump.songcraft_instruments.item.emirecord.RecordRepository;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.LooperPlayStatePacket;
@@ -14,6 +15,7 @@ import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSou
 import com.stump.songcraft_instruments.util.LooperUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -84,6 +86,10 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         else if (recordData.contains(BURNED_MEDIA_TAG, Tag.TAG_STRING)) {
             setChannel(RecordRepository.getRecord(getBurnedMediaLoc()).orElse(null));
         }
+
+        // Burned media and migrated legacy loopers may still hold unpacked notes
+        if ((channel != null) && RecordNotes.pack(channel))
+            updateRecordNBT();
     }
     protected ResourceLocation getBurnedMediaLoc() {
         return new ResourceLocation(recordIn.getTag().getString(BURNED_MEDIA_TAG));
@@ -95,8 +101,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
     public boolean hasFootage() {
         final CompoundTag channel = getChannel();
-        return (channel != null) &&
-            channel.contains(NOTES_TAG, Tag.TAG_LIST) && !channel.getList(NOTES_TAG, Tag.TAG_COMPOUND).isEmpty();
+        return (channel != null) && !RecordNotes.getNotes(channel).isEmpty();
     }
 
     public boolean isWritable() {
@@ -342,9 +347,9 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
         final int ticks = getTicks();
 
-        channel.getList(NOTES_TAG, Tag.TAG_COMPOUND).stream()
-            .map((note) -> (CompoundTag) note)
-            .filter((note) -> note.getInt(TIMESTAMP_TAG) == ticks)
+        RecordNotes.getNotes(channel).stream()
+            .map((note) -> ((IntArrayTag) note).getAsIntArray())
+            .filter((note) -> note[RecordNotes.TIMESTAMP] == ticks)
             .forEach(lbe.playback()::playNote);
 
         lbe.incrementTick();
@@ -356,7 +361,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         if (recordIn.is(ModItems.RECORD_WRITABLE.get())) {
             // Record ejected while player writing to the record; remove notes
             if (isWritable())
-                recordData.remove(NOTES_TAG);
+                RecordNotes.clear(getChannel());
             // Empty record; empty data.
             if (!hasFootage())
                 recordData.remove(CHANNEL_TAG);

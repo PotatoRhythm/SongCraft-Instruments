@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public enum GuitarSoundType implements LayoutSoundType {
     EMI(3, () -> new SoundOption(SCSounds.GUITAR)),
-    NYLON(3, () -> new SoundOption(SCSounds.GUITAR_NYLON)),
     STEEL(3, () -> new SoundOption(SCSounds.GUITAR_STEEL)),
     SKY_GUITAR(2, () -> new SoundOption(SCSounds.SKY_GUITAR)),
     SKY_TOY_UKULELE(2, () -> new SoundOption(SCSounds.SKY_TOY_UKULELE)),

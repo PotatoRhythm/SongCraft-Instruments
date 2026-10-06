@@ -8,7 +8,6 @@ import com.stump.songcraft_instruments.item.emirecord.WritableRecordItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableAccessoryInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableBlockInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
-import com.stump.songcraft_instruments.item.partial.instrument.CreditableWindInstrumentItem;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.InstrumentPacketUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -185,17 +184,15 @@ public class ModItems {
                 )
         )),
 
-        TROMBONE = register("trombone", () -> new CreditableWindInstrumentItem(
+        TROMBONE = register("trombone", () -> new WindInstrumentItem(
             (player) -> InstrumentPacketUtil.sendOpenPacket(
                 player, loc("trombone")
-            ),
-            "Philharmonia"
+            )
         )),
-        SAXOPHONE = register("saxophone", () -> new CreditableWindInstrumentItem(
+        SAXOPHONE = register("saxophone", () -> new WindInstrumentItem(
             (player) -> InstrumentPacketUtil.sendOpenPacket(
                 player, loc("saxophone")
-            ),
-            "Philharmonia"
+            )
         )),
 
         KEYBOARD_STAND = registerBlockItem(
@@ -209,6 +206,9 @@ public class ModItems {
         )),
         CELLO = register("cello", () -> new InstrumentItem(
             (player) -> sendOpenPacket(player, loc("cello"))
+        )),
+        DOUBLE_BASS = register("double_bass", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("double_bass"))
         )),
         STEEL_DRUM = register("steel_drum", () -> new InstrumentItem(
             (player) -> sendOpenPacket(player, loc("steel_drum"))

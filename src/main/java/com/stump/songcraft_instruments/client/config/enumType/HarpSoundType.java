@@ -13,7 +13,6 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public enum HarpSoundType implements LayoutSoundType {
     HATO_HARP(3, () -> new SoundOption(SCSounds.HEARTOPIA_HARP)),
-    SKY_HARP(2, () -> new SoundOption(SCSounds.SKY_HARP)),
     FF14_HARP(3, () -> new SoundOption(SCSounds.FF14_HARP)),
     WWM_KONGHOU(3, () -> new SoundOption(SCSounds.WWM_1)),
     HATO_LYRE(2, () -> new SoundOption(SCSounds.HEARTOPIA_LYRE));

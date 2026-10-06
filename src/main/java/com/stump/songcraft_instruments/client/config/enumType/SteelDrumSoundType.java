@@ -13,9 +13,8 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public enum SteelDrumSoundType implements LayoutSoundType {
     HATO_HANG_DRUM(2, () -> new SoundOption(SCSounds.HEARTOPIA_HANG)),
-    SKY_HAND_PAN(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_HANDPAN)),
-    SKY_TRIUMPH_HAND_PAN(LayoutSoundType.PADS, () -> new SoundOption(SCSounds.SKY_TRIUMPH_HANDPAN)),
-    HATO_BOOMWHACKERS(1, () -> new SoundOption(SCSounds.HEARTOPIA_BOOMWHACKERS)),
+    SKY_HAND_PAN(2, () -> new SoundOption(SCSounds.SKY_HANDPAN)),
+    SKY_TRIUMPH_HAND_PAN(2, () -> new SoundOption(SCSounds.SKY_TRIUMPH_HANDPAN)),
     WWM_SOUND_7(2, () -> new SoundOption(SCSounds.WWM_7)),
     FF14_TIMPANI(3, () -> new SoundOption(SCSounds.FF14_TIMPANI));
 

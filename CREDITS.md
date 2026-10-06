@@ -2,7 +2,7 @@
 
 ## Original Mods
 
-SongCraft Instruments is a heavily modified continuation of two mods by StavWasPlayZ, and includes all of their content:
+SongCraft Instruments is a heavily modified continuation of two mods by StavWasPlayZ, and includes most of their content:
 
 - **[Genshin Instruments](https://github.com/StavWasPlayZ/Genshin-Instruments)** by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html).
 - **[Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments)** by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html).
@@ -17,7 +17,6 @@ Sound types are listed in the order they appear in game.
 
 ### Keyboard
 
-- **Piano (EMI)** — From the [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html).
 - **Yamaha_C5** — Made from the [Salamander Grand Piano](https://sfzinstruments.github.io/pianos/salamander/) (a sampled Yamaha C5) by Alexander Holm, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Rendered into individual notes for this mod.
 - **Piano (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Piano (Sky)**, **Grand Piano (Sky)**, **Winter Piano (Sky)** — See [Sky](#sky) under Game Sounds.
@@ -27,8 +26,6 @@ Sound types are listed in the order they appear in game.
 
 ### Violin
 
-- **Slow** — Made from the Violin_Slow preset of the [Arianna's Violin](https://www.polyphone.io/en/soundfonts/bowed-strings/434-arianna-s-violin) soundfont by Arianna, released into the [Public Domain](https://www.polyphone.io/en/licenses). Rendered into individual notes for this mod.
-- **Fast** — Made from the Violin_Fast preset of the [Arianna's Violin](https://www.polyphone.io/en/soundfonts/bowed-strings/434-arianna-s-violin) soundfont by Arianna, released into the [Public Domain](https://www.polyphone.io/en/licenses). Rendered into individual notes for this mod.
 - **Pizzicato** — Made from the [Strings DXS Super Pizz](https://www.polyphone.io/en/soundfonts/bowed-strings/325-strings-dxs-super-pizz) soundfont by Xiaosu Du, licensed under [Give credit (CC BY)](https://www.polyphone.io/en/licenses#give-credit). Rendered into individual notes for this mod.
 - **Violin (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Violin (Sky)** — See [Sky](#sky) under Game Sounds.
@@ -38,7 +35,6 @@ Sound types are listed in the order they appear in game.
 ### Guitar
 
 - **Guitar (EMI)** — From the [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). Original samples by the [Philharmonia Orchestra](https://github.com/skratchdot/philharmonia-samples), licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
-- **Nylon** — Made from the Nylon Guitar preset of the [GeneralUser GS](https://schristiancollins.com/generaluser.php) soundfont by S. Christian Collins, licensed under the [GeneralUser GS License v2.0](https://github.com/mrbumpy409/GeneralUser-GS/blob/main/documentation/LICENSE.txt). Rendered into individual notes for this mod.
 - **Steel** — Made from the Steel Guitar preset of the [GeneralUser GS](https://schristiancollins.com/generaluser.php) soundfont by S. Christian Collins, licensed under the [GeneralUser GS License v2.0](https://github.com/mrbumpy409/GeneralUser-GS/blob/main/documentation/LICENSE.txt). Rendered into individual notes for this mod.
 - **Guitar (Sky)**, **Toy Ukulele (Sky)** — See [Sky](#sky) under Game Sounds.
 - **Lunghe (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
@@ -46,7 +42,6 @@ Sound types are listed in the order they appear in game.
 
 ### Trombone
 
-- **Trombone (EMI)** — From the [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). Original samples by the [Philharmonia Orchestra](https://github.com/skratchdot/philharmonia-samples), licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
 - **Trombone** — Made from the Trombone PHGM preset of the [trombone Lightweiged collection](https://musical-artifacts.com/artifacts/3542) soundfont on Musical Artifacts, compiled by Mike77154. Rendered into individual notes for this mod.
 - **Trombone (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 - **Trumpet** — Made from the Trumpet preset of [Alex's GM Soundfont version 1.3](https://musical-artifacts.com/artifacts/1390) by Alex Beneventi on Musical Artifacts, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Rendered into individual notes for this mod.
@@ -56,7 +51,6 @@ Sound types are listed in the order they appear in game.
 
 ### Saxophone
 
-- **Saxophone (EMI)** — From the [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). Original samples by the [Philharmonia Orchestra](https://github.com/skratchdot/philharmonia-samples), licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
 - **Sax (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Saxophone (Sky)** — See [Sky](#sky) under Game Sounds.
 - **Saxophone (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
@@ -115,7 +109,6 @@ Sound types are listed in the order they appear in game.
 ### Harp
 
 - **Harp (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
-- **Harp (Sky)** — See [Sky](#sky) under Game Sounds.
 - **Harp (FF14)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 - **Konghou (WWM)** — See [Where Winds Meet](#where-winds-meet) under Game Sounds.
 - **Lyre (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
@@ -125,16 +118,18 @@ Sound types are listed in the order they appear in game.
 - **Cello (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Cello (Sky)** — See [Sky](#sky) under Game Sounds.
 - **Cello (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
+
+### Double Bass
+
+- **Double Bass** — Made from the Acoustic_bass preset of [Alex's GM Soundfont version 1.3](https://musical-artifacts.com/artifacts/1390) by Alex Beneventi on Musical Artifacts, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Rendered into individual notes for this mod.
+- **Acoustic Bass (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Contrabass (Sky)** — See [Sky](#sky) under Game Sounds.
 - **Double Bass (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
-- **Acoustic Bass** — Made from the Acoustic_bass preset of [Alex's GM Soundfont version 1.3](https://musical-artifacts.com/artifacts/1390) by Alex Beneventi on Musical Artifacts, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Rendered into individual notes for this mod.
-- **Acoustic Bass (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 
 ### Steel Drum
 
 - **Hang Drum (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Hand Pan (Sky)**, **Triumph Hand Pan (Sky)** — See [Sky](#sky) under Game Sounds.
-- **Boomwhackers (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Sound #7 (WWM)** — See [Where Winds Meet](#where-winds-meet) under Game Sounds.
 - **Timpani (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 
@@ -159,16 +154,14 @@ Sound types are listed in the order they appear in game.
 - **Panpipes (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 - **Horn (Sky)** — See [Sky](#sky) under Game Sounds.
 - **Horn (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
-- **Krill Horn (Sky)** — See [Sky](#sky) under Game Sounds.
 
 ### Drum
 
 - **Cajon (Hato)**, **Conga & Bongos (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Bongo (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 - **Drum (Sky)**, **DunDun (Sky)**, **Fortune Drum (Sky)** — See [Sky](#sky) under Game Sounds.
-- **Bass Drum (FF)**, **Snare Drum (FF)**, **Drum Kit (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
+- **Marching Drums (FF)**, **Drum Kit (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 - **TR-909 (Sky)**, **Dance (Sky)**, **Cymbals (Sky)** — See [Sky](#sky) under Game Sounds.
-- **Cymbals (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 
 ### Kalimba
 
@@ -183,11 +176,12 @@ Sound types are listed in the order they appear in game.
 
 ### Animal Call
 
-- **Bird Call (Sky)**, **Crab Call (Sky)**, **Fish Call (Sky)**, **Jelly Call (Sky)**, **Manta Call (Sky)**, **Spirit Manta Call (Sky)**, **Moth Call (Sky)** — See [Sky](#sky) under Game Sounds.
+- **Bird Call (Sky)**, **Crab Call (Sky)**, **Fish Call (Sky)**, **Jelly Call (Sky)**, **Manta Call (Sky)**, **Spirit Manta Call (Sky)**, **Moth Call (Sky)**, **Krill Horn (Sky)** — See [Sky](#sky) under Game Sounds.
 
 ### Synth
 
-- **Bass Synth (Sky)**, **Chime Synth (Sky)**, **Sine Synth (Sky)** — See [Sky](#sky) under Game Sounds.
+- **Bass Synth (Sky)**, **Chime Synth (Sky)** — See [Sky](#sky) under Game Sounds.
+- **Sine**, **Square**, **Saw**, **Triangle** — Synthesized for this mod from pure sine and band-limited square, sawtooth and triangle waves. No third-party samples.
 
 ### Bell
 
@@ -243,8 +237,9 @@ Sound types are listed in the order they appear in game.
 - Guitar — Lunghe (Hato)
 - Saxophone — Sax (Hato)
 - Harp — Harp (Hato), Lyre (Hato)
-- Cello — Cello (Hato), Acoustic Bass (Hato)
-- Steel Drum — Hang Drum (Hato), Boomwhackers (Hato)
+- Cello — Cello (Hato)
+- Double Bass — Acoustic Bass (Hato)
+- Steel Drum — Hang Drum (Hato)
 - Concertina — Concertina (Hato), Bagpipes (Hato)
 - Flute — Soprano Recorder (Hato)
 - Xiao — Xiao (Hato)
@@ -257,6 +252,8 @@ Sound types are listed in the order they appear in game.
 > *Sounds from [Sky: Children of the Light](https://www.thatskygame.com) by thatgamecompany. All rights belong to thatgamecompany.*
 >
 > *Samples taken from Specy's [genshin-music](https://github.com/Specy/genshin-music) app (licensed under [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html)) and rendered into individual notes for this mod.*
+>
+> *The Hand Pans and the Bass Synth were expanded from 8 notes to two octaves, and the three pianos from two octaves to three, by pitch-shifting their own samples with [Rubber Band](https://breakfastquay.com/rubberband/). The Chime Synth's lower octave is its own samples played at half speed.*
 
 - Keyboard — Piano (Sky), Grand Piano (Sky), Winter Piano (Sky)
 - Violin — Violin (Sky)
@@ -266,17 +263,17 @@ Sound types are listed in the order they appear in game.
 - Pipa — Pipa (Sky)
 - Microphone — Aurora (Sky)
 - Electric Guitar — Electric Guitar (Sky)
-- Harp — Harp (Sky)
-- Cello — Cello (Sky), Contrabass (Sky)
+- Cello — Cello (Sky)
+- Double Bass — Contrabass (Sky)
 - Steel Drum — Hand Pan (Sky), Triumph Hand Pan (Sky)
 - Concertina — Harmonica (Sky)
 - Flute — Flute (Sky), Transverse Flute (Sky)
-- Xiao — Panflute (Sky), Horn (Sky), Krill Horn (Sky)
+- Xiao — Panflute (Sky), Horn (Sky)
 - Drum — Drum (Sky), DunDun (Sky), Fortune Drum (Sky), TR-909 (Sky), Dance (Sky), Cymbals (Sky)
 - Kalimba — Kalimba (Sky), Xylophone (Sky)
 - Ocarina — Ocarina (Sky), Manta Ocarina (Sky)
-- Animal Call — Bird Call (Sky), Crab Call (Sky), Fish Call (Sky), Jelly Call (Sky), Manta Call (Sky), Spirit Manta Call (Sky), Moth Call (Sky)
-- Synth — Bass Synth (Sky), Chime Synth (Sky), Sine Synth (Sky)
+- Animal Call — Bird Call (Sky), Crab Call (Sky), Fish Call (Sky), Jelly Call (Sky), Manta Call (Sky), Spirit Manta Call (Sky), Moth Call (Sky), Krill Horn (Sky)
+- Synth — Bass Synth (Sky), Chime Synth (Sky)
 - Bell — Bells (Sky), Small Bell (Sky)
 
 ### Final Fantasy XIV
@@ -292,11 +289,12 @@ Sound types are listed in the order they appear in game.
 - Saxophone — Saxophone (FF)
 - Electric Guitar — Clean Guitar (FF), Muted Guitar (FF), Overdriven Guitar (FF), Power Chords Guitar (FF), Special Guitar (FF)
 - Harp — Harp (FF14)
-- Cello — Cello (FF), Double Bass (FF)
+- Cello — Cello (FF)
+- Double Bass — Double Bass (FF)
 - Steel Drum — Timpani (FF)
 - Flute — Flute (FF), Fife (FF), Oboe (FF), Clarinet (FF)
 - Xiao — Panpipes (FF), Horn (FF)
-- Drum — Bongo (FF), Bass Drum (FF), Snare Drum (FF), Drum Kit (FF), Cymbals (FF)
+- Drum — Bongo (FF), Marching Drums (FF), Drum Kit (FF)
 
 ### Where Winds Meet
 

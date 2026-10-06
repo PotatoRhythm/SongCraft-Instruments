@@ -44,7 +44,7 @@ public class WritableRecordItem extends EMIRecordItem {
 
         final CompoundTag channel = CommonUtil.getOrCreateElementTag(stack.getOrCreateTag(), CHANNEL_TAG);
 
-        if (!channel.getBoolean(WRITABLE_TAG) && !channel.contains(NOTES_TAG, Tag.TAG_LIST)) {
+        if (!channel.getBoolean(WRITABLE_TAG) && !RecordNotes.hasNotes(channel)) {
             // Record is empty; check if is legacy looper
             LooperUtil.migrateLegacyLooper(lbe).ifPresentOrElse(
                 (recordData) -> stack.getTag().put(CHANNEL_TAG, recordData),
