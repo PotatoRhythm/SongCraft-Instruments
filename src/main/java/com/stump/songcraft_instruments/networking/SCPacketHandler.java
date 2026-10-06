@@ -4,6 +4,7 @@ import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.networking.packet.instrument.c2s.*;
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.*;
 import com.stump.songcraft_instruments.networking.packet.*;
+import com.stump.songcraft_instruments.networking.packet.record.*;
 import com.stump.songcraft_instruments.util.ServerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +32,10 @@ public class SCPacketHandler {
         S2CLooperDampenPacket.class,
         // Sync stuff
         DoesLooperExistPacket.class, LooperUnplayablePacket.class, SyncModTagPacket.class,
-        LooperPlayStatePacket.class, LooperConnectionsPacket.class, LooperRestartPacket.class
+        LooperPlayStatePacket.class, LooperConnectionsPacket.class, LooperRestartPacket.class,
+        // Record files
+        S2CRecordFilePartPacket.class, C2SRecordFilePartPacket.class,
+        S2CRecordImportRequestPacket.class, S2CRecordFilesListPacket.class
     });
 
     private static int id = 0;
@@ -40,7 +44,7 @@ public class SCPacketHandler {
     }
 
 
-    private static final String PROTOCOL_VERSION = "1.0.0";
+    private static final String PROTOCOL_VERSION = "1.1.0";
 
     private static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
         new ResourceLocation(SCInstrumentMod.MODID, "main"),

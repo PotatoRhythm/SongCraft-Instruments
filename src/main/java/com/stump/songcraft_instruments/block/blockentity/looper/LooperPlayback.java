@@ -3,7 +3,6 @@ package com.stump.songcraft_instruments.block.blockentity.looper;
 import com.mojang.logging.LogUtils;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.blockentity.SpeakerBlockEntity;
-import com.stump.songcraft_instruments.item.emirecord.RecordNotes;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CLooperDampenPacket;
@@ -11,6 +10,7 @@ import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CLoope
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldNoteSoundPacketUtil;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.NoteSoundPacketUtil;
+import com.stump.songcraft_instruments.recording.Recording;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
@@ -94,21 +94,21 @@ public class LooperPlayback {
 
 
     /**
-     * @param note A note packed as per {@link RecordNotes}
+     * @param note A note of the looper's {@link LooperBlockEntity#getRecording recording}
      */
     public void playNote(final int[] note) {
         try {
-            switch (RecordNotes.getType(note)) {
-                case REGULAR:
+            switch (note[Recording.TYPE]) {
+                case Recording.TYPE_REGULAR:
                     playNoteSound(note);
                     break;
 
-                case HELD:
+                case Recording.TYPE_HELD:
                     playHeldSound(note);
                     break;
 
-                case DAMPEN:
-                    dampenSounds(getPerformerInitiatorID(note[RecordNotes.PERFORMER]));
+                case Recording.TYPE_DAMPEN:
+                    dampenSounds(getPerformerInitiatorID(note[Recording.PERFORMER]));
                     break;
             }
         } catch (Exception e) {
@@ -121,20 +121,21 @@ public class LooperPlayback {
      * @return The note's sound, or null if its sound type or index no longer exists
      */
     private static <T> @Nullable T getRecordedSound(final @Nullable T[] sounds, final int[] note) {
-        final int index = note[RecordNotes.SOUND_INDEX];
+        final int index = note[Recording.SOUND_INDEX];
         return ((sounds == null) || (index < 0) || (index >= sounds.length)) ? null : sounds[index];
     }
 
     private void playNoteSound(final int[] note) {
         final NoteSoundMetadata meta = metaFromNote(note);
-        final ResourceLocation soundLocation = RecordNotes.getSoundType(looper.getChannel(), note);
+        final ResourceLocation soundLocation = ResourceLocation.tryParse(looper.getRecording().soundType(note));
 
-        final NoteSound sound = getRecordedSound(NoteSoundRegistrar.getSounds(soundLocation), note);
-        // Recorded with a sound type that has since been removed
-        if (sound == null)
+        final NoteSound sound = (soundLocation == null) ? null
+            : getRecordedSound(NoteSoundRegistrar.getSounds(soundLocation), note);
+        // Recorded with a sound type that has since been removed (or not in this mod)
+        if (sound == null || meta == null)
             return;
 
-        final InitiatorID initiator = getPerformerInitiatorID(note[RecordNotes.PERFORMER]);
+        final InitiatorID initiator = getPerformerInitiatorID(note[Recording.PERFORMER]);
 
         NoteSoundPacketUtil.sendPlayNotePackets(
                 looper.getLevel(),
@@ -144,19 +145,21 @@ public class LooperPlayback {
         );
         getPairedSpeakers().forEach((speaker) -> speaker.playNote(sound, meta, initiator));
 
-        triggerEmitNoteParticle(note[RecordNotes.PARTICLE_COLOR]);
+        triggerEmitNoteParticle(note[Recording.PARTICLE_COLOR]);
     }
 
     private void playHeldSound(final int[] note) {
         final NoteSoundMetadata meta = metaFromNote(note);
 
-        final ResourceLocation soundLocation = RecordNotes.getSoundType(looper.getChannel(), note);
-        final HeldNoteSound sound = getRecordedSound(HeldNoteSoundRegistrar.getSounds(soundLocation), note);
-        if (sound == null)
+        final ResourceLocation soundLocation = ResourceLocation.tryParse(looper.getRecording().soundType(note));
+        final HeldNoteSound sound = (soundLocation == null) ? null
+            : getRecordedSound(HeldNoteSoundRegistrar.getSounds(soundLocation), note);
+        if (sound == null || meta == null)
             return;
 
-        final HeldSoundPhase phase = RecordNotes.getHeldPhase(note);
-        final InitiatorID initiator = getPerformerInitiatorID(note[RecordNotes.PERFORMER]);
+        final HeldSoundPhase phase = (note[Recording.HELD_PHASE] == Recording.PHASE_RELEASE)
+            ? HeldSoundPhase.RELEASE : HeldSoundPhase.ATTACK;
+        final InitiatorID initiator = getPerformerInitiatorID(note[Recording.PERFORMER]);
 
         HeldNoteSoundPacketUtil.sendPlayNotePackets(
             looper.getLevel(), sound,
@@ -165,7 +168,7 @@ public class LooperPlayback {
         getPairedSpeakers().forEach((speaker) -> speaker.playHeldNote(sound, meta, phase, initiator));
 
         if (phase == HeldSoundPhase.ATTACK) {
-            final int rgb = note[RecordNotes.PARTICLE_COLOR];
+            final int rgb = note[Recording.PARTICLE_COLOR];
 
             cachedHeldNotes.add(new CachedHeldNote(sound, meta, rgb, initiator));
             triggerEmitNoteParticle(rgb);
@@ -192,13 +195,20 @@ public class LooperPlayback {
         );
     }
 
-    private NoteSoundMetadata metaFromNote(final int[] note) {
+    /**
+     * @return The note's metadata, or null if its instrument ID is malformed
+     */
+    private @Nullable NoteSoundMetadata metaFromNote(final int[] note) {
+        final ResourceLocation instrumentId = ResourceLocation.tryParse(looper.getRecording().instrumentId(note));
+        if (instrumentId == null)
+            return null;
+
         return new NoteSoundMetadata(
             looper.getBlockPos(),
-            note[RecordNotes.PITCH],
-            note[RecordNotes.VOLUME],
-            note[RecordNotes.PARTICLE_COLOR],
-            RecordNotes.getInstrumentId(looper.getChannel(), note), Optional.empty()
+            note[Recording.PITCH],
+            note[Recording.VOLUME],
+            note[Recording.PARTICLE_COLOR],
+            instrumentId, Optional.empty()
         );
     }
 

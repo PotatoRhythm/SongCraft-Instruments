@@ -3,32 +3,23 @@ package com.stump.songcraft_instruments.block.blockentity.looper;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
 import com.stump.songcraft_instruments.gamerule.ModGameRules;
-import com.stump.songcraft_instruments.item.emirecord.RecordNotes;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
+import com.stump.songcraft_instruments.recording.Recording;
+import com.stump.songcraft_instruments.recording.RecordingBuilder;
+import com.stump.songcraft_instruments.recording.RecordingCodec;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
-import com.stump.songcraft_instruments.util.CommonUtil;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.UUID;
 
 /**
- * Writes recorded notes into the looper's inserted record.
+ * Writes recorded notes into the looper's {@link LooperBlockEntity#getDraft draft},
+ * which becomes the inserted record's recording once the recording is finalized.
  */
 public class LooperRecordWriter {
-    public static final String PARTICLE_COLOR_TAG = "ParticleColor",
-        PERFORMER_TAG = "Performer", PERFORMERS_TAG = "Performers",
-        // The names and particle colors of the performers, in the same order as PERFORMERS_TAG
-        PERFORMER_NAMES_TAG = "PerformerNames", PERFORMER_COLORS_TAG = "PerformerColors";
-
     private final LooperBlockEntity looper;
 
     public LooperRecordWriter(final LooperBlockEntity looper) {
@@ -40,12 +31,13 @@ public class LooperRecordWriter {
      * Writes a new note to the writable record.
      */
     public void writeNote(NoteSound sound, NoteSoundMetadata soundMeta, int timestamp, int particleRgb, UUID performer) {
-        if (!looper.isWritable())
+        final RecordingBuilder draft = looper.getDraft();
+        if (draft == null)
             return;
 
-        RecordNotes.addNote(looper.getChannel(), timestamp, getPerformerIndex(performer),
+        draft.addNote(timestamp, getPerformerIndex(draft, performer),
             soundMeta.pitch(), soundMeta.volume(), particleRgb,
-            soundMeta.instrumentId(), sound.baseSoundLocation, sound.index
+            soundMeta.instrumentId().toString(), sound.baseSoundLocation.toString(), sound.index
         );
         looper.setChanged();
     }
@@ -55,47 +47,35 @@ public class LooperRecordWriter {
     public void writeHeldNote(HeldNoteSound sound, HeldSoundPhase phase,
                               NoteSoundMetadata soundMeta, int timestamp,
                               int particleRgb, UUID performer) {
-        if (!looper.isWritable())
+        final RecordingBuilder draft = looper.getDraft();
+        if (draft == null)
             return;
 
-        RecordNotes.addHeldNote(looper.getChannel(), timestamp, getPerformerIndex(performer),
+        draft.addHeldNote(timestamp, getPerformerIndex(draft, performer),
             soundMeta.pitch(), soundMeta.volume(), particleRgb,
-            soundMeta.instrumentId(), sound.baseSoundLocation(), sound.index(),
-            phase
+            soundMeta.instrumentId().toString(), sound.baseSoundLocation().toString(), sound.index(),
+            (phase == HeldSoundPhase.RELEASE) ? Recording.PHASE_RELEASE : Recording.PHASE_ATTACK
         );
         looper.setChanged();
     }
 
     public void writeDampen(int timestamp, UUID performer) {
-        if (!looper.isWritable())
+        final RecordingBuilder draft = looper.getDraft();
+        if (draft == null)
             return;
 
-        RecordNotes.addDampen(looper.getChannel(), timestamp, getPerformerIndex(performer));
+        draft.addDampen(timestamp, getPerformerIndex(draft, performer));
         looper.setChanged();
     }
 
     /**
      * Each player recording on a record is a performer, identified in its notes by their index in the
-     * record's performer list. Performers are played back as separate initiators, so that dampening
+     * recording's performer list. Performers are played back as separate initiators, so that dampening
      * and held notes of one do not affect the others.
-     * @return The index of the performer, added to the record if not yet present
+     * @return The index of the performer, added to the recording if not yet present
      */
-    private int getPerformerIndex(final UUID performer) {
-        final CompoundTag channel = looper.getChannel();
-        if (!channel.contains(PERFORMERS_TAG, Tag.TAG_LIST))
-            channel.put(PERFORMERS_TAG, new ListTag());
-
-        final ListTag performers = channel.getList(PERFORMERS_TAG, Tag.TAG_INT_ARRAY);
-        for (int i = 0; i < performers.size(); i++) {
-            if (NbtUtils.loadUUID(performers.get(i)).equals(performer))
-                return i;
-        }
-
-        performers.add(NbtUtils.createUUID(performer));
-        CommonUtil.getOrCreateListTag(channel, PERFORMER_NAMES_TAG).add(StringTag.valueOf(getPlayerName(performer)));
-        CommonUtil.getOrCreateListTag(channel, PERFORMER_COLORS_TAG)
-            .add(new IntArrayTag(getPlayerParticleColors(performer)));
-        return performers.size() - 1;
+    private int getPerformerIndex(final RecordingBuilder draft, final UUID performer) {
+        return draft.performerIndex(performer, () -> getPlayerName(performer), () -> getPlayerParticleColors(performer));
     }
 
     /**
@@ -118,21 +98,24 @@ public class LooperRecordWriter {
      * Discards everything recorded so far
      */
     public void clearRecordedNotes() {
-        RecordNotes.clear(looper.getChannel());
-        looper.getChannel().remove(PERFORMERS_TAG);
-        looper.getChannel().remove(PERFORMER_NAMES_TAG);
-        looper.getChannel().remove(PERFORMER_COLORS_TAG);
+        if (looper.getDraft() != null)
+            looper.getDraft().clear();
         looper.setTicks(0);
         looper.setChanged();
     }
 
     /**
      * A capped looper is a looper that cannot have any more notes in it, as defined in {@link ModGameRules#RULE_LOOPER_MAX_NOTES}.
-     * Any negative will make the looper uncappable.
+     * Any negative will make the looper uncappable by the rule, though recordings always end at {@link RecordingCodec#MAX_TICK} ticks.
      * @return Whether this looper is capped
      */
     public boolean isCapped(final Level level) {
+        final RecordingBuilder draft = looper.getDraft();
+        if (draft == null)
+            return true;
+
         final int cap = level.getGameRules().getInt(ModGameRules.RULE_LOOPER_MAX_NOTES);
-        return (cap >= 0) && (RecordNotes.getNotes(looper.getChannel()).size() >= cap);
+        return ((cap >= 0) && (draft.noteCount() >= cap))
+            || (looper.getTicks() > RecordingCodec.MAX_TICK);
     }
 }

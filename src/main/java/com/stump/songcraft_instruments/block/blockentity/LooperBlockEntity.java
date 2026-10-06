@@ -5,19 +5,19 @@ import com.stump.songcraft_instruments.block.blockentity.looper.LooperConnection
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperPlayback;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperRecordWriter;
 import com.stump.songcraft_instruments.block.blockentity.looper.RecordingSession;
-import com.stump.songcraft_instruments.item.ModItems;
-import com.stump.songcraft_instruments.item.emirecord.EMIRecordItem;
-import com.stump.songcraft_instruments.item.emirecord.RecordNotes;
-import com.stump.songcraft_instruments.item.emirecord.RecordRepository;
+import com.mojang.logging.LogUtils;
+import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.LooperPlayStatePacket;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
+import com.stump.songcraft_instruments.recording.Recording;
+import com.stump.songcraft_instruments.recording.RecordingBuilder;
+import com.stump.songcraft_instruments.recording.RecordingCodec;
+import com.stump.songcraft_instruments.recording.RecordingStore;
 import com.stump.songcraft_instruments.util.LooperUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -28,21 +28,35 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.ContainerSingleItem;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
-import static com.stump.songcraft_instruments.item.emirecord.BurnedRecordItem.*;
+import java.io.IOException;
 
 /**
  * The looper's record slot, block state and timeline. Recording, connections, note writing and playback
  * are each handled by their own part: {@link #session()}, {@link #connections()}, {@link #writer()} and {@link #playback()}.
  */
 public class LooperBlockEntity extends BlockEntity implements ContainerSingleItem {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public static final String
         RECORD_TAG = "Record",
-        TICKS_TAG = "Ticks"
+        TICKS_TAG = "Ticks",
+        // The notes recorded so far onto an empty record, in the recording file format
+        DRAFT_TAG = "Draft"
     ;
 
     private ItemStack recordIn = ItemStack.EMPTY;
-    private CompoundTag channel;
+    /**
+     * The notes being recorded while an empty record is inserted, otherwise null
+     */
+    private @Nullable RecordingBuilder draft;
+    /**
+     * The recording of the inserted burned record, loaded from the world's {@link RecordingStore} on first use
+     */
+    private @Nullable Recording recording;
+    private boolean recordingResolved = false;
 
     private final RecordingSession session = new RecordingSession(this);
     private final LooperConnections connections = new LooperConnections(this);
@@ -64,35 +78,54 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
 
     /**
-     * Retrieves the channel (footage) information from the inserted record
+     * @return The notes being recorded onto the inserted empty record, or null if no empty record is inserted
      */
-    public CompoundTag getChannel() {
-        return channel;
-    }
-
-    private void setChannel(final CompoundTag channel) {
-        this.channel = channel;
+    public @Nullable RecordingBuilder getDraft() {
+        return draft;
     }
 
     /**
-     * Retrieves the channel (footage) information from the inserted record
+     * @return The recording of the inserted burned record, or null if there is none
+     * (or its recording is missing from this world). Server only.
      */
-    private void updateChannel() {
-        final CompoundTag recordData = recordIn.getOrCreateTag();
+    public @Nullable Recording getRecording() {
+        if (!recordingResolved && level != null && !level.isClientSide && level.getServer() != null) {
+            recordingResolved = true;
 
-        if (recordData.contains(CHANNEL_TAG, Tag.TAG_COMPOUND)) {
-            channel = recordData.getCompound(CHANNEL_TAG);
-        }
-        else if (recordData.contains(BURNED_MEDIA_TAG, Tag.TAG_STRING)) {
-            setChannel(RecordRepository.getRecord(getBurnedMediaLoc()).orElse(null));
+            final String id = WritableRecordItem.getRecordingId(recordIn);
+            if (id != null) {
+                final RecordingStore store = RecordingStore.get(level.getServer());
+                recording = store.get(id).orElse(null);
+                store.markSeen(id);
+
+                if (recording == null)
+                    LOGGER.warn("The recording {} of the record in the looper at {} is missing", id, getBlockPos());
+            }
         }
 
-        // Burned media and migrated legacy loopers may still hold unpacked notes
-        if ((channel != null) && RecordNotes.pack(channel))
-            updateRecordNBT();
+        return recording;
     }
-    protected ResourceLocation getBurnedMediaLoc() {
-        return new ResourceLocation(recordIn.getTag().getString(BURNED_MEDIA_TAG));
+
+    /**
+     * Reads the inserted record: an empty record starts a new draft, a burned one is looked up when first needed
+     * @param savedDraft The draft saved with this looper, if any
+     */
+    private void updateRecording(final @Nullable byte[] savedDraft) {
+        recording = null;
+        recordingResolved = false;
+        draft = null;
+
+        if (!(recordIn.getItem() instanceof WritableRecordItem) || WritableRecordItem.getRecordingId(recordIn) != null)
+            return;
+
+        draft = new RecordingBuilder();
+        if (savedDraft != null) {
+            try {
+                draft = new RecordingBuilder(RecordingCodec.decode(savedDraft));
+            } catch (IOException e) {
+                LOGGER.error("Could not read the unfinished recording of the looper at {}", getBlockPos(), e);
+            }
+        }
     }
 
     private void updateRecordNBT() {
@@ -100,31 +133,47 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
     }
 
     public boolean hasFootage() {
-        final CompoundTag channel = getChannel();
-        return (channel != null) && !RecordNotes.getNotes(channel).isEmpty();
+        if (draft != null)
+            return !draft.isEmpty();
+
+        final Recording recording = getRecording();
+        return (recording != null) && (recording.noteCount() > 0);
     }
 
+    /**
+     * @return Whether an empty record is inserted, which may still be recorded onto
+     */
     public boolean isWritable() {
-        return (getChannel() != null) && getChannel().getBoolean(WRITABLE_TAG);
+        return draft != null;
     }
-    public void setWritable(final boolean writable) {
-        getChannel().putBoolean(WRITABLE_TAG, writable);
+
+    /**
+     * @return Whether the inserted record is burned, but its recording is not in this world
+     */
+    public boolean isRecordingMissing() {
+        return (WritableRecordItem.getRecordingId(recordIn) != null) && (getRecording() == null);
     }
 
     public boolean isRecordIn() {
         return !recordIn.isEmpty();
-    }
-    protected CompoundTag getRecordData() {
-        return recordIn.getOrCreateTag();
     }
 
     @Override
     public void load(CompoundTag pTag) {
         super.load(pTag);
         recordIn = ItemStack.of(getPersistentData().getCompound(RECORD_TAG));
-        updateChannel();
+        updateRecording(pTag.contains(DRAFT_TAG, Tag.TAG_BYTE_ARRAY) ? pTag.getByteArray(DRAFT_TAG) : null);
         connections.load();
         session.load();
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag pTag) {
+        super.saveAdditional(pTag);
+        // Saved with the looper rather than the world's recordings, as it may still be discarded.
+        // Never sent to clients.
+        if (draft != null && !draft.isEmpty())
+            pTag.putByteArray(DRAFT_TAG, RecordingCodec.encode(draft.build(-1)));
     }
 
     //#region ContainerSingleItem implementation
@@ -138,13 +187,11 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
     @Override
     public void setItem(int pSlot, ItemStack pStack) {
-        if (!(pStack.getItem() instanceof EMIRecordItem recordItem))
+        if (!(pStack.getItem() instanceof WritableRecordItem))
             return;
 
         recordIn = pStack.copyWithCount(1);
-        recordItem.onInsert(recordIn, this);
-
-        updateChannel();
+        updateRecording(null);
 
         BlockState newState = getBlockState().setValue(LooperBlock.RECORD_IN, true);
         if (hasFootage())
@@ -171,6 +218,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         );
 
         getPersistentData().remove(RECORD_TAG);
+        updateRecording(null);
         reset();
 
         return prev;
@@ -188,7 +236,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
     @Override
     public boolean canPlaceItem(int pIndex, ItemStack pStack) {
-        return (pStack.getItem() instanceof EMIRecordItem) && !isRecordIn();
+        return (pStack.getItem() instanceof WritableRecordItem) && !isRecordIn();
     }
 
     @Override
@@ -250,8 +298,16 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         return 0;
     }
 
+    /**
+     * Overrides when the inserted record loops back, as when syncing loopers
+     */
     public void setRepeatTick(final int tick) {
-        getChannel().putInt(REPEAT_TICK_TAG, tick);
+        if (!isRecordIn())
+            return;
+
+        WritableRecordItem.setRepeatTickOverride(recordIn, tick);
+        updateRecordNBT();
+        setChanged();
     }
 
     /**
@@ -262,9 +318,8 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
         playback.stopAndClearHeldSounds();
 
-        setRepeatTick(getTicks());
+        burnDraft();
         session.setRecording(false);
-        setWritable(false);
 
         // The record is burned; nothing is left to connect to
         connections.clear();
@@ -290,12 +345,34 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         return getPersistentData().getInt(TICKS_TAG);
     }
     public int getRepeatTick() {
-        final CompoundTag channel = getChannel();
+        final int override = WritableRecordItem.getRepeatTickOverride(recordIn);
+        if (override != -1)
+            return override;
 
-        if (channel.contains(REPEAT_TICK_TAG))
-            return channel.getInt(REPEAT_TICK_TAG);
-        else
-            return -1;
+        final Recording recording = getRecording();
+        return (recording != null) ? recording.length() : -1;
+    }
+
+    /**
+     * Stores the notes recorded so far as a recording of the world, and burns it into the inserted record
+     */
+    private void burnDraft() {
+        if (draft == null || draft.isEmpty() || level == null || level.getServer() == null)
+            return;
+
+        final Recording finished = draft.build(Math.min(getTicks(), RecordingCodec.MAX_TICK));
+        final String id;
+        try {
+            id = RecordingStore.get(level.getServer()).save(finished);
+        } catch (IOException e) {
+            LOGGER.error("Could not save the recording of the looper at {}", getBlockPos(), e);
+            return;
+        }
+
+        WritableRecordItem.burn(recordIn, id, finished);
+        draft = null;
+        recording = finished;
+        recordingResolved = true;
     }
 
 
@@ -339,34 +416,24 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         if (!isPlaying)
             return;
 
-        final CompoundTag channel = lbe.getChannel();
-        if (channel == null)
+        final Recording recording = lbe.getRecording();
+        if (recording == null)
             return;
 
         playback.emitHeldParticles();
 
         final int ticks = getTicks();
+        // Keeps the recording from being cleaned up while it's played
+        if (ticks == 0)
+            RecordingStore.get(pLevel.getServer()).markSeen(WritableRecordItem.getRecordingId(recordIn));
 
-        RecordNotes.getNotes(channel).stream()
-            .map((note) -> ((IntArrayTag) note).getAsIntArray())
-            .filter((note) -> note[RecordNotes.TIMESTAMP] == ticks)
-            .forEach(lbe.playback()::playNote);
+        recording.forEachNoteAt(ticks, lbe.playback()::playNote);
 
         lbe.incrementTick();
     }
 
     public void popRecord() {
-        final CompoundTag recordData = getRecordData();
-
-        if (recordIn.is(ModItems.RECORD_WRITABLE.get())) {
-            // Record ejected while player writing to the record; remove notes
-            if (isWritable())
-                RecordNotes.clear(getChannel());
-            // Empty record; empty data.
-            if (!hasFootage())
-                recordData.remove(CHANNEL_TAG);
-        }
-
+        // Ejected while recording; the notes recorded so far are discarded, and the record comes out empty
         playback.stopAndClearHeldSounds();
 
         // Finally, pop it

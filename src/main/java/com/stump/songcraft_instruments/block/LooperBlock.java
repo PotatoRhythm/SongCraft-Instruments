@@ -4,7 +4,7 @@ import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.blockentity.ModBlockEntities;
 import com.stump.songcraft_instruments.block.util.LooperInteractionRunnable;
 import com.stump.songcraft_instruments.criteria.ModCriteria;
-import com.stump.songcraft_instruments.item.emirecord.EMIRecordItem;
+import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.util.LooperUtil;
 import com.stump.songcraft_instruments.item.InstrumentItem;
 import net.minecraft.ChatFormatting;
@@ -160,7 +160,7 @@ public class LooperBlock extends Block implements EntityBlock {
      */
     protected InteractionResult insertRecord(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer,
                                              LooperBlockEntity lbe, ItemStack heldStack, BlockHitResult pHit) {
-        if (!(heldStack.getItem() instanceof EMIRecordItem))
+        if (!(heldStack.getItem() instanceof WritableRecordItem))
             return InteractionResult.FAIL;
 
         // Eject previously inserted record
@@ -175,7 +175,12 @@ public class LooperBlock extends Block implements EntityBlock {
         if (!pPlayer.isCreative())
             heldStack.shrink(1);
 
-        if (!lbe.hasFootage()) {
+        if (lbe.isRecordingMissing()) {
+            pPlayer.displayClientMessage(
+                Component.translatable("songcraft_instruments.record.missing").withStyle(ChatFormatting.RED),
+                true
+            );
+        } else if (!lbe.hasFootage()) {
             pPlayer.displayClientMessage(
                 Component.translatable("songcraft_instruments.record.no_footage"),
                 true

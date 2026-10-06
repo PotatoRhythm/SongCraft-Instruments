@@ -35,10 +35,8 @@
     "label.songcraft_instruments.trombone_options": "Trombone Options",
 
 
-
     "songcraft_instruments.disclaimer.title": "Disclaimer!",
     "songcraft_instruments.disclaimer.content": "SongCraft Instruments is an unofficial, fan-made Minecraft mod. It is not affiliated with or endorsed by any of the games or companies whose instruments and sounds it features, including Genshin Impact (HoYoverse), Guild Wars 2 (ArenaNet) and Heartopia (XD).\n\nAll assets taken from these games, such as sounds, images and instruments, belong to their respective owners. Credits and sources for every sound used in this mod can be found on the SongCraft Instruments GitHub repository.\n\nAs the user, you are fully responsible for your actions within the game, including (but not limited to!) playing and sharing or publishing any songs that may be protected under copyright laws.",
-
 
 
     "button.songcraft_instruments.stop_music_on_play.tooltip": "When you or other players within %s blocks of range play an instrument, Minecraft's background music will stop.",
@@ -94,7 +92,6 @@
 
 
     "button.none": "None",
-
 
 
     "button.songcraft_instruments.label": "Note Labels",
@@ -304,7 +301,6 @@
     "songcraft_instruments.label.genshin_notation.djem_djem_drum.r": "R",
 
 
-
     "songcraft_instruments.advancements.main.root.title": "A Bard's Journey",
     "songcraft_instruments.advancements.main.root.description": "Though wine may not be by your side, the instruments will always walk you through the Game of Freedom.",
 
@@ -413,10 +409,9 @@
     "item.songcraft_instruments.writable_record": "Empty Record",
     "item.songcraft_instruments.burned_record": "Burned Record",
 
-    "item.songcraft_instruments.interesting_record": "Interesting Record",
 
-    "item.songcraft_instruments.record.arranger": "Arranger: %s",
     "item.songcraft_instruments.record.performers": "Recorded by: %s",
+    "item.songcraft_instruments.record.length": "Length: %s (%s notes)",
 
     "label.songcraft_instruments.pipa_options": "Pipa Options",
     "button.songcraft_instruments.pipa.soundType": "Sound",
@@ -447,6 +442,7 @@
 
     "songcraft_instruments.record.no_footage": "This record has no footage! Use an instrument to start recording",
     "songcraft_instruments.record.not_writable": "Record already burned",
+    "songcraft_instruments.record.missing": "This record's recording isn't in this world. Import it with /screcord import",
 
 
     "button.songcraft_instruments.record": "Record",
@@ -460,35 +456,45 @@
     "button.songcraft_instruments.stop": "Stop",
 
     "gamerule.songcraft_instruments_looperMaxNotes": "Looper Max Notes",
-    "gamerule.songcraft_instruments_looperMaxNotes.description": "Defines the maximum amount of notes a looper can have. Any value below 0 will make the looper uncappable.",
-
-
-    "commands.songcraft_instruments.emirecord.failed.record_already_burned": "Held record of %s is already burned",
-    "commands.songcraft_instruments.emirecord.failed.record_burned": "Cannot save a burned record",
-    "commands.songcraft_instruments.emirecord.failed.no_record": "%s is not holding an Empty Record",
-    "commands.songcraft_instruments.emirecord.failed.record_empty": "Held record of %s is empty",
-    "commands.songcraft_instruments.emirecord.failed.record_invalid": "Provided record name '%s' is unrecognizable",
-    "commands.songcraft_instruments.emirecord.failed.too_many": "Too many records present at %s's hand. Exactly 1 record must be held to load a track.",
-    "commands.songcraft_instruments.emirecord.failed.invalid_namespace": "Cannot save record by the namespace of %s (provided %s)",
-    "commands.songcraft_instruments.emirecord.failed.illegal_name": "Illegal record name: %s",
-
-    "commands.songcraft_instruments.emirecord.success.record_burned": "Record successfully burned",
-    "commands.songcraft_instruments.emirecord.success.record_removed": "Record removed successfully",
-    "commands.songcraft_instruments.emirecord.success.record_saved": "Record successfully saved",
-
+    "gamerule.songcraft_instruments_looperMaxNotes.description": "The most notes a looper can record onto one record, and the most an imported record may have. Any value below 0 removes the limit.",
 
 
     "songcraft_instruments.advancements.main.japanese.title": "True Weeb",
     "songcraft_instruments.advancements.main.japanese.description": "Play on all Asian instruments",
 
-    "songcraft_instruments.advancements.main.record_rickroll_in.title": "Interesting Record",
-    "songcraft_instruments.advancements.main.record_rickroll_in.description": "Play the utterly suspicious record",
+
+    "commands.songcraft_instruments.screcord.failed.not_holding": "Hold a record in your main hand or off hand",
+    "commands.songcraft_instruments.screcord.failed.not_burned": "The held record is empty",
+    "commands.songcraft_instruments.screcord.failed.not_empty": "Hold an Empty Record to import onto",
+    "commands.songcraft_instruments.screcord.failed.missing": "The held record's recording isn't in this world",
+    "commands.songcraft_instruments.screcord.failed.illegal_name": "Invalid file name: %s. Use up to 64 letters, numbers, - and _",
+    "commands.songcraft_instruments.screcord.failed.import_disabled": "Only operators can import records on this server",
+    "commands.songcraft_instruments.screcord.failed.import_pending": "Wait for your current import to finish",
+    "commands.songcraft_instruments.screcord.failed.import_daily_limit": "You've imported %s KB of new records today, the most this server allows (%s KB). Try again in %s hours",
+    "commands.songcraft_instruments.screcord.failed.io": "Could not read or write the recordings of this world. See the server log",
+    "commands.songcraft_instruments.screcord.export.started": "Sending %s to you...",
+    "commands.songcraft_instruments.screcord.export.success": "Saved the record to %s",
+    "commands.songcraft_instruments.screcord.export.exists": "You already have a record file named %s. Pick another name",
+    "commands.songcraft_instruments.screcord.export.failed": "Could not save the record file: %s",
+    "commands.songcraft_instruments.screcord.import.started": "Importing %s...",
+    "commands.songcraft_instruments.screcord.import.not_found": "No record file named %s in %s",
+    "commands.songcraft_instruments.screcord.import.too_large": "%s is too large to import (%s KB; you can import up to %s KB right now)",
+    "commands.songcraft_instruments.screcord.import.read_failed": "Could not read %s: %s",
+    "commands.songcraft_instruments.screcord.import.invalid": "That file is not a valid record",
+    "commands.songcraft_instruments.screcord.import.too_many_notes": "That record has %s notes, but this server allows up to %s",
+    "commands.songcraft_instruments.screcord.import.daily_limit": "This record (%s KB) would put you over this server's daily import limit (%s of %s KB used)",
+    "commands.songcraft_instruments.screcord.import.timed_out": "The import timed out",
+    "commands.songcraft_instruments.screcord.import.no_empty_record": "Record imported, but you are no longer holding an Empty Record to burn it onto",
+    "commands.songcraft_instruments.screcord.import.success": "Record imported",
+    "commands.songcraft_instruments.screcord.files.header": "Your record files (in %s):",
+    "commands.songcraft_instruments.screcord.files.none": "You have no record files in %s",
+    "commands.songcraft_instruments.screcord.cleanup.none": "Every recording has been seen in the last %s days",
+    "commands.songcraft_instruments.screcord.cleanup.preview": "%s recordings (%s KB) have not been seen in %s days. Run /screcord cleanup %s confirm to delete them",
+    "commands.songcraft_instruments.screcord.cleanup.done": "Deleted %s recordings (%s KB)",
+    "commands.songcraft_instruments.screcord.stats": "This world has %s recordings using %s KB",
 
     "songcraft_instruments.advancements.main.record_writable_in.title": "Composer",
     "songcraft_instruments.advancements.main.record_writable_in.description": "Insert or burn music into a record",
-
-    "songcraft_instruments.advancements.main.records_all.title": "Holan'i",
-    "songcraft_instruments.advancements.main.records_all.description": "Play all burned records",
 
 
     "button.songcraft_instruments.control_mode.genshin.description": "Genshin Impact controls",

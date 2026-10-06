@@ -9,7 +9,7 @@ public abstract class ModGameRules {
     public static void load() {}
 
     public static final GameRules.Key<GameRules.IntegerValue>
-        RULE_LOOPER_MAX_NOTES = GameRules.register(SCInstrumentMod.MODID+"_looperMaxNotes", Category.MISC, GameRules.IntegerValue.create(-1))
+        RULE_LOOPER_MAX_NOTES = GameRules.register(SCInstrumentMod.MODID+"_looperMaxNotes", Category.MISC, GameRules.IntegerValue.create(1_000_000))
     ;
     
 }

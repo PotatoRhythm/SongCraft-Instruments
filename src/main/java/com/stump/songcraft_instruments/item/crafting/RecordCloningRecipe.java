@@ -1,7 +1,7 @@
 package com.stump.songcraft_instruments.item.crafting;
 
 import com.stump.songcraft_instruments.item.ModItems;
-import com.stump.songcraft_instruments.item.emirecord.WritableRecordItem;
+import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;

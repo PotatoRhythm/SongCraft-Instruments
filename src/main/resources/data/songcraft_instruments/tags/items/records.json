@@ -1,9 +1,5 @@
 {
     "values": [
-        "songcraft_instruments:record_writable",
-        "songcraft_instruments:record_rickroll",
-        "songcraft_instruments:record_johnny",
-        "songcraft_instruments:record_super_idol",
-        "songcraft_instruments:record_oven_kid"
+        "songcraft_instruments:record_writable"
     ]
 }

@@ -3,8 +3,7 @@ package com.stump.songcraft_instruments.item;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.SCCreativeModeTabs;
 import com.stump.songcraft_instruments.block.ModBlocks;
-import com.stump.songcraft_instruments.item.emirecord.BurnedRecordItem;
-import com.stump.songcraft_instruments.item.emirecord.WritableRecordItem;
+import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableAccessoryInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableBlockInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
@@ -336,43 +335,6 @@ public class ModItems {
         ),
 
         RECORD_WRITABLE = register("record_writable", () -> new WritableRecordItem(new Properties()),
-            CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
-        ),
-        RECORD_JOHNNY = register("record_johnny", () ->
-            new BurnedRecordItem(
-                new Properties().stacksTo(1).rarity(Rarity.RARE),
-                new ResourceLocation(SCInstrumentMod.MODID, "johnny"),
-                "Hänschen klein - Franz Wiedemann",
-                null
-            ),
-            CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
-        ),
-        RECORD_SUPER_IDOL = register("record_super_idol", () ->
-            new BurnedRecordItem(
-                new Properties().stacksTo(1).rarity(Rarity.RARE),
-                new ResourceLocation(SCInstrumentMod.MODID, "super_idol"),
-                "Super Idol - De Xian Rong",
-                "Saxophy"
-            ),
-            CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
-        ),
-        RECORD_OVEN_KID = register("record_oven_kid", () ->
-            new BurnedRecordItem(
-                new Properties().stacksTo(1).rarity(Rarity.RARE),
-                new ResourceLocation(SCInstrumentMod.MODID, "oven_kid"),
-                "Timmy Trumpet & Savage - Freaks",
-                "StavWasPlayZ"
-            ),
-            CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
-        ),
-        RECORD_RICKROLL = register("record_rickroll", () ->
-            new BurnedRecordItem(
-                new Properties().stacksTo(1).rarity(Rarity.EPIC),
-                new ResourceLocation(SCInstrumentMod.MODID, "rickroll"),
-                null,
-                "StavWasPlayZ",
-                Component.translatable("item.songcraft_instruments.interesting_record")
-            ),
             CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
         )
     ;

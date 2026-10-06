@@ -1,11 +1,9 @@
 package com.stump.songcraft_instruments.util;
 
-import com.stump.songcraft_instruments.block.blockentity.looper.RecordingSession;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.partial.IDoubleBlock;
 import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
-import com.stump.songcraft_instruments.item.emirecord.EMIRecordItem;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -24,14 +22,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import static java.util.Map.entry;
 
 public class LooperUtil {
     public static final String LOOPER_TAG = "looper", POS_TAG = "pos", CONNECTIONS_TAG = "connections";
@@ -317,59 +312,6 @@ public class LooperUtil {
         return RecordingCapabilityProvider.isRecording(player);
     }
 
-
-    //#region Legacy Looper Migration
-
-    /**
-     * Maps the old keys to the new ones
-     */
-    private static final Map<String, String> LOOPER_LEGACY_MAPPER = Map.ofEntries(
-        // Record
-        entry("instrumentId", EMIRecordItem.INSTRUMENT_ID_TAG),
-        entry("notes", EMIRecordItem.NOTES_TAG),
-        entry("volume", EMIRecordItem.VOLUME_TAG),
-        entry("pitch", EMIRecordItem.PITCH_TAG),
-        entry("soundIndex", EMIRecordItem.SOUND_INDEX_TAG),
-        entry("soundType", EMIRecordItem.SOUND_TYPE_TAG),
-        entry("timestamp", EMIRecordItem.TIMESTAMP_TAG),
-        // Looper
-        entry("recording", RecordingSession.RECORDING_TAG),
-        entry("ticks", LooperBlockEntity.TICKS_TAG),
-        // Looper -> Record
-        entry("channel", EMIRecordItem.CHANNEL_TAG),
-        entry("repeatTick", EMIRecordItem.REPEAT_TICK_TAG)
-    );
-
-    /**
-     * Migrates all keys of a looper, if it is a legacy one.
-     * @return A new record channel compound data containing the old looper's data.
-     * To be burned into a record.
-     */
-    public static Optional<CompoundTag> migrateLegacyLooper(final LooperBlockEntity lbe) {
-        final CompoundTag lbed = lbe.getPersistentData();
-
-        if (!lbed.contains("channel", Tag.TAG_COMPOUND))
-            return Optional.empty();
-
-        final CompoundTag looperData = CommonUtil.deepConvertCompound(lbed, LOOPER_LEGACY_MAPPER);
-        final CompoundTag channel = looperData.getCompound(EMIRecordItem.CHANNEL_TAG);
-        // Writable is a new tag. This record will be burned:
-        looperData.putBoolean(EMIRecordItem.WRITABLE_TAG, false);
-        // RepeatTick moved from looper to channel
-        CommonUtil.moveTags(looperData, channel, EMIRecordItem.REPEAT_TICK_TAG);
-
-        // Remove all old looper tags
-        lbed.getAllKeys()
-            .stream().toList() // Convert to list as to not mess with the internal map
-            .forEach(lbed::remove);
-
-        // Add everything back except for the channel; which belongs to a record
-        looperData.getAllKeys().stream()
-            .filter((key) -> !key.equals(EMIRecordItem.CHANNEL_TAG))
-            .forEach((key) -> lbed.put(key, looperData.get(key)));
-
-        return Optional.of(channel);
-    }
 
     public static BlockPos getRecordingLooperPos(final Player player) {
         return RecordingCapabilityProvider.getLooperPos(player);
