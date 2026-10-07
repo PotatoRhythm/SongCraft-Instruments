@@ -9,7 +9,6 @@ import com.stump.songcraft_instruments.util.CommonUtil;
 import com.stump.songcraft_instruments.block.ModBlocks;
 import com.stump.songcraft_instruments.block.blockentity.ModBlockEntities;
 import com.stump.songcraft_instruments.criteria.ModCriteria;
-import com.stump.songcraft_instruments.gamerule.ModGameRules;
 import com.stump.songcraft_instruments.item.crafting.ModRecipeSerializers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
@@ -55,7 +54,6 @@ public class SCInstrumentMod
             DrumsetNoteIdentifier.class
         );
 
-        ModGameRules.load();
         ModCriteria.load();
 
         ModItems.register(bus);

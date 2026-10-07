@@ -19,19 +19,23 @@ public class ModServerConfigs {
     public static final ForgeConfigSpec CONFIGS;
 
     public static final BooleanValue RECORD_IMPORT_OPERATORS_ONLY;
-    public static final IntValue RECORD_IMPORT_DAILY_LIMIT_KB;
+    public static final IntValue RECORD_MAX_NOTES, RECORD_IMPORT_DAILY_LIMIT_KB;
 
     static {
         final ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
 
         configBuilder.push("records");
 
+        RECORD_MAX_NOTES = configBuilder
+            .comment("The most notes a looper can record onto one record, and the most an imported record may have. -1 for no limit")
+            .defineInRange("max_notes", 1_000_000, -1, Integer.MAX_VALUE);
+
         RECORD_IMPORT_OPERATORS_ONLY = configBuilder
             .comment("Whether only operators may import record files with /screcord import. Exporting is always allowed")
             .define("import_operators_only", false);
         RECORD_IMPORT_DAILY_LIMIT_KB = configBuilder
-            .comment("How much new recording data (in KB) a player may import in 24 hours. Records take about 2-3 bytes per note. Files already in the world don't count. Operators are exempt. 0 for no limit")
-            .defineInRange("import_daily_limit_kb", 10240, 0, 1048576);
+            .comment("How much new recording data (in KB) a player may import in 24 hours. Records take about 2-3 bytes per note. Files already in the world don't count. Operators are exempt. 0 blocks all imports for non-operators, -1 for no limit")
+            .defineInRange("import_daily_limit_kb", 10240, -1, 1048576);
 
         configBuilder.pop();
 

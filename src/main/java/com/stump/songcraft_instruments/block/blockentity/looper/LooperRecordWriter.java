@@ -2,7 +2,7 @@ package com.stump.songcraft_instruments.block.blockentity.looper;
 
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
-import com.stump.songcraft_instruments.gamerule.ModGameRules;
+import com.stump.songcraft_instruments.config.ModServerConfigs;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
 import com.stump.songcraft_instruments.recording.Recording;
@@ -105,8 +105,8 @@ public class LooperRecordWriter {
     }
 
     /**
-     * A capped looper is a looper that cannot have any more notes in it, as defined in {@link ModGameRules#RULE_LOOPER_MAX_NOTES}.
-     * Any negative will make the looper uncappable by the rule, though recordings always end at {@link RecordingCodec#MAX_TICK} ticks.
+     * A capped looper is a looper that cannot have any more notes in it, as defined in {@link ModServerConfigs#RECORD_MAX_NOTES}.
+     * A negative limit will make the looper uncappable by the config, though recordings always end at {@link RecordingCodec#MAX_TICK} ticks.
      * @return Whether this looper is capped
      */
     public boolean isCapped(final Level level) {
@@ -114,7 +114,7 @@ public class LooperRecordWriter {
         if (draft == null)
             return true;
 
-        final int cap = level.getGameRules().getInt(ModGameRules.RULE_LOOPER_MAX_NOTES);
+        final int cap = ModServerConfigs.RECORD_MAX_NOTES.get();
         return ((cap >= 0) && (draft.noteCount() >= cap))
             || (looper.getTicks() > RecordingCodec.MAX_TICK);
     }

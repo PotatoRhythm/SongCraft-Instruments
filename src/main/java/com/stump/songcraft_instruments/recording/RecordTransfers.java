@@ -3,7 +3,6 @@ package com.stump.songcraft_instruments.recording;
 import com.mojang.logging.LogUtils;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.config.ModServerConfigs;
-import com.stump.songcraft_instruments.gamerule.ModGameRules;
 import com.stump.songcraft_instruments.item.ModItems;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
@@ -100,7 +99,7 @@ public final class RecordTransfers {
         final long now = System.currentTimeMillis();
 
         final long limit = ModServerConfigs.RECORD_IMPORT_DAILY_LIMIT_KB.get() * 1024L;
-        if (limit > 0) {
+        if (limit >= 0) {
             final List<RecordingIndex.Import> recent = RecordingStore.get(player.server).index().getRecentImports(player.getUUID(), now);
             final long used = recent.stream().mapToLong(RecordingIndex.Import::bytes).sum();
             if (used >= limit) {
@@ -119,7 +118,7 @@ public final class RecordTransfers {
      */
     private static int getUploadAllowance(final ServerPlayer player) {
         final long limit = ModServerConfigs.RECORD_IMPORT_DAILY_LIMIT_KB.get() * 1024L;
-        if (isExemptFromLimits(player) || limit <= 0)
+        if (isExemptFromLimits(player) || limit < 0)
             return MAX_UPLOAD_BYTES;
 
         final long used = RecordingStore.get(player.server).index()
@@ -189,7 +188,7 @@ public final class RecordTransfers {
 
     private static void completeImport(final ServerPlayer player, final byte[] file) {
         // Recordings are held to the same note limit as loopers
-        final int cap = player.serverLevel().getGameRules().getInt(ModGameRules.RULE_LOOPER_MAX_NOTES);
+        final int cap = ModServerConfigs.RECORD_MAX_NOTES.get();
         final Recording recording;
         try {
             recording = RecordingCodec.decode(file, cap);
@@ -212,7 +211,7 @@ public final class RecordTransfers {
         final long now = System.currentTimeMillis();
         final long newBytes = store.has(RecordingCodec.id(RecordingCodec.encodeRaw(recording))) ? 0 : file.length;
         final long limit = ModServerConfigs.RECORD_IMPORT_DAILY_LIMIT_KB.get() * 1024L;
-        if (limit > 0 && newBytes > 0 && !isExemptFromLimits(player)) {
+        if (limit >= 0 && newBytes > 0 && !isExemptFromLimits(player)) {
             final long used = store.index().getRecentImports(player.getUUID(), now).stream()
                 .mapToLong(RecordingIndex.Import::bytes).sum();
             if (used + newBytes > limit) {

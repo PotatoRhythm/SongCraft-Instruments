@@ -455,8 +455,6 @@
     "gui.songcraft_instruments.looper.state.recording": "● Recording",
     "button.songcraft_instruments.stop": "Stop",
 
-    "gamerule.songcraft_instruments_looperMaxNotes": "Looper Max Notes",
-    "gamerule.songcraft_instruments_looperMaxNotes.description": "The most notes a looper can record onto one record, and the most an imported record may have. Any value below 0 removes the limit.",
 
 
     "songcraft_instruments.advancements.main.japanese.title": "True Weeb",
