@@ -1,6 +1,5 @@
 package com.stump.songcraft_instruments.client.gui.instrument.partial.grid;
 
-import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.grid.NoteGridButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.held.IHoldableNoteButton;

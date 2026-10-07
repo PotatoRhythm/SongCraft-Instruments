@@ -6,7 +6,6 @@ import com.stump.songcraft_instruments.client.colorSet.ColorSetManager;
 import com.stump.songcraft_instruments.client.keyMaps.InstrumentKeyMappings; //hmm
 import com.stump.songcraft_instruments.mixins.required.ScreenAccessor;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
-import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.util.LooperSessionState;
 import com.stump.songcraft_instruments.networking.packet.DoesLooperExistPacket;
 import com.stump.songcraft_instruments.networking.packet.LooperConnectionsPacket;

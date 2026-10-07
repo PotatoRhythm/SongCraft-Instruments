@@ -32871,6 +32871,3030 @@
       }
     ]
   },
+  "note_block_banjo_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_banjo_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_banjo_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_banjo_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_banjo_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_banjo_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_banjo_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_banjo_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_banjo_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_banjo_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_banjo_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_banjo_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_banjo_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_banjo_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_banjo_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_banjo_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_banjo_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_banjo_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_banjo_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_banjo_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_banjo_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/banjo",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_basedrum_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_basedrum_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_basedrum_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_basedrum_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_basedrum_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_basedrum_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_basedrum_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_basedrum_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_basedrum_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_basedrum_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_basedrum_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_basedrum_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_basedrum_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_basedrum_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_basedrum_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_basedrum_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_basedrum_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_basedrum_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_basedrum_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_basedrum_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_basedrum_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bd",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_bass_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_bass_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_bass_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_bass_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_bass_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_bass_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_bass_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_bass_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_bass_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_bass_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_bass_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_bass_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_bass_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_bass_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_bass_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_bass_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_bass_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_bass_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_bass_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_bass_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_bass_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bassattack",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_bell_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_bell_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_bell_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_bell_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_bell_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_bell_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_bell_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_bell_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_bell_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_bell_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_bell_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_bell_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_bell_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_bell_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_bell_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_bell_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_bell_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_bell_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_bell_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_bell_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_bell_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bell",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_bit_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_bit_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_bit_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_bit_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_bit_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_bit_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_bit_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_bit_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_bit_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_bit_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_bit_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_bit_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_bit_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_bit_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_bit_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_bit_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_bit_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_bit_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_bit_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_bit_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_bit_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/bit",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_chime_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_chime_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_chime_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_chime_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_chime_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_chime_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_chime_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_chime_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_chime_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_chime_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_chime_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_chime_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_chime_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_chime_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_chime_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_chime_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_chime_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_chime_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_chime_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_chime_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_chime_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/icechime",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_cow_bell_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_cow_bell_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_cow_bell_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_cow_bell_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_cow_bell_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_cow_bell_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_cow_bell_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_cow_bell_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_cow_bell_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_cow_bell_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_cow_bell_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_cow_bell_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_cow_bell_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_cow_bell_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_cow_bell_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_cow_bell_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_cow_bell_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_cow_bell_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_cow_bell_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_cow_bell_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_cow_bell_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/cow_bell",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_didgeridoo_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/didgeridoo",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_flute_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_flute_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_flute_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_flute_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_flute_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_flute_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_flute_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_flute_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_flute_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_flute_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_flute_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_flute_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_flute_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_flute_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_flute_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_flute_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_flute_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_flute_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_flute_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_flute_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_flute_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/flute",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_guitar_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_guitar_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_guitar_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_guitar_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_guitar_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_guitar_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_guitar_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_guitar_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_guitar_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_guitar_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_guitar_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_guitar_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_guitar_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_guitar_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_guitar_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_guitar_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_guitar_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_guitar_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_guitar_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_guitar_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_guitar_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/guitar",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_harp_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_harp_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_harp_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_harp_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_harp_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_harp_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_harp_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_harp_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_harp_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_harp_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_harp_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_harp_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_harp_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_harp_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_harp_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_harp_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_harp_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_harp_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_harp_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_harp_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_harp_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/harp",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_hat_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_hat_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_hat_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_hat_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_hat_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_hat_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_hat_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_hat_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_hat_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_hat_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_hat_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_hat_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_hat_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_hat_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_hat_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_hat_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_hat_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_hat_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_hat_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_hat_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_hat_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/hat",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_iron_xylophone_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/iron_xylophone",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_pling_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_pling_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_pling_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_pling_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_pling_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_pling_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_pling_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_pling_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_pling_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_pling_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_pling_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_pling_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_pling_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_pling_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_pling_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_pling_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_pling_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_pling_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_pling_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_pling_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_pling_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/pling",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_snare_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_snare_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_snare_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_snare_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_snare_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_snare_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_snare_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_snare_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_snare_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_snare_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_snare_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_snare_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_snare_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_snare_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_snare_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_snare_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_snare_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_snare_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_snare_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_snare_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_snare_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/snare",
+        "pitch": 0.8908987
+      }
+    ]
+  },
+  "note_block_xylophone_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.35355338
+      }
+    ]
+  },
+  "note_block_xylophone_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.39685026
+      }
+    ]
+  },
+  "note_block_xylophone_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.9438743
+      }
+    ]
+  },
+  "note_block_xylophone_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 1.0594631
+      }
+    ]
+  },
+  "note_block_xylophone_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 1.1892071
+      }
+    ]
+  },
+  "note_block_xylophone_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 1.3348398
+      }
+    ]
+  },
+  "note_block_xylophone_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 1.4142135
+      }
+    ]
+  },
+  "note_block_xylophone_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 1.587401
+      }
+    ]
+  },
+  "note_block_xylophone_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 1.7817974
+      }
+    ]
+  },
+  "note_block_xylophone_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 1.8877486
+      }
+    ]
+  },
+  "note_block_xylophone_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 2.1189263
+      }
+    ]
+  },
+  "note_block_xylophone_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 2.3784142
+      }
+    ]
+  },
+  "note_block_xylophone_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.44544935
+      }
+    ]
+  },
+  "note_block_xylophone_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 2.6696796
+      }
+    ]
+  },
+  "note_block_xylophone_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.47193715
+      }
+    ]
+  },
+  "note_block_xylophone_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.5297316
+      }
+    ]
+  },
+  "note_block_xylophone_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.59460354
+      }
+    ]
+  },
+  "note_block_xylophone_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.6674199
+      }
+    ]
+  },
+  "note_block_xylophone_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.70710677
+      }
+    ]
+  },
+  "note_block_xylophone_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.7937005
+      }
+    ]
+  },
+  "note_block_xylophone_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "note/xylobone",
+        "pitch": 0.8908987
+      }
+    ]
+  },
   "pipa_regular_note_0": {
     "sounds": [
       {

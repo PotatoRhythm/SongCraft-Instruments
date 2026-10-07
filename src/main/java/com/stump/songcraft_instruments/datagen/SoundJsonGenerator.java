@@ -186,6 +186,8 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("gw2_organ", 20, 0.9f, true, true);
         registerInstrument("gw2_quaggan_organ", 20, 0.9f, true, true);
 
+        registerNoteBlockSounds();
+
         add("glorious_drum_don", definition().with(sound("songcraft_instruments:glorious_drum/don").volume(1f)));
         add("glorious_drum_ka", definition().with(sound("songcraft_instruments:glorious_drum/ka").volume(1f)));
         add("glorious_drum_ka_stereo", definition().with(sound("songcraft_instruments:glorious_drum/ka.stereo").volume(1f)));
@@ -347,6 +349,40 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
                             sound(attackStereoPath).volume(volume)
                     ));
                 }
+            }
+        }
+    }
+
+    /**
+     * Vanilla note block sound files, by their note block instrument names
+     */
+    private static final String[][] NOTE_BLOCK_SOUND_FILES = {
+        {"harp", "harp"}, {"basedrum", "bd"}, {"snare", "snare"}, {"hat", "hat"},
+        {"bass", "bassattack"}, {"flute", "flute"}, {"bell", "bell"}, {"guitar", "guitar"},
+        {"chime", "icechime"}, {"xylophone", "xylobone"}, {"iron_xylophone", "iron_xylophone"},
+        {"cow_bell", "cow_bell"}, {"didgeridoo", "didgeridoo"}, {"bit", "bit"},
+        {"banjo", "banjo"}, {"pling", "pling"}
+    };
+    /**
+     * Semitones above C of each column of the note grid
+     */
+    private static final int[] GRID_SEMITONES = {0, 2, 4, 5, 7, 9, 11};
+
+    /**
+     * Registers a 3 octave grid starting on C for every tunable note block sound, by pitching the vanilla sound files.
+     * The vanilla files play an F# at pitch 1, and the grid's lowest C is 1.5 octaves below that,
+     * so the vanilla note block's 2 octave range sits within the grid.
+     */
+    private void registerNoteBlockSounds() {
+        for (final String[] noteBlockSound : NOTE_BLOCK_SOUND_FILES) {
+            for (int i = 0; i < 21; i++) {
+                final int semitones = (i / 7) * 12 + GRID_SEMITONES[i % 7] - 18;
+
+                add("note_block_" + noteBlockSound[0] + "_note_" + i, definition().with(
+                        sound("minecraft:note/" + noteBlockSound[1])
+                                .pitch(Math.pow(2, semitones / 12d))
+                                .attenuationDistance(MONO_DISTANCE)
+                ));
             }
         }
     }

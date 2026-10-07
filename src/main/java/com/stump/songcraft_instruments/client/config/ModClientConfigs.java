@@ -78,6 +78,7 @@ public class ModClientConfigs {
     public static final EnumValue<AnimalCallSoundType> ANIMAL_CALL_SOUND_TYPE;
     public static final EnumValue<SynthSoundType> SYNTH_SOUND_TYPE;
     public static final EnumValue<BellSoundType> BELL_SOUND_TYPE;
+    public static final EnumValue<NoteBlockSoundType> NOTE_BLOCK_SOUND_TYPE;
 
     static {
         final ForgeConfigSpec.Builder configBuilder = new Builder();
@@ -142,6 +143,7 @@ public class ModClientConfigs {
         ANIMAL_CALL_SOUND_TYPE = configBuilder.defineEnum("animal_call_sound_type", AnimalCallSoundType.SKY_BIRD_CALL);
         SYNTH_SOUND_TYPE = configBuilder.defineEnum("synth_sound_type", SynthSoundType.SKY_BASS_SYNTH);
         BELL_SOUND_TYPE = configBuilder.defineEnum("bell_sound_type", BellSoundType.SKY_BELLS);
+        NOTE_BLOCK_SOUND_TYPE = configBuilder.defineEnum("note_block_sound_type", NoteBlockSoundType.HARP);
 
 
         MIDI_ENABLED = configBuilder.define("midi_enabled", false);

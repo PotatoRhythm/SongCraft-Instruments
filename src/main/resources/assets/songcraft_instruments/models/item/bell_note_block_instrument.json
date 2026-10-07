@@ -1,6 +1,0 @@
-{
-    "parent": "songcraft_instruments:item/instrument",
-    "textures": {
-        "layer0": "songcraft_instruments:item/note_block_instrument"
-    }
-}

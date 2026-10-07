@@ -2,8 +2,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
         "#",
-        "N",
-        " "
+        "N"
     ],
 
     "key": {
@@ -15,10 +14,8 @@
         }
     },
 
-    "group": "songcraft_instruments:noteblock_instruments",
-
     "result": {
-        "item": "songcraft_instruments:harp_note_block_instrument",
+        "item": "songcraft_instruments:note_block_instrument",
         "count": 1
     }
 }

@@ -1,7 +1,6 @@
 package com.stump.songcraft_instruments.client.gui.instrument.gw2_drumset;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
-import com.stump.songcraft_instruments.client.config.enumType.DrumsetSoundType;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.INoteLabel;
 import com.stump.songcraft_instruments.client.gui.options.partial.InstrumentOptionsScreen;

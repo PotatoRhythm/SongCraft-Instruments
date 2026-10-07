@@ -21,7 +21,6 @@ import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.AbstractLayout;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -29,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.Consumer;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class GridInstrumentScreen extends InstrumentScreen implements IHeldInstrumentScreen {

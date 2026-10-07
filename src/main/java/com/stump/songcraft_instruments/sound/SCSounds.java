@@ -21,11 +21,6 @@ public class SCSounds {
         SOUNDS.register(bus);
     }
 
-    static {
-        NOTEBLOCK_SOUNDS = new HashMap<>();
-        registerNoteBlockSounds();
-    }
-
     public static final NoteSound[]
         WINDSONG_LYRE_NOTE_SOUNDS = nsr(loc("windsong_lyre")).stereo().registerGrid(),
         VINTAGE_LYRE_NOTE_SOUNDS = nsr(loc("vintage_lyre")).registerGrid(),
@@ -881,21 +876,30 @@ public class SCSounds {
         return new HeldNoteSoundRegistrar(SCSounds.SOUNDS, instrumentId);
     }
 
-    private static final HashMap<NoteBlockInstrument, NoteSound> NOTEBLOCK_SOUNDS;
-    public static NoteSound[] getNoteblockSounds(final NoteBlockInstrument instrumentType) {
-        return new NoteSound[] {NOTEBLOCK_SOUNDS.get(instrumentType)};
+    private static final HashMap<NoteBlockInstrument, NoteSound[]> NOTE_BLOCK_SOUNDS = registerNoteBlockSounds();
+    /**
+     * @return The 3 octave grid of the given note block sound, starting on C
+     */
+    public static NoteSound[] getNoteBlockSounds(final NoteBlockInstrument instrument) {
+        return NOTE_BLOCK_SOUNDS.get(instrument);
     }
 
-    private static void registerNoteBlockSounds() {
-        final NoteSoundRegistrar registrar = nsr(loc("note_block_instrument"));
+    /**
+     * Registers a 3 octave grid for every tunable note block sound.
+     * Their sounds.json entries pitch the vanilla sound files; see {@code SoundJsonGenerator#registerNoteBlockSounds}.
+     */
+    private static HashMap<NoteBlockInstrument, NoteSound[]> registerNoteBlockSounds() {
+        final HashMap<NoteBlockInstrument, NoteSound[]> result = new HashMap<>();
 
-        for (NoteBlockInstrument noteSound : NoteBlockInstrument.values()) {
-            registrar.chain(noteSound.getSoundEvent().get().getLocation())
-                    .alreadyRegistered()
-                    .add();
-            NOTEBLOCK_SOUNDS.put(noteSound, registrar.peek());
+        for (final NoteBlockInstrument instrument : NoteBlockInstrument.values()) {
+            if (!instrument.isTunable())
+                continue;
+
+            result.put(instrument,
+                threeOctaveMonoSoundBuilder(nsr(loc("note_block_" + instrument.getSerializedName())))
+            );
         }
 
-        registrar.registerAll();
+        return result;
     }
 }

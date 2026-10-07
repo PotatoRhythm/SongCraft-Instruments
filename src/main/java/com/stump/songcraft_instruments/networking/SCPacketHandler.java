@@ -26,7 +26,7 @@ public class SCPacketHandler {
         C2SDampenNotesPacket.class, S2CDampenNotesPacket.class,
         OpenInstrumentPacket.class, CloseInstrumentPacket.class,
         C2SHeldNoteSoundPacket.class, S2CHeldNoteSoundPacket.class,
-        LooperRecordStatePacket.class, OpenNoteBlockInstrumentPacket.class,
+        LooperRecordStatePacket.class,
         S2CLooperParticlePacket.class, C2SColorSetAcceptPacket.class, C2SActiveColorSetPacket.class,
         S2CColorSetAddPacket.class, S2CColorSetConfirmationPacket.class,
         S2CLooperDampenPacket.class,

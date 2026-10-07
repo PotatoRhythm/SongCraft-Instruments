@@ -1,7 +1,6 @@
 package com.stump.songcraft_instruments.item;
 
 import com.stump.songcraft_instruments.render.DrumsetItemRenderer;
-import com.stump.songcraft_instruments.render.DrumsetRenderer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;

@@ -1,9 +1,7 @@
 package com.stump.songcraft_instruments.block.blockentity;
 
-import com.stump.songcraft_instruments.block.blockentity.ModBlockEntities;
 import com.stump.songcraft_instruments.block.partial.InstrumentBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import software.bernie.geckolib.animatable.GeoBlockEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;

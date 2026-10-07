@@ -1,6 +1,5 @@
 package com.stump.songcraft_instruments.client.config.enumType;
 
-import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.SoundOption;
 
 import java.util.Locale;

@@ -4,8 +4,6 @@ import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.INoteLabel;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.NoteLabelSupplier;
-import com.stump.songcraft_instruments.util.LabelUtil;
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 

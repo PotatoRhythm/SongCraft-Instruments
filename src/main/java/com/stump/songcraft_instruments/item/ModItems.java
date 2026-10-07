@@ -8,13 +8,11 @@ import com.stump.songcraft_instruments.item.partial.instrument.CreditableAccesso
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableBlockInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.InstrumentPacketUtil;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -26,9 +24,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.stump.songcraft_instruments.networking.packet.instrument.util.InstrumentPacketUtil.sendOpenPacket;
@@ -239,6 +235,9 @@ public class ModItems {
         BELL = register("bell", () -> new InstrumentItem(
             (player) -> sendOpenPacket(player, loc("bell"))
         )),
+        NOTE_BLOCK_INSTRUMENT = register("note_block_instrument", () -> new InstrumentItem(
+            (player) -> sendOpenPacket(player, loc("note_block_instrument"))
+        )),
 
         GW2_BASS = register("gw2_bass", () ->
                 new InstrumentItem(
@@ -338,27 +337,6 @@ public class ModItems {
             CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
         )
     ;
-
-    public static final Map<NoteBlockInstrument, RegistryObject<Item>> NOTEBLOCK_INSTRUMENTS = initNoteBlockInstruments();
-
-    public static HashMap<NoteBlockInstrument, RegistryObject<Item>> initNoteBlockInstruments() {
-        final NoteBlockInstrument[] instruments = NoteBlockInstrument.values();
-        final HashMap<NoteBlockInstrument, RegistryObject<Item>> result = new HashMap<>(instruments.length);
-
-        for (final NoteBlockInstrument instrument : instruments) {
-            if (!instrument.isTunable())
-                continue;
-
-            result.put(instrument,
-                register(NoteBlockInstrumentItem.getId(instrument),
-                    () -> new NoteBlockInstrumentItem(instrument)
-                )
-            );
-        }
-        
-        return result;
-    }
-
 
     private static ResourceLocation loc(final String path) {
         return new ResourceLocation(SCInstrumentMod.MODID, path);

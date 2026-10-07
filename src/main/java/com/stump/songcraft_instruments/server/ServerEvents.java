@@ -2,7 +2,6 @@ package com.stump.songcraft_instruments.server;
 
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperConnections;
 import com.stump.songcraft_instruments.SCInstrumentMod;
-import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.util.LooperRecordStateUtil;
 import com.stump.songcraft_instruments.event.InstrumentOpenStateChangedEvent;
 import net.minecraft.server.level.ServerPlayer;

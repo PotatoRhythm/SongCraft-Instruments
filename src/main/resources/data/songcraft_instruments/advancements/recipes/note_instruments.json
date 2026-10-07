@@ -20,22 +20,7 @@
 
     "rewards": {
         "recipes": [
-            "songcraft_instruments:noteblock_instrument/banjo_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/basedrum_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/bass_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/bell_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/bit_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/chime_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/cow_bell_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/didgeridoo_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/flute_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/guitar_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/harp_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/hat_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/iron_xylophone_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/pling_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/snare_note_block_instrument",
-            "songcraft_instruments:noteblock_instrument/xylophone_note_block_instrument"
+            "songcraft_instruments:note_block_instrument"
         ]
     }
 }

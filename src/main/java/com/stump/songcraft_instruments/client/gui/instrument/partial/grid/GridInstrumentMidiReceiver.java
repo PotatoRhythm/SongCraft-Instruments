@@ -1,6 +1,5 @@
 package com.stump.songcraft_instruments.client.gui.instrument.partial.grid;
 
-import com.mojang.logging.LogUtils;
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.grid.NoteGridButton;
@@ -10,7 +9,6 @@ import com.stump.songcraft_instruments.client.midi.PressedMIDINote;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.util.LabelUtil;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 public class GridInstrumentMidiReceiver extends InstrumentMidiReceiver {
 

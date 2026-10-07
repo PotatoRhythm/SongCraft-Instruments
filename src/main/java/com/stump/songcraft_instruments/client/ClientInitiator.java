@@ -52,7 +52,6 @@ import com.stump.songcraft_instruments.client.gui.instrument.noteblockinstrument
 import com.stump.songcraft_instruments.client.gui.instrument.pipa.PipaScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.shamisen.ShamisenScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.violin.ViolinScreen;
-import com.stump.songcraft_instruments.util.CommonUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelEvent;
@@ -67,13 +66,6 @@ import java.util.function.Supplier;
 
 @EventBusSubscriber(value = Dist.CLIENT, bus = Bus.MOD, modid = SCInstrumentMod.MODID)
 public class ClientInitiator {
-
-    private static final Class<?>[] LOAD_ME = new Class[] {
-            // Load this ourselves because it's not included
-            // in out instruments map - hence the theme loader of the
-            // note block is not loaded.
-            NoteBlockInstrumentScreen.class
-    };
 
     private static final Map<ResourceLocation, Supplier<? extends InstrumentScreen>> INSTRUMENTS =
         Map.ofEntries(
@@ -113,6 +105,7 @@ public class ClientInitiator {
                 Map.entry(AnimalCallScreen.INSTRUMENT_ID, AnimalCallScreen::create),
                 Map.entry(SynthScreen.INSTRUMENT_ID, SynthScreen::new),
                 Map.entry(BellScreen.INSTRUMENT_ID, BellScreen::create),
+                Map.entry(NoteBlockInstrumentScreen.INSTRUMENT_ID, NoteBlockInstrumentScreen::new),
 
                 Map.entry(Gw2BassScreen.INSTRUMENT_ID, Gw2BassScreen::new),
                 Map.entry(Gw2BellScreen.INSTRUMENT_ID, Gw2BellScreen::new),
@@ -134,7 +127,6 @@ public class ClientInitiator {
     public static void initClient(final FMLClientSetupEvent event) {
         ModArmPose.load();
         ModItemPredicates.register();
-        CommonUtil.loadClasses(LOAD_ME);
 
         InstrumentScreenRegistry.register(INSTRUMENTS);
     }
