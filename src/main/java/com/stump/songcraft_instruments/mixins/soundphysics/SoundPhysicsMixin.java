@@ -16,9 +16,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * For instrument sounds, we evaluate their real position instead,
  * and the environment (muffling and reverb) it then applies via {@code setEnvironment} is kept above
  * a minimum clarity and glides into place.
+ * <p>{@code processSound}'s sound-identifier parameter is a {@link ResourceLocation} in Sound Physics 1.5.0+
+ * and a {@link String} in 1.4.x; a HEAD injector for each ({@code require = 0}) handles whichever is present.</p>
  */
 @Mixin(value = SoundPhysics.class, remap = false)
 public abstract class SoundPhysicsMixin {
+    // Sound Physics 1.5.0+: ResourceLocation identifier
     @Inject(
             method = "processSound(IDDDLnet/minecraft/sounds/SoundSource;Lnet/minecraft/resources/ResourceLocation;Z)Lnet/minecraft/world/phys/Vec3;",
             at = @At("HEAD"),
@@ -30,6 +33,23 @@ public abstract class SoundPhysicsMixin {
                                                                    boolean auxOnly,
                                                                    CallbackInfoReturnable<Vec3> cir) {
         if (SoundPhysicsCompat.redirectProcessing(source, sound, auxOnly)) {
+            cir.setReturnValue(null);
+        }
+    }
+
+    // Sound Physics 1.4.x: String identifier
+    @Inject(
+            method = "processSound(IDDDLnet/minecraft/sounds/SoundSource;Ljava/lang/String;Z)Lnet/minecraft/world/phys/Vec3;",
+            at = @At("HEAD"),
+            cancellable = true,
+            require = 0
+    )
+    private static void songcraft_instruments$processAtWorldOriginLegacy(int source, double x, double y, double z,
+                                                                         SoundSource category, String sound,
+                                                                         boolean auxOnly,
+                                                                         CallbackInfoReturnable<Vec3> cir) {
+        final ResourceLocation id = ResourceLocation.tryParse(sound);
+        if (id != null && SoundPhysicsCompat.redirectProcessing(source, id, auxOnly)) {
             cir.setReturnValue(null);
         }
     }

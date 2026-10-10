@@ -176,9 +176,11 @@ public class SoundPhysicsCompat {
         handle.execute((channel) -> {
             final int source = sourceOf(channel);
             // Before vanilla sets the channel up, so its twin mirrors all of that.
-            // A disabled Sound Physics applies no environment to crossfade through.
-            // (We still track the sound, as Sound Physics changes its distance falloff even when disabled.)
-            tracked.pair = SoundPhysicsMod.CONFIG.enabled.get() ? SoundPair.create(source) : null;
+            // No twin when Sound Physics is disabled (it applies no environment to crossfade through) or when its
+            // processSound could not be bridged. We still track the sound, as Sound Physics changes its distance
+            // falloff even when disabled.
+            final boolean crossfade = SoundPhysicsMod.CONFIG.enabled.get() && SoundPhysicsApi.isAvailable();
+            tracked.pair = crossfade ? SoundPair.create(source) : null;
             SOURCES.put(source, tracked);
 
             if (debugLogging())
@@ -422,7 +424,8 @@ public class SoundPhysicsCompat {
 
         PROCESSING.set(new Processing(tracked, source, auxOnly));
         try {
-            newPos = SoundPhysics.processSound(
+            // Bridged: 1.4.x and 1.5.x take different sound-identifier types (see SoundPhysicsApi)
+            newPos = SoundPhysicsApi.processSound(
                 source, physicsOrigin.x, physicsOrigin.y, physicsOrigin.z, PROCESSING_CATEGORY, sound, auxOnly
             );
         } finally {
