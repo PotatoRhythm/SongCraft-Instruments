@@ -67,7 +67,10 @@ description='''Fork of StavWasPlayZ's Genshin Instruments mod that adds server-s
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-# Optional integration: instrument notes get reverb and occlusion
+# Optional integration: instrument notes get reverb and occlusion.
+# The integration itself requires Sound Physics Remastered 1.5.0+ (1.4.x uses an incompatible sound API);
+# older versions are detected and the integration is skipped (see SoundPhysicsMixinPlugin), so the range
+# stays open to let Songcraft load alongside any version.
 [[dependencies.${mod_id}]]
     modId="sound_physics_remastered"
     mandatory=false
