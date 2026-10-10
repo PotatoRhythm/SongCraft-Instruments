@@ -33,6 +33,7 @@ public class ModClientConfigs {
     public static final IntValue TRANSPOSE;
     public static final IntValue OCTAVE_SWAP_MIN, OCTAVE_SWAP_MAX;
     public static final DoubleValue VOLUME, MIDI_IN_SENSITIVITY;
+    public static final DoubleValue SOUND_PHYSICS_MIN_CLARITY;
 
     public static final EnumValue<NoteGridLabel> GRID_LABEL_TYPE;
     public static final EnumValue<NoteIconStyle> NOTE_ICON_STYLE;
@@ -110,6 +111,12 @@ public class ModClientConfigs {
             .defineInRange("octave_swap_min", -2, -2, 2);
         OCTAVE_SWAP_MAX = configBuilder.comment("The highest octave Octave Swap mode may shift to")
             .defineInRange("octave_swap_max", 2, -2, 2);
+
+        SOUND_PHYSICS_MIN_CLARITY = configBuilder.comment(
+            "With Sound Physics Remastered installed: how clear instrument notes stay when heard through blocks.",
+            "Notes are muffled by Sound Physics as usual, but never past this point, so they never vanish completely.",
+            "0 lets Sound Physics silence notes entirely; 1 disables muffling of instrument notes."
+        ).defineInRange("sound_physics_min_clarity", 0.1, 0, 1);
 
         ACCEPTED_DISCLAIMER = configBuilder.define("accepted_disclaimer", false);
 

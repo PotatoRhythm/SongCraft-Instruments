@@ -14,7 +14,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * via {@link #update}. It stops itself once the Stereo sound is stopped.</p>
  */
 @OnlyIn(Dist.CLIENT)
-public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance {
+public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance implements WorldOriginSoundInstance {
     private final AbstractTickableSoundInstance stereo;
     /**
      * Whether the volume & pitch defined in sounds.json should be applied,
@@ -61,5 +61,10 @@ public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance {
     @Override
     public float getPitch() {
         return applySoundDefinition ? super.getPitch() : pitch;
+    }
+
+    @Override
+    public Vec3 getWorldOrigin() {
+        return new Vec3(x, y, z);
     }
 }

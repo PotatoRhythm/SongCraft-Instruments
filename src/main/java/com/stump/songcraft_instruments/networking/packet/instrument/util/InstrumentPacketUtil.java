@@ -49,11 +49,32 @@ public class InstrumentPacketUtil {
     public static <T, P extends S2CNotePacket<T>> P sendPlayerPlayNotePackets(Entity initiator,
                                                                               T sound, NoteSoundMetadata soundMeta,
                                                                               S2CNotePacketDelegate<T, P> notePacketDelegate) {
+        return sendPlayerPlayNotePackets(
+            initiator, sound, soundMeta, notePacketDelegate,
+            noteListeners(initiator.level(), soundMeta.pos())
+        );
+    }
+    /**
+     * Sends play note packets to the given listeners.
+     * @param initiator The entity producing the sounds
+     * @param sound The sound to initiate
+     * @param soundMeta Additional metadata of the used sound
+     * @param notePacketDelegate The constructor of the sound packet to be sent
+     * @param listeners The players to send the packet to
+     * @param <T> The sound object type
+     * @param <P> The packet type
+     *
+     * @return The sent packet
+     */
+    public static <T, P extends S2CNotePacket<T>> P sendPlayerPlayNotePackets(Entity initiator,
+                                                                              T sound, NoteSoundMetadata soundMeta,
+                                                                              S2CNotePacketDelegate<T, P> notePacketDelegate,
+                                                                              List<? extends Player> listeners) {
         final P packet = notePacketDelegate.create(
             Optional.of(initiator.getId()), sound, soundMeta
         );
 
-        for (final Player listener : InstrumentPacketUtil.noteListeners(initiator.level(), soundMeta.pos()))
+        for (final Player listener : listeners)
             SCPacketHandler.sendToClient(packet, (ServerPlayer)listener);
 
 
@@ -107,12 +128,33 @@ public class InstrumentPacketUtil {
      */
     public static <T, P extends S2CNotePacket<T>> P sendPlayNotePackets(Level level, T sound, NoteSoundMetadata soundMeta,
                                                S2CNotePacketDelegate<T, P> notePacketDelegate) {
+        return sendPlayNotePackets(
+            level, sound, soundMeta, notePacketDelegate,
+            noteListeners(level, soundMeta.pos())
+        );
+    }
+    /**
+     * Sends play note packets to the given listeners.
+     * This method treats the sound as it was NOT produced by a player.
+     * @param level The world that the sound should initiate in
+     * @param sound The sound to initiate
+     * @param soundMeta Additional metadata of the used sound
+     * @param notePacketDelegate The constructor of the sound packet to be sent
+     * @param listeners The players to send the packet to
+     * @param <T> The sound object type
+     * @param <P> The packet type
+     *
+     * @return The sent packet
+     */
+    public static <T, P extends S2CNotePacket<T>> P sendPlayNotePackets(Level level, T sound, NoteSoundMetadata soundMeta,
+                                               S2CNotePacketDelegate<T, P> notePacketDelegate,
+                                               List<? extends Player> listeners) {
 
         final P packet = notePacketDelegate.create(
             Optional.empty(), sound, soundMeta
         );
 
-        for (final Player listener : InstrumentPacketUtil.noteListeners(level, soundMeta.pos()))
+        for (final Player listener : listeners)
             SCPacketHandler.sendToClient(packet, (ServerPlayer)listener);
 
 

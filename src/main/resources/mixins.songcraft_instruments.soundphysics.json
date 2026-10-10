@@ -1,0 +1,13 @@
+{
+    "required": false,
+	"package": "com.stump.songcraft_instruments.mixins.soundphysics",
+	"plugin": "com.stump.songcraft_instruments.mixins.soundphysics.SoundPhysicsMixinPlugin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "mixins.songcraft_instruments.refmap.json",
+	"client": [
+        "ChannelMixin",
+        "SoundEngineMixin",
+        "SoundPhysicsMixin"
+    ],
+	"minVersion": "0.8"
+}

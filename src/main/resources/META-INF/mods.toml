@@ -67,3 +67,10 @@ description='''Fork of StavWasPlayZ's Genshin Instruments mod that adds server-s
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+# Optional integration: instrument notes get reverb and occlusion
+[[dependencies.${mod_id}]]
+    modId="sound_physics_remastered"
+    mandatory=false
+    versionRange="[0,)"
+    ordering="NONE"
+    side="CLIENT"

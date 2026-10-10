@@ -90,6 +90,10 @@ minecraft {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
 
+            // Lets the mixins of dependency mods (e.g. Sound Physics Remastered) apply in dev
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -163,6 +167,13 @@ repositories {
             includeGroup("com.eliotlash.mclib")
         }
     }
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
     // Put repositories for dependencies here
     // ForgeGradle automatically adds the Forge maven and Maven Central for you
 
@@ -186,6 +197,10 @@ dependencies {
 
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
     implementation("com.eliotlash.mclib:mclib:20")
+
+    // Optional Sound Physics Remastered integration; also loaded in dev to test it
+    compileOnly fg.deobf("maven.modrinth:sound-physics-remastered:${sound_physics_version}")
+    runtimeOnly fg.deobf("maven.modrinth:sound-physics-remastered:${sound_physics_version}")
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
@@ -206,6 +221,7 @@ mixin {
     add sourceSets.main, 'mixins.songcraft_instruments.refmap.json'
     config 'mixins.songcraft_instruments.optional.json'
     config 'mixins.songcraft_instruments.required.json'
+    config 'mixins.songcraft_instruments.soundphysics.json'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.particle.ModParticles;
 import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.DampenableSoundInstance;
 import com.stump.songcraft_instruments.sound.NoteSound;
+import com.stump.songcraft_instruments.sound.WorldOriginSoundInstance;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound.Phase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
@@ -21,7 +22,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 @OnlyIn(Dist.CLIENT)
-public class HeldNoteSoundInstance extends AbstractTickableSoundInstance implements DampenableSoundInstance {
+public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
+        implements DampenableSoundInstance, WorldOriginSoundInstance {
     public final HeldNoteSound heldSoundContainer;
     public final HeldNoteSound.Phase phase;
     private int particleTimer = 10;
@@ -219,6 +221,15 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance impleme
     }
     protected Vec3 getSourcePos() {
         return getSourcePos(soundOrigin.orElse(null), initiator.orElse(null));
+    }
+
+    @Override
+    public Vec3 getWorldOrigin() {
+        if (!relative)
+            return new Vec3(x, y, z);
+
+        // A released Stereo sound stays where it was "blown", same as its crossfade
+        return (crossfadePos != null) ? crossfadePos : getSourcePos();
     }
 
 

@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class NoteSoundInstance extends AbstractTickableSoundInstance
-        implements DampenableSoundInstance {
+        implements DampenableSoundInstance, WorldOriginSoundInstance {
 
     public static final float FADE_TIME = 0.5f;
 
@@ -117,6 +117,11 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
 
     public Optional<CrossfadeMonoSoundInstance> getMonoCrossfade() {
         return Optional.ofNullable(monoCrossfade);
+    }
+
+    @Override
+    public Vec3 getWorldOrigin() {
+        return sourcePos;
     }
 
     @Override

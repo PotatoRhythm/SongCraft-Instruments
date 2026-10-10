@@ -8,9 +8,11 @@ import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -30,11 +32,15 @@ public class HeldNoteSoundPacketUtil {
     public static void sendPlayerPlayNotePackets(Entity initiator, HeldNoteSound sound,
                                                  ResourceLocation instrumentId, int pitch, int volume, int particleColor,
                                                  HeldSoundPhase phase) {
-        fireEntityEvent(initiator,
-            InstrumentPacketUtil.sendPlayerPlayNotePackets(
-                initiator, sound, instrumentId, pitch, volume, particleColor,
-                toReg(phase, initiator)
-            )
+        sendPlayerPlayNotePackets(
+            initiator, sound,
+            new NoteSoundMetadata(
+                initiator.blockPosition(),
+                pitch, volume, particleColor,
+                instrumentId,
+                Optional.empty()
+            ),
+            phase
         );
     }
     /**
@@ -48,7 +54,8 @@ public class HeldNoteSoundPacketUtil {
                                                  HeldSoundPhase phase) {
         fireEntityEvent(initiator,
             InstrumentPacketUtil.sendPlayerPlayNotePackets(
-                initiator, sound, soundMeta, toReg(phase, initiator)
+                initiator, sound, soundMeta, toReg(phase, initiator),
+                listeners(initiator.level(), soundMeta.pos(), phase)
             )
         );
     }
@@ -66,11 +73,16 @@ public class HeldNoteSoundPacketUtil {
     public static void sendPlayNotePackets(Level level, BlockPos pos, HeldNoteSound sound, ResourceLocation instrumentId,
                                            int pitch, int volume, int particleColor, HeldSoundPhase phase,
                                            InitiatorID initiatorID) {
-        fireGenericEvent(level,
-            InstrumentPacketUtil.sendPlayNotePackets(
-                level, pos, sound, instrumentId, pitch, volume, particleColor,
-                toReg(initiatorID, phase)
-            )
+        sendPlayNotePackets(
+            level, sound,
+            new NoteSoundMetadata(
+                pos,
+                pitch, volume,
+                particleColor,
+                instrumentId,
+                Optional.empty()
+            ),
+            phase, initiatorID
         );
     }
     /**
@@ -86,9 +98,21 @@ public class HeldNoteSoundPacketUtil {
                                            InitiatorID initiatorID) {
         fireGenericEvent(level,
             InstrumentPacketUtil.sendPlayNotePackets(
-                level, sound, soundMeta, toReg(initiatorID, phase)
+                level, sound, soundMeta, toReg(initiatorID, phase),
+                listeners(level, soundMeta.pos(), phase)
             )
         );
+    }
+
+    /**
+     * Held notes are started within {@link InstrumentPacketUtil#PLAY_DISTANCE}, but released for everyone in the level:
+     * a player who heard a note start may have since moved out of range, and would otherwise keep holding it.
+     * Those who don't hold the note ignore its release.
+     */
+    private static List<? extends Player> listeners(Level level, BlockPos pos, HeldSoundPhase phase) {
+        return (phase == HeldSoundPhase.RELEASE)
+            ? level.players()
+            : InstrumentPacketUtil.noteListeners(level, pos);
     }
 
 
