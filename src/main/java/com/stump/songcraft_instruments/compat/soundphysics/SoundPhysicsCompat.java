@@ -74,6 +74,10 @@ public class SoundPhysicsCompat {
      */
     private static final float MAX_CUTOFF = 0.999f;
     /**
+     * The environment of a sound heard dry: no reverb sends, no muffling. See {@link TrackedSound#bypass}
+     */
+    private static final float[] DRY_ENVIRONMENT = {0, 0, 0, 0, 1, 1, 1, 1, 1, 1};
+    /**
      * How far above the top of a block sounds coming from inside of it are evaluated from
      */
     private static final double ABOVE_BLOCK_OFFSET = 0.1;
@@ -113,6 +117,11 @@ public class SoundPhysicsCompat {
     private static final class TrackedSound {
         private final boolean relative;
         /**
+         * Whether the player turned Sound Physics off for instrument notes when this sound started.
+         * Sound Physics then doesn't process it at all, and it is heard dry from its real position.
+         */
+        private final boolean bypass;
+        /**
          * The distance a linearly attenuated sound fully fades out at, or -1 if it is not linearly attenuated
          */
         private final float maxDistance;
@@ -134,9 +143,10 @@ public class SoundPhysicsCompat {
          */
         private volatile Vec3 physicsOrigin;
 
-        private TrackedSound(boolean relative, float maxDistance, EmitterEnvironment environment,
+        private TrackedSound(boolean relative, boolean bypass, float maxDistance, EmitterEnvironment environment,
                              ResourceLocation soundId, Vec3 origin) {
             this.relative = relative;
+            this.bypass = bypass;
             this.maxDistance = maxDistance;
             this.environment = environment;
             this.soundId = soundId;
@@ -168,7 +178,8 @@ public class SoundPhysicsCompat {
 
         final Vec3 origin = originSound.getWorldOrigin();
         final TrackedSound tracked = new TrackedSound(
-            sound.isRelative(), maxDistance, emitterAt(origin), sound.getLocation(), origin
+            sound.isRelative(), !ModClientConfigs.SOUND_PHYSICS_ENABLED.get(),
+            maxDistance, emitterAt(origin), sound.getLocation(), origin
         );
         INSTANCES.put(sound, tracked);
 
@@ -176,10 +187,11 @@ public class SoundPhysicsCompat {
         handle.execute((channel) -> {
             final int source = sourceOf(channel);
             // Before vanilla sets the channel up, so its twin mirrors all of that.
-            // No twin when Sound Physics is disabled (it applies no environment to crossfade through) or when its
-            // processSound could not be bridged. We still track the sound, as Sound Physics changes its distance
-            // falloff even when disabled.
-            final boolean crossfade = SoundPhysicsMod.CONFIG.enabled.get() && SoundPhysicsApi.isAvailable();
+            // No twin when Sound Physics is disabled or bypassed (it applies no environment to crossfade through)
+            // or when its processSound could not be bridged. We still track the sound, as Sound Physics changes its
+            // distance falloff even when disabled.
+            final boolean crossfade = !tracked.bypass
+                && SoundPhysicsMod.CONFIG.enabled.get() && SoundPhysicsApi.isAvailable();
             tracked.pair = crossfade ? SoundPair.create(source) : null;
             SOURCES.put(source, tracked);
 
@@ -403,7 +415,7 @@ public class SoundPhysicsCompat {
      */
     public static Vec3 onPositionUpdate(int source, Vec3 pos) {
         final TrackedSound tracked = SOURCES.get(source);
-        if (tracked == null)
+        if ((tracked == null) || tracked.bypass)
             return pos;
 
         updateEnvironment(tracked, source);
@@ -418,6 +430,11 @@ public class SoundPhysicsCompat {
 
     private static void process(TrackedSound tracked, int source, ResourceLocation sound, boolean auxOnly) {
         restoreAttenuation(tracked, source);
+
+        if (tracked.bypass) {
+            applyDryEnvironment(tracked, source);
+            return;
+        }
 
         final Vec3 origin = tracked.origin, physicsOrigin = tracked.physicsOrigin;
         final Vec3 newPos;
@@ -472,6 +489,9 @@ public class SoundPhysicsCompat {
      * or (if it has none) by gliding to it.
      */
     private static void updateEnvironment(TrackedSound tracked, int source) {
+        if (tracked.bypass)
+            return;
+
         final boolean evaluated = tracked.environment.isEvaluated();
 
         if (tracked.pair != null) {
@@ -490,6 +510,18 @@ public class SoundPhysicsCompat {
         tracked.appliedEnvironment = v.clone();
 
         setEnvironmentOf(source, v);
+    }
+
+    /**
+     * Clears whatever environment Sound Physics left on a bypassed sound's source, which may be reused from another sound
+     */
+    private static void applyDryEnvironment(TrackedSound tracked, int source) {
+        // When disabled, Sound Physics applies no environments to clear
+        if (!SoundPhysicsMod.CONFIG.enabled.get() || Arrays.equals(DRY_ENVIRONMENT, tracked.appliedEnvironment))
+            return;
+        tracked.appliedEnvironment = DRY_ENVIRONMENT.clone();
+
+        setEnvironmentOf(source, DRY_ENVIRONMENT);
     }
 
     /**

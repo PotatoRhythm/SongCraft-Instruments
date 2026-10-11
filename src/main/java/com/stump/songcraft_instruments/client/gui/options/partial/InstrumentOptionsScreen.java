@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModList;
 
 import javax.annotation.Nullable;
 
@@ -33,6 +34,7 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
     public static final MutableComponent MIDI_OPTIONS = Component.translatable("label.songcraft_instruments.midiOptions");
 
     private static final String STOP_MUSIC_KEY = "button.songcraft_instruments.stop_music_on_play";
+    private static final String SOUND_PHYSICS_MOD_ID = "sound_physics_remastered";
 
 
     public abstract INoteLabel[] getLabels();
@@ -146,6 +148,17 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
                 );
         rowHelper.addChild(serverAudio);
 
+        if (ModList.get().isLoaded(SOUND_PHYSICS_MOD_ID)) {
+            final CycleButton<Boolean> soundPhysics = CycleButton.booleanBuilder(CommonComponents.OPTION_ON, CommonComponents.OPTION_OFF)
+                .withInitialValue(ModClientConfigs.SOUND_PHYSICS_ENABLED.get())
+                .withTooltip((value) -> Tooltip.create(Component.translatable("button.songcraft_instruments.sound_physics.tooltip")))
+                .create(0, 0,
+                    getSmallButtonWidth(), getButtonHeight(),
+                    Component.translatable("button.songcraft_instruments.sound_physics"), this::onSoundPhysicsChanged
+                );
+            rowHelper.addChild(soundPhysics);
+        }
+
         final Button particleColorEditorBtn = Button.builder(
                         Component.translatable("button.songcraft_instruments.particle_color_editor"),
                         (btn) -> openParticleColorEditor()
@@ -200,6 +213,9 @@ public abstract class InstrumentOptionsScreen extends AbstractInstrumentOptionsS
     }
     protected void onServerAudioChanged(final CycleButton<Boolean> button, final boolean value) {
         ModClientConfigs.SERVER_AUDIO.set(value);
+    }
+    protected void onSoundPhysicsChanged(final CycleButton<Boolean> button, final boolean value) {
+        ModClientConfigs.SOUND_PHYSICS_ENABLED.set(value);
     }
 
     protected void openParticleColorEditor() {

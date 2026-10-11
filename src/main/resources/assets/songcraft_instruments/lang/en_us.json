@@ -58,6 +58,8 @@
     "button.songcraft_instruments.note_icon_style.jianpu.description": "Uses Jianpu numbered notation on all grid instruments, with dots marking the low and high octaves",
     "button.songcraft_instruments.server_audio": "Server-Side Audio",
     "button.songcraft_instruments.server_audio.tooltip": "When on, hear your notes after they reach the server. Useful for syncing with high latency",
+    "button.songcraft_instruments.sound_physics": "Sound Physics",
+    "button.songcraft_instruments.sound_physics.tooltip": "When on, instrument notes get Sound Physics Remastered's reverb and muffling. Turn off to hear them dry; other sounds are unaffected",
     "button.songcraft_instruments.octave_range.tooltip": "Octave Range: %s to %s\nDrag the edges to change it",
 
 

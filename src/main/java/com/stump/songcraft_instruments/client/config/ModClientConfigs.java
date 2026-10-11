@@ -43,7 +43,7 @@ public class ModClientConfigs {
         STOP_MUSIC_ON_PLAY, SHARED_INSTRUMENT,
         RENDER_BACKGROUND, ACCEPTED_DISCLAIMER, ACCURATE_NOTES,
         MIDI_ENABLED, EXTEND_OCTAVES, FIXED_TOUCH, ACCEPT_ALL_CHANNELS,
-        SERVER_AUDIO
+        SERVER_AUDIO, SOUND_PHYSICS_ENABLED
     ;
 
     public static final EnumValue<ZitherSoundType> ZITHER_SOUND_TYPE;
@@ -111,6 +111,10 @@ public class ModClientConfigs {
             .defineInRange("octave_swap_min", -2, -2, 2);
         OCTAVE_SWAP_MAX = configBuilder.comment("The highest octave Octave Swap mode may shift to")
             .defineInRange("octave_swap_max", 2, -2, 2);
+
+        SOUND_PHYSICS_ENABLED = configBuilder.comment(
+            "Whether instrument notes get reverb and muffling."
+        ).define("sound_physics_enabled", true);
 
         SOUND_PHYSICS_MIN_CLARITY = configBuilder.comment(
             "With Sound Physics Remastered installed: how clear instrument notes stay when heard through blocks.",
