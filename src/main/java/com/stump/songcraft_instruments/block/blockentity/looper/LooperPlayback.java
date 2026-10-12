@@ -94,17 +94,17 @@ public class LooperPlayback {
 
 
     /**
-     * @param note A note of the looper's {@link LooperBlockEntity#getRecording recording}
+     * @param recording The recording the note is of; the looper's own, or a synced looper's being recorded over
      */
-    public void playNote(final int[] note) {
+    public void playNote(final Recording recording, final int[] note) {
         try {
             switch (note[Recording.TYPE]) {
                 case Recording.TYPE_REGULAR:
-                    playNoteSound(note);
+                    playNoteSound(recording, note);
                     break;
 
                 case Recording.TYPE_HELD:
-                    playHeldSound(note);
+                    playHeldSound(recording, note);
                     break;
 
                 case Recording.TYPE_DAMPEN:
@@ -125,9 +125,9 @@ public class LooperPlayback {
         return ((sounds == null) || (index < 0) || (index >= sounds.length)) ? null : sounds[index];
     }
 
-    private void playNoteSound(final int[] note) {
-        final NoteSoundMetadata meta = metaFromNote(note);
-        final ResourceLocation soundLocation = ResourceLocation.tryParse(looper.getRecording().soundType(note));
+    private void playNoteSound(final Recording recording, final int[] note) {
+        final NoteSoundMetadata meta = metaFromNote(recording, note);
+        final ResourceLocation soundLocation = ResourceLocation.tryParse(recording.soundType(note));
 
         final NoteSound sound = (soundLocation == null) ? null
             : getRecordedSound(NoteSoundRegistrar.getSounds(soundLocation), note);
@@ -148,10 +148,10 @@ public class LooperPlayback {
         triggerEmitNoteParticle(note[Recording.PARTICLE_COLOR]);
     }
 
-    private void playHeldSound(final int[] note) {
-        final NoteSoundMetadata meta = metaFromNote(note);
+    private void playHeldSound(final Recording recording, final int[] note) {
+        final NoteSoundMetadata meta = metaFromNote(recording, note);
 
-        final ResourceLocation soundLocation = ResourceLocation.tryParse(looper.getRecording().soundType(note));
+        final ResourceLocation soundLocation = ResourceLocation.tryParse(recording.soundType(note));
         final HeldNoteSound sound = (soundLocation == null) ? null
             : getRecordedSound(HeldNoteSoundRegistrar.getSounds(soundLocation), note);
         if (sound == null || meta == null)
@@ -198,8 +198,8 @@ public class LooperPlayback {
     /**
      * @return The note's metadata, or null if its instrument ID is malformed
      */
-    private @Nullable NoteSoundMetadata metaFromNote(final int[] note) {
-        final ResourceLocation instrumentId = ResourceLocation.tryParse(looper.getRecording().instrumentId(note));
+    private @Nullable NoteSoundMetadata metaFromNote(final Recording recording, final int[] note) {
+        final ResourceLocation instrumentId = ResourceLocation.tryParse(recording.instrumentId(note));
         if (instrumentId == null)
             return null;
 

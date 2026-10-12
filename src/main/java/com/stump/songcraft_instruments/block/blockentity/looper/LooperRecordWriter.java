@@ -114,8 +114,12 @@ public class LooperRecordWriter {
         if (draft == null)
             return true;
 
+        // The notes of a record recorded over are burned in as well
+        final Recording backing = looper.session().getBacking();
+        final int noteCount = draft.noteCount() + ((backing != null) ? backing.noteCount() : 0);
+
         final int cap = ModServerConfigs.RECORD_MAX_NOTES.get();
-        return ((cap >= 0) && (draft.noteCount() >= cap))
+        return ((cap >= 0) && (noteCount >= cap))
             || (looper.getTicks() > RecordingCodec.MAX_TICK);
     }
 }

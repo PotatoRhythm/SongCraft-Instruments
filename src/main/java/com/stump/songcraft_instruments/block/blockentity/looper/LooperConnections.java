@@ -247,7 +247,9 @@ public class LooperConnections {
             .toList();
 
         final RecordingSession session = looper.session();
-        return new LooperConnectionsPacket(looper.getBlockPos(), entries, session.getState(), session.isGroupSession());
+        return new LooperConnectionsPacket(looper.getBlockPos(), entries, session.getState(), session.isGroupSession(),
+            session.getBackingName()
+        );
     }
 
     //#endregion

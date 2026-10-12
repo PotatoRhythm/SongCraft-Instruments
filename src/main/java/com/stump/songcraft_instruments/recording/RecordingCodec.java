@@ -14,7 +14,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -280,10 +279,8 @@ public final class RecordingCodec {
         final int performerCount = readVarInt(in);
         check(performerCount >= 0 && performerCount <= MAX_PERFORMERS, "performer count");
         final List<Performer> performers = new ArrayList<>(performerCount);
-        final HashSet<UUID> performerIds = new HashSet<>();
         for (int i = 0; i < performerCount; i++) {
             final UUID id = new UUID(in.readLong(), in.readLong());
-            check(performerIds.add(id), "duplicate performer");
             final String name = in.readUTF();
             final int colorCount = readVarInt(in);
             check(colorCount >= 0 && colorCount <= MAX_PERFORMER_COLORS, "performer color count");

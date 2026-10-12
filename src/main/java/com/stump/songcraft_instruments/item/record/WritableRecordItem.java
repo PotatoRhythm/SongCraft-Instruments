@@ -19,7 +19,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A record, empty or burned. A burned record only holds the ID of its recording
@@ -33,9 +35,7 @@ public class WritableRecordItem extends Item {
         NOTE_COUNT_TAG = "NoteCount",
         PERFORMER_NAMES_TAG = "PerformerNames",
         // The particle colors of the performers, in the same order as PERFORMER_NAMES_TAG
-        PERFORMER_COLORS_TAG = "PerformerColors",
-        // Set when loopers are synced with the looper adapter, overriding when this copy loops back
-        REPEAT_TICK_TAG = "RepeatTick"
+        PERFORMER_COLORS_TAG = "PerformerColors"
     ;
 
     public WritableRecordItem(Properties properties) {
@@ -67,26 +67,19 @@ public class WritableRecordItem extends Item {
         tag.putString(RECORDING_ID_TAG, recordingId);
         tag.putInt(LENGTH_TAG, recording.length());
         tag.putInt(NOTE_COUNT_TAG, recording.noteCount());
-        tag.remove(REPEAT_TICK_TAG);
+
+        // A player who recorded multiple parts is listed once, with their most recent name and colors
+        final LinkedHashMap<UUID, Performer> latest = new LinkedHashMap<>();
+        for (final Performer performer : recording.performers())
+            latest.merge(performer.id(), performer, (previous, current) -> current);
 
         final ListTag names = new ListTag(), colors = new ListTag();
-        for (final Performer performer : recording.performers()) {
+        for (final Performer performer : latest.values()) {
             names.add(StringTag.valueOf(performer.name()));
             colors.add(new IntArrayTag(performer.colors()));
         }
         tag.put(PERFORMER_NAMES_TAG, names);
         tag.put(PERFORMER_COLORS_TAG, colors);
-    }
-
-    /**
-     * @return The tick this copy loops back at if it was overridden, otherwise -1
-     */
-    public static int getRepeatTickOverride(final ItemStack stack) {
-        final CompoundTag tag = stack.getTag();
-        return (tag != null && tag.contains(REPEAT_TICK_TAG, Tag.TAG_INT)) ? tag.getInt(REPEAT_TICK_TAG) : -1;
-    }
-    public static void setRepeatTickOverride(final ItemStack stack, final int tick) {
-        stack.getOrCreateTag().putInt(REPEAT_TICK_TAG, tick);
     }
 
 

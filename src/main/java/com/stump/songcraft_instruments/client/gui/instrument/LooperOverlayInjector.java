@@ -59,7 +59,8 @@ public class LooperOverlayInjector {
     private static final int
         CONNECTION_COLOR = 0xFFFFFF,
         CONNECTION_SELF_COLOR = 0xFFFF55,
-        CONNECTION_OFFLINE_COLOR = 0x808080
+        CONNECTION_OFFLINE_COLOR = 0x808080,
+        CONNECTION_RECORD_COLOR = 0x55FFFF
     ;
 
     private static InstrumentScreen screen = null;
@@ -71,6 +72,10 @@ public class LooperOverlayInjector {
     private static BlockPos looperPos = null;
     private static List<LooperConnectionsPacket.Entry> connections = List.of();
     private static LooperSessionState sessionState = LooperSessionState.IDLE;
+    /**
+     * The name of the synced looper's record that is (or would be) recorded over, or null if there is none
+     */
+    private static @Nullable Component backingName = null;
 
     /**
      * The looper whose group session we are participating in, if any.
@@ -123,6 +128,7 @@ public class LooperOverlayInjector {
         } else {
             connections = List.of();
             sessionState = LooperSessionState.IDLE;
+            backingName = null;
         }
 
         event.addListener(
@@ -183,6 +189,7 @@ public class LooperOverlayInjector {
         removeRecordButton();
         screen = null;
         connections = List.of();
+        backingName = null;
         // The server only reports a looper as unplayable when we aren't in a group session
         groupLooperPos = null;
     }
@@ -199,7 +206,8 @@ public class LooperOverlayInjector {
     public static void handleConnectionsSync(final BlockPos syncedLooperPos,
                                              final List<LooperConnectionsPacket.Entry> syncedConnections,
                                              final LooperSessionState syncedState,
-                                             final boolean syncedGroupSession) {
+                                             final boolean syncedGroupSession,
+                                             final @Nullable Component syncedBackingName) {
         final UUID selfId = Minecraft.getInstance().player.getUUID();
         final boolean selfConnected = syncedConnections.stream().anyMatch((entry) -> entry.playerId().equals(selfId));
         final boolean wasGroupSession = syncedLooperPos.equals(groupLooperPos);
@@ -217,6 +225,7 @@ public class LooperOverlayInjector {
         if (syncedLooperPos.equals(groupLooperPos) || syncedLooperPos.equals(looperPos)) {
             connections = syncedConnections;
             sessionState = syncedState;
+            backingName = syncedBackingName;
         }
 
         if (screen == null || !syncedLooperPos.equals(looperPos))
@@ -284,7 +293,10 @@ public class LooperOverlayInjector {
     @SuppressWarnings("resource")
     @SubscribeEvent
     public static void onScreenRender(final ScreenEvent.Render.Post event) {
-        if (event.getScreen() != screen || recordBtn == null || !isGroup() || !screen.instrumentRenders())
+        if (event.getScreen() != screen || recordBtn == null || !screen.instrumentRenders())
+            return;
+        // A record recorded over is listed as a participant too
+        if (!isGroup() && backingName == null)
             return;
 
         final GuiGraphics gui = event.getGuiGraphics();
@@ -305,9 +317,17 @@ public class LooperOverlayInjector {
 
         final List<LooperConnectionsPacket.Entry> shownConnections = activeConnections();
         gui.drawString(font,
-            Component.translatable("gui.songcraft_instruments.looper.connected", shownConnections.size()),
+            Component.translatable("gui.songcraft_instruments.looper.connected",
+                shownConnections.size() + ((backingName != null) ? 1 : 0)
+            ),
             CONNECTIONS_X, y, CONNECTION_COLOR
         );
+
+        // The record recorded over is listed first
+        if (backingName != null) {
+            y += CONNECTIONS_LINE_HEIGHT;
+            gui.drawString(font, Component.literal("- ").append(backingName), CONNECTIONS_X, y, CONNECTION_RECORD_COLOR);
+        }
 
         for (final LooperConnectionsPacket.Entry entry : shownConnections) {
             y += CONNECTIONS_LINE_HEIGHT;
@@ -351,8 +371,10 @@ public class LooperOverlayInjector {
         isRecording = false;
         LooperOverlayInjector.screen = null;
         // Keep the group session's state, to be shown on the next instrument opened
-        if (groupLooperPos == null)
+        if (groupLooperPos == null) {
             connections = List.of();
+            backingName = null;
+        }
     }
 
     @SuppressWarnings("resource")

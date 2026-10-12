@@ -412,9 +412,11 @@
     "item.songcraft_instruments.looper_adapter.instrument.select": "Looper connected. Waiting for instrument or 2nd looper connection.",
     "item.songcraft_instruments.looper_adapter.instrument.success_pair": "Instrument paired successfully!",
 
-    "item.songcraft_instruments.looper_adapter.looper.description": "Syncs 2 loopers together by copying the 1st's properties",
+    "item.songcraft_instruments.looper_adapter.looper.description": "Syncs 2 loopers: record on the one with an Empty Record to add a part over the other's Burned Record. Use on the same 2 loopers again to unsync them",
     "item.songcraft_instruments.looper_adapter.looper.select": "Instrument connected. Waiting for looper connection.",
     "item.songcraft_instruments.looper_adapter.looper.success_pair": "Loopers synced successfully!",
+    "item.songcraft_instruments.looper_adapter.looper.unsync": "Loopers unsynced",
+    "item.songcraft_instruments.looper_adapter.looper.no_empty_record": "One of the loopers must hold an Empty Record",
 
     "item.songcraft_instruments.speaker_cable": "Speaker Cable",
     "item.songcraft_instruments.speaker_cable.pair.description": "Right-click an instrument block or looper and a speaker (in either order) to connect them. A speaker can have at most 1 looper",

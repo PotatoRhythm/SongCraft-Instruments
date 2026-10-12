@@ -17,6 +17,7 @@ import com.stump.songcraft_instruments.recording.RecordingStore;
 import com.stump.songcraft_instruments.util.LooperUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -43,6 +44,8 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
     public static final String
         RECORD_TAG = "Record",
         TICKS_TAG = "Ticks",
+        // The looper synced with this one through the looper adapter
+        SYNCED_LOOPER_TAG = "SyncedLooper",
         // The notes recorded so far onto an empty record, in the recording file format
         DRAFT_TAG = "Draft"
     ;
@@ -132,6 +135,67 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         getPersistentData().put(RECORD_TAG, recordIn.save(new CompoundTag()));
     }
 
+    //#region Synced looper
+
+    public @Nullable BlockPos getSyncedLooperPos() {
+        final CompoundTag data = getPersistentData();
+        return data.contains(SYNCED_LOOPER_TAG, Tag.TAG_COMPOUND)
+            ? NbtUtils.readBlockPos(data.getCompound(SYNCED_LOOPER_TAG))
+            : null;
+    }
+    public void setSyncedLooperPos(final @Nullable BlockPos pos) {
+        if (pos == null)
+            getPersistentData().remove(SYNCED_LOOPER_TAG);
+        else
+            getPersistentData().put(SYNCED_LOOPER_TAG, NbtUtils.writeBlockPos(pos));
+        setChanged();
+    }
+
+    /**
+     * @return The loaded looper synced with this one through the looper adapter, or null if there is none.
+     * Forgets the link if the other looper was broken or synced elsewhere.
+     */
+    public @Nullable LooperBlockEntity getSyncedLooper() {
+        final BlockPos pos = getSyncedLooperPos();
+        if (pos == null || level == null || !level.isLoaded(pos))
+            return null;
+
+        final LooperBlockEntity other = LooperUtil.getFromPos(level, pos);
+        if (other == null || !getBlockPos().equals(other.getSyncedLooperPos())) {
+            setSyncedLooperPos(null);
+            return null;
+        }
+
+        return other;
+    }
+
+    /**
+     * When this looper holds an empty record and its synced looper a burned one, new parts recorded on this looper
+     * are recorded over the synced looper's record. Server only.
+     * @return The synced looper holding the burned record to record over, or null if there is none
+     */
+    public @Nullable LooperBlockEntity getBackingLooper() {
+        if (!isWritable())
+            return null;
+
+        final LooperBlockEntity other = getSyncedLooper();
+        return (other != null && !other.isWritable() && other.hasFootage()) ? other : null;
+    }
+
+    /**
+     * Updates the players connected to the synced looper on what they would record over
+     */
+    private void syncSyncedLooperConnections() {
+        if (level == null || level.isClientSide)
+            return;
+
+        final LooperBlockEntity other = getSyncedLooper();
+        if (other != null)
+            other.connections().sync();
+    }
+
+    //#endregion
+
     public boolean hasFootage() {
         if (draft != null)
             return !draft.isEmpty();
@@ -201,6 +265,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
         getLevel().setBlock(getBlockPos(), newState, 3);
         setChanged();
+        syncSyncedLooperConnections();
     }
 
     @Override
@@ -220,6 +285,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         getPersistentData().remove(RECORD_TAG);
         updateRecording(null);
         reset();
+        syncSyncedLooperConnections();
 
         return prev;
     }
@@ -299,18 +365,6 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
     }
 
     /**
-     * Overrides when the inserted record loops back, as when syncing loopers
-     */
-    public void setRepeatTick(final int tick) {
-        if (!isRecordIn())
-            return;
-
-        WritableRecordItem.setRepeatTickOverride(recordIn, tick);
-        updateRecordNBT();
-        setChanged();
-    }
-
-    /**
      * Used for stopping the Looper's recording
      */
     public void lock() {
@@ -319,6 +373,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         playback.stopAndClearHeldSounds();
 
         burnDraft();
+        session.clearBacking();
         session.setRecording(false);
 
         // The record is burned; nothing is left to connect to
@@ -345,22 +400,27 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         return getPersistentData().getInt(TICKS_TAG);
     }
     public int getRepeatTick() {
-        final int override = WritableRecordItem.getRepeatTickOverride(recordIn);
-        if (override != -1)
-            return override;
-
         final Recording recording = getRecording();
         return (recording != null) ? recording.length() : -1;
     }
 
     /**
-     * Stores the notes recorded so far as a recording of the world, and burns it into the inserted record
+     * Stores the notes recorded so far as a recording of the world, and burns it into the inserted record.
+     * When recorded over a synced looper's record, all of its notes are burned in too.
      */
     private void burnDraft() {
         if (draft == null || draft.isEmpty() || level == null || level.getServer() == null)
             return;
 
-        final Recording finished = draft.build(Math.min(getTicks(), RecordingCodec.MAX_TICK));
+        final Recording backing = session.getBacking();
+        final Recording finished;
+        if (backing != null) {
+            // Stopping before the record recorded over ends still keeps all of it
+            final int length = Math.min(Math.max(getTicks(), backing.length()), RecordingCodec.MAX_TICK);
+            finished = draft.buildOver(backing, length);
+        } else {
+            finished = draft.build(Math.min(getTicks(), RecordingCodec.MAX_TICK));
+        }
         final String id;
         try {
             id = RecordingStore.get(level.getServer()).save(finished);
@@ -410,8 +470,10 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         if (!isPlaying && !lbe.session().isRecording())
             return;
 
-        if (lbe.session().isRecording())
+        if (lbe.session().isRecording()) {
+            lbe.session().playBacking(lbe.getTicks());
             lbe.incrementTick();
+        }
 
         if (!isPlaying)
             return;
@@ -427,7 +489,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         if (ticks == 0)
             RecordingStore.get(pLevel.getServer()).markSeen(WritableRecordItem.getRecordingId(recordIn));
 
-        recording.forEachNoteAt(ticks, lbe.playback()::playNote);
+        recording.forEachNoteAt(ticks, (note) -> lbe.playback().playNote(recording, note));
 
         lbe.incrementTick();
     }

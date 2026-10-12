@@ -1,13 +1,21 @@
 package com.stump.songcraft_instruments.block.blockentity.looper;
 
+import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.util.LooperSessionState;
 import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenProvider;
 import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
+import com.stump.songcraft_instruments.item.record.WritableRecordItem;
+import com.stump.songcraft_instruments.recording.Recording;
+import com.stump.songcraft_instruments.recording.RecordingStore;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,11 +26,18 @@ import java.util.UUID;
  * A solo recording is started by its player pressing record, and locks the looper to them once they play their first note.
  * A group recording is started with multiple players connected: it counts in with beeps, then records every participant
  * from the first note played after the final beep.
+ * <p>
+ * A looper holding an empty record, synced to a looper holding a burned one, records over it: recording always
+ * goes through a session, even with a single participant. On the final beep, the burned record plays from its start
+ * (once) and the recording begins. The burned record's notes are burned into the new record along with the new part.
  */
 public class RecordingSession {
     public static final String
         RECORDING_TAG = "Recording",
-        GROUP_STATE_TAG = "GroupState"
+        GROUP_STATE_TAG = "GroupState",
+        // The recording of the synced looper's record being recorded over, and the record's name
+        BACKING_ID_TAG = "BackingId",
+        BACKING_NAME_TAG = "BackingName"
     ;
 
     public static final int COUNTDOWN_BEEPS = 4, COUNTDOWN_BEEP_INTERVAL = 20;
@@ -52,6 +67,12 @@ public class RecordingSession {
      */
     private int absentTicks = -1;
 
+    /**
+     * The recording being recorded over, held while in use so that it stays loaded
+     */
+    private @Nullable Recording backing;
+    private boolean backingResolved = false;
+
     public RecordingSession(final LooperBlockEntity looper) {
         this.looper = looper;
     }
@@ -62,6 +83,8 @@ public class RecordingSession {
         // Restart an interrupted countdown from the top
         countdownTicks = 0;
         absentTicks = -1;
+        backing = null;
+        backingResolved = false;
     }
 
 
@@ -112,6 +135,11 @@ public class RecordingSession {
     public void reset() {
         locked = false;
         lockedBy = null;
+
+        if (isOverdub()) {
+            stopBacking();
+            clearBacking();
+        }
 
         if (isGroupSession()) {
             setRecording(false);
@@ -205,6 +233,9 @@ public class RecordingSession {
 
         countdownTicks = 0;
         looper.setTicks(0);
+        captureBacking();
+        if (isOverdub())
+            stopSyncedLooper();
         setGroupState(LooperSessionState.COUNTDOWN);
         return true;
     }
@@ -214,10 +245,20 @@ public class RecordingSession {
      * Otherwise, the session is cancelled and players remain connected.
      */
     public void stopGroupSession() {
-        if (groupState == LooperSessionState.RECORDING) {
+        if (isOverdub())
+            stopBacking();
+
+        // Recording over a record starts on the final beep; cancel if nothing was played since
+        if (groupState == LooperSessionState.RECORDING && !looper.hasFootage()) {
+            looper.writer().clearRecordedNotes();
+            clearBacking();
+            setRecording(false);
+            setGroupState(LooperSessionState.IDLE);
+        } else if (groupState == LooperSessionState.RECORDING) {
             looper.lock();
             looper.getLevel().setBlockAndUpdate(looper.getBlockPos(), looper.setPlaying(true, looper.getBlockState()));
         } else if (isGroupSession()) {
+            clearBacking();
             setGroupState(LooperSessionState.IDLE);
         }
     }
@@ -231,6 +272,8 @@ public class RecordingSession {
             return false;
 
         looper.writer().clearRecordedNotes();
+        if (isOverdub())
+            stopBacking();
         countdownTicks = 0;
         setGroupState(LooperSessionState.COUNTDOWN);
         setRecording(false);
@@ -324,13 +367,143 @@ public class RecordingSession {
             playCountdownBeep(isFinalBeep);
 
             if (isFinalBeep) {
-                setGroupState(LooperSessionState.ARMED);
+                if (isOverdub())
+                    startOverdub();
+                else
+                    setGroupState(LooperSessionState.ARMED);
                 return;
             }
         }
 
         countdownTicks++;
     }
+
+    //#region Recording over a synced looper's record
+
+    /**
+     * @return Whether this session records over a synced looper's record
+     */
+    public boolean isOverdub() {
+        return looper.getPersistentData().contains(BACKING_ID_TAG, Tag.TAG_STRING);
+    }
+
+    /**
+     * Remembers the synced looper's burned record (if any) to record over,
+     * so that swapping it out mid-session changes nothing.
+     */
+    private void captureBacking() {
+        clearBacking();
+
+        final LooperBlockEntity backingLooper = looper.getBackingLooper();
+        if (backingLooper == null)
+            return;
+
+        final ItemStack record = backingLooper.getItem(0);
+        looper.getPersistentData().putString(BACKING_ID_TAG, WritableRecordItem.getRecordingId(record));
+        looper.getPersistentData().putString(BACKING_NAME_TAG, Component.Serializer.toJson(record.getHoverName()));
+        backing = backingLooper.getRecording();
+        backingResolved = true;
+    }
+
+    public void clearBacking() {
+        looper.getPersistentData().remove(BACKING_ID_TAG);
+        looper.getPersistentData().remove(BACKING_NAME_TAG);
+        backing = null;
+        backingResolved = false;
+    }
+
+    /**
+     * @return The recording being recorded over, or null if there is none (or it is missing). Server only.
+     */
+    public @Nullable Recording getBacking() {
+        if (!isOverdub())
+            return null;
+
+        if (!backingResolved && looper.getLevel() != null && looper.getLevel().getServer() != null) {
+            backingResolved = true;
+            backing = RecordingStore.get(looper.getLevel().getServer())
+                .get(looper.getPersistentData().getString(BACKING_ID_TAG))
+                .orElse(null);
+        }
+
+        return backing;
+    }
+
+    /**
+     * @return The name of the record recorded over, or of the one that would be if a recording started now.
+     * Null if there is none. Server only.
+     */
+    public @Nullable Component getBackingName() {
+        if (isOverdub())
+            return Component.Serializer.fromJson(looper.getPersistentData().getString(BACKING_NAME_TAG));
+
+        final LooperBlockEntity backingLooper = isGroupSession() ? null : looper.getBackingLooper();
+        return (backingLooper != null) ? backingLooper.getItem(0).getHoverName() : null;
+    }
+
+    /**
+     * Starts recording on the final beep, along with the record being recorded over
+     */
+    private void startOverdub() {
+        looper.setTicks(0);
+        // In case it was started again during the countdown
+        stopSyncedLooper();
+
+        setRecording(true);
+        setGroupState(LooperSessionState.RECORDING);
+    }
+
+    /**
+     * Stops the synced looper if it is playing on its own, as its record is played by this session instead,
+     * in time with the recording
+     */
+    private void stopSyncedLooper() {
+        final LooperBlockEntity synced = looper.getSyncedLooper();
+        if (synced == null || !synced.getBlockState().getValue(LooperBlock.PLAYING))
+            return;
+
+        synced.setTicks(0);
+        synced.getLevel().setBlockAndUpdate(synced.getBlockPos(), synced.setPlaying(false, synced.getBlockState()));
+    }
+
+    /**
+     * Plays the notes of the record being recorded over at the recording's current tick.
+     * It plays only once; the recording may continue past its end.
+     */
+    public void playBacking(final int tick) {
+        final Recording recording = getBacking();
+        if (recording == null)
+            return;
+
+        final LooperPlayback playback = getBackingPlayback();
+        if (tick > recording.length()) {
+            if (tick == recording.length() + 1)
+                playback.stopAndClearHeldSounds();
+            return;
+        }
+
+        playback.emitHeldParticles();
+        recording.forEachNoteAt(tick, (note) -> playback.playNote(recording, note));
+    }
+
+    /**
+     * Releases the held notes of the record being recorded over
+     */
+    private void stopBacking() {
+        getBackingPlayback().stopAndClearHeldSounds();
+    }
+
+    /**
+     * @return The synced looper's playback, so that the record recorded over is heard from its own looper.
+     * This looper's own if the synced looper is gone.
+     */
+    private LooperPlayback getBackingPlayback() {
+        final LooperBlockEntity synced = looper.getSyncedLooper();
+        return (synced != null) ? synced.playback() : looper.playback();
+    }
+
+    //#endregion
+
 
     /**
      * @param isFinalBeep The final beep signals that recording may begin, and is an octave higher

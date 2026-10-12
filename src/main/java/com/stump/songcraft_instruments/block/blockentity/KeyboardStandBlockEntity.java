@@ -1,5 +1,8 @@
 package com.stump.songcraft_instruments.block.blockentity;
 
+import com.stump.songcraft_instruments.block.KeyboardStandBlock;
+import com.stump.songcraft_instruments.block.blockentity.keyboard.KeyboardKeys;
+import com.stump.songcraft_instruments.block.blockentity.keyboard.KeyboardKeysHolder;
 import com.stump.songcraft_instruments.block.partial.InstrumentBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
@@ -11,13 +14,24 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class KeyboardStandBlockEntity
         extends InstrumentBlockEntity
-        implements GeoBlockEntity {
+        implements GeoBlockEntity, KeyboardKeysHolder {
 
     private final AnimatableInstanceCache cache =
             GeckoLibUtil.createInstanceCache(this);
+    private final KeyboardKeys keys = new KeyboardKeys();
 
     public KeyboardStandBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.KEYBOARD_STAND.get(), pos, state);
+    }
+
+    @Override
+    public KeyboardKeys getKeyboardKeys() {
+        return keys;
+    }
+
+    @Override
+    public boolean hasKeyboard() {
+        return getBlockState().getValue(KeyboardStandBlock.HAS_KEYBOARD);
     }
 
     @Override

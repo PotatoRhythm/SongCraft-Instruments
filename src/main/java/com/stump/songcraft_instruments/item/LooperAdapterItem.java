@@ -86,14 +86,8 @@ public class LooperAdapterItem extends Item {
         if (!(be instanceof LooperBlockEntity lbe))
             return false;
 
-        if (!lbe.isRecordIn()) {
-            player.displayClientMessage(
-                Component.translatable("songcraft_instruments.looper.no_record")
-                    .withStyle(ChatFormatting.RED),
-                true
-            );
+        if (!validateRecordPresence(lbe, player))
             return false;
-        }
 
         if (adapterTag.contains(BLOCK_INSTRUMENT_POS_TAG, Tag.TAG_COMPOUND))
             return pairLooperToInstrument(adapterTag, blockPos, NbtUtils.readBlockPos(adapterTag.getCompound(BLOCK_INSTRUMENT_POS_TAG)), player);
@@ -106,6 +100,21 @@ public class LooperAdapterItem extends Item {
             true
         );
         return true;
+    }
+
+    /**
+     * Instruments may only be paired to, and loopers synced with, a looper holding a record
+     */
+    private static boolean validateRecordPresence(LooperBlockEntity lbe, Player player) {
+        if (lbe.isRecordIn())
+            return true;
+
+        player.displayClientMessage(
+            Component.translatable("songcraft_instruments.looper.no_record")
+                .withStyle(ChatFormatting.RED),
+            true
+        );
+        return false;
     }
 
 
@@ -155,33 +164,73 @@ public class LooperAdapterItem extends Item {
     }
 
     /**
-     * Syncs the 2 loopers by setting their repeat ticks to be of the lower looper.
+     * Syncs the 2 loopers, or unsyncs them if they already were. While synced, the burned record in one
+     * plays as the empty record in the other is recorded on, and is burned into it along with the new part.
      */
     private static boolean syncLoopers(CompoundTag adapterTag, LooperBlockEntity lbe1, LooperBlockEntity lbe2, Player player) {
-        if (lbe1.getBlockPos().equals(lbe2.getBlockPos()))
-            return false;
-
         // Clear all compound keys after pairing
         for (final String key : adapterTag.getAllKeys())
             adapterTag.remove(key);
 
-        if (!lbe1.hasFootage() || !lbe1.hasFootage()) {
+        if (isInSession(lbe1) || isInSession(lbe2)) {
             player.displayClientMessage(
-                Component.translatable("songcraft_instruments.record.no_footage").withStyle(ChatFormatting.RED),
+                Component.translatable("songcraft_instruments.looper.connections_locked").withStyle(ChatFormatting.RED),
                 true
             );
             return true;
         }
 
-        lbe2.setRepeatTick(lbe1.getRepeatTick());
-        lbe2.setTicks(lbe1.getTicks());
+        final boolean unsync = (lbe1.getSyncedLooper() == lbe2);
+
+        // The record of one is recorded over onto the other's empty record
+        if (!unsync && !lbe1.isWritable() && !lbe2.isWritable()) {
+            player.displayClientMessage(
+                Component.translatable("item.songcraft_instruments.looper_adapter.looper.no_empty_record").withStyle(ChatFormatting.RED),
+                true
+            );
+            return true;
+        }
+
+        // A looper may only be synced with one other
+        unsync(lbe1);
+        unsync(lbe2);
+
+        if (!unsync) {
+            lbe1.setSyncedLooperPos(lbe2.getBlockPos());
+            lbe2.setSyncedLooperPos(lbe1.getBlockPos());
+        }
+
+        // Update their players on what they would record over
+        lbe1.connections().sync();
+        lbe2.connections().sync();
 
         player.displayClientMessage(
-            Component.translatable("item.songcraft_instruments.looper_adapter.instrument.success_pair").withStyle(ChatFormatting.GREEN),
+            Component.translatable(unsync
+                ? "item.songcraft_instruments.looper_adapter.looper.unsync"
+                : "item.songcraft_instruments.looper_adapter.looper.success_pair"
+            ).withStyle(ChatFormatting.GREEN),
             true
         );
         return true;
     }
+
+    private static boolean isInSession(LooperBlockEntity lbe) {
+        return lbe.session().isGroupSession() || lbe.session().isRecording();
+    }
+
+    /**
+     * Removes the looper's link to its synced looper, on both ends
+     */
+    private static void unsync(LooperBlockEntity lbe) {
+        final LooperBlockEntity other = lbe.getSyncedLooper();
+        lbe.setSyncedLooperPos(null);
+
+        if (other != null) {
+            other.setSyncedLooperPos(null);
+            other.connections().sync();
+        }
+    }
+
     private static boolean syncLoopers(CompoundTag adapterTag, BlockPos looper1Pos, BlockPos looper2Pos, Player player) {
         if (looper2Pos.equals(looper1Pos))
             return false;

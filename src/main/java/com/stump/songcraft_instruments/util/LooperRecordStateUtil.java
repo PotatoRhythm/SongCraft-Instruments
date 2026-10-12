@@ -90,11 +90,13 @@ public class LooperRecordStateUtil {
             return;
 
         // With multiple players connected, recording is done as a group
-        // by those on their connected instrument's screen
-        if (recording && lbe.connections().getAll().size() > 1) {
+        // by those on their connected instrument's screen.
+        // Recording over a synced looper's record is done as one too, to count in with it.
+        final boolean overdub = lbe.getBackingLooper() != null;
+        if (recording && (overdub || lbe.connections().getAll().size() > 1)) {
             lbe.connections().disconnectAbsentPlayers();
 
-            if (lbe.connections().getAll().size() > 1) {
+            if (overdub || lbe.connections().getAll().size() > 1) {
                 if (!lbe.session().startGroupSession())
                     notifyLooperUnplayable(player);
                 return;

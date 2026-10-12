@@ -5,10 +5,12 @@ import com.stump.songcraft_instruments.client.gui.instrument.LooperOverlayInject
 import com.stump.songcraft_instruments.networking.IModPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent.Context;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,19 +33,24 @@ public class LooperConnectionsPacket implements IModPacket {
     private final LooperSessionState state;
     // Distinguishes a group recording from a solo one, as both share the RECORDING state
     private final boolean groupSession;
+    // The name of the synced looper's record that is (or would be) recorded over, if any
+    private final @Nullable Component backingName;
 
     public LooperConnectionsPacket(final BlockPos looperPos, final List<Entry> connections,
-                                   final LooperSessionState state, final boolean groupSession) {
+                                   final LooperSessionState state, final boolean groupSession,
+                                   final @Nullable Component backingName) {
         this.looperPos = looperPos;
         this.connections = connections;
         this.state = state;
         this.groupSession = groupSession;
+        this.backingName = backingName;
     }
     public LooperConnectionsPacket(final FriendlyByteBuf buf) {
         looperPos = buf.readBlockPos();
         connections = buf.readList((fbb) -> new Entry(fbb.readUUID(), fbb.readUtf(), fbb.readBoolean(), fbb.readBoolean()));
         state = buf.readEnum(LooperSessionState.class);
         groupSession = buf.readBoolean();
+        backingName = buf.readNullable(FriendlyByteBuf::readComponent);
     }
 
     @Override
@@ -57,12 +64,13 @@ public class LooperConnectionsPacket implements IModPacket {
         });
         buf.writeEnum(state);
         buf.writeBoolean(groupSession);
+        buf.writeNullable(backingName, FriendlyByteBuf::writeComponent);
     }
 
     @Override
     public void handle(final Context context) {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-            LooperOverlayInjector.handleConnectionsSync(looperPos, connections, state, groupSession)
+            LooperOverlayInjector.handleConnectionsSync(looperPos, connections, state, groupSession, backingName)
         );
     }
 }

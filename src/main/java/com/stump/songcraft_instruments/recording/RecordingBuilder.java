@@ -100,6 +100,50 @@ public final class RecordingBuilder {
 
 
     /**
+     * Lays these notes over {@code base}'s, as when recording a new part over a synced looper's record.
+     * Each part keeps its own performers, even when the same player recorded both, so that every part
+     * is credited with the colors it was recorded with.
+     * @param length The tick the recording loops back at
+     */
+    public Recording buildOver(final Recording base, final int length) {
+        final RecordingBuilder merged = new RecordingBuilder();
+
+        final int[] basePerformers = new int[base.performers().size()];
+        for (int i = 0; i < basePerformers.length; i++) {
+            merged.performers.add(base.performers().get(i));
+            basePerformers[i] = i;
+        }
+        final int[] newPerformers = new int[performers.size()];
+        for (int i = 0; i < newPerformers.length; i++) {
+            merged.performers.add(performers.get(i));
+            newPerformers[i] = basePerformers.length + i;
+        }
+
+        // Added first, so that base notes play before new ones of the same tick
+        for (int i = 0; i < base.noteCount(); i++)
+            merged.notes.add(merged.remap(base.note(i), basePerformers, base.instrumentIds(), base.soundTypes()));
+        for (final int[] note : notes)
+            merged.notes.add(merged.remap(note, newPerformers, instrumentIds, soundTypes));
+
+        return merged.build(length);
+    }
+
+    /**
+     * @return A copy of a note from another recording, with its performer and palette indices pointing into this one
+     */
+    private int[] remap(final int[] note, final int[] performerMap,
+                        final List<String> fromInstrumentIds, final List<String> fromSoundTypes) {
+        final int[] copy = note.clone();
+        copy[Recording.PERFORMER] = performerMap[note[Recording.PERFORMER]];
+
+        if (note[Recording.TYPE] != Recording.TYPE_DAMPEN) {
+            copy[Recording.INSTRUMENT_ID] = paletteIndex(instrumentIds, fromInstrumentIds.get(note[Recording.INSTRUMENT_ID]));
+            copy[Recording.SOUND_TYPE] = paletteIndex(soundTypes, fromSoundTypes.get(note[Recording.SOUND_TYPE]));
+        }
+        return copy;
+    }
+
+    /**
      * @param length The tick the recording loops back at, or -1 if it is unfinished
      */
     public Recording build(final int length) {
