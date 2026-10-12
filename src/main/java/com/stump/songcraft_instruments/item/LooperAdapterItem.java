@@ -3,7 +3,6 @@ package com.stump.songcraft_instruments.item;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
-import com.stump.songcraft_instruments.block.partial.IDoubleBlock;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.SyncModTagPacket;
 import com.stump.songcraft_instruments.util.CommonUtil;
@@ -27,7 +26,6 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -126,29 +124,15 @@ public class LooperAdapterItem extends Item {
         // The player using the adapter owns the block instrument's connection
         return LooperUtil.performPair(lbe, (connectionId) -> {
 
-            final BlockState instrumentBlockState = ibe.getBlockState();
-            final Block instrumentBlock = instrumentBlockState.getBlock();
-
             final BlockPos instrumentBlockPos = ibe.getBlockPos(),
                 looperBlockPos = lbe.getBlockPos();
 
-            // Linked blocks (like the Keyboard) should too have the tag:
-            BlockPos otherBlockPos = null;
-            if (instrumentBlock instanceof IDoubleBlock doubleBlock)
-                otherBlockPos = doubleBlock.getOtherBlock(instrumentBlockState, instrumentBlockPos, player.level());
-
             LooperUtil.createLooperTag(ibe, looperBlockPos, connectionId);
-            if (otherBlockPos != null)
-                LooperUtil.createLooperTag(player.level().getBlockEntity(otherBlockPos), looperBlockPos, connectionId);
-
             ibe.setChanged();
 
             // Handle syncing data to client
-            if (player instanceof ServerPlayer serverPlayer) {
+            if (player instanceof ServerPlayer serverPlayer)
                 SCPacketHandler.sendToClient(new SyncModTagPacket(SCInstrumentMod.modTag(ibe), instrumentBlockPos), serverPlayer);
-                if (otherBlockPos != null)
-                    SCPacketHandler.sendToClient(new SyncModTagPacket(SCInstrumentMod.modTag(ibe), otherBlockPos), serverPlayer);
-            }
 
         }, player);
     }

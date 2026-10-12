@@ -23,7 +23,8 @@ public abstract class AbstractDyeableItemRenderer<T extends BlockItem & GeoItem>
             RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender,
             float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
 
-        if ("Dyeable".equals(bone.getName())) {
+        // Also tints Dyeable_ bones, for dyeable parts that animate separately
+        if (bone.getName().startsWith("Dyeable")) {
 
             int color = 0xFFFFFF;
 

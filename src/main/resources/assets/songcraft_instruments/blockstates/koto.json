@@ -1,26 +1,36 @@
 {
     "variants": {
-
-        "part=left,facing=north": {
-            "model": "songcraft_instruments:block/koto_left",
+        "part=controller,facing=north": {
+            "model": "songcraft_instruments:block/koto",
             "y": 0
         },
-        "part=left,facing=east": {
-            "model": "songcraft_instruments:block/koto_left",
+        "part=controller,facing=east": {
+            "model": "songcraft_instruments:block/koto",
             "y": 90
         },
-        "part=left,facing=south": {
-            "model": "songcraft_instruments:block/koto_left",
+        "part=controller,facing=south": {
+            "model": "songcraft_instruments:block/koto",
             "y": 180
         },
-        "part=left,facing=west": {
-            "model": "songcraft_instruments:block/koto_left",
+        "part=controller,facing=west": {
+            "model": "songcraft_instruments:block/koto",
             "y": 270
         },
-
-        "part=right": {
-            "model": "songcraft_instruments:block/koto_right"
+        "part=dummy,facing=north": {
+            "model": "songcraft_instruments:block/koto",
+            "y": 0
+        },
+        "part=dummy,facing=east": {
+            "model": "songcraft_instruments:block/koto",
+            "y": 90
+        },
+        "part=dummy,facing=south": {
+            "model": "songcraft_instruments:block/koto",
+            "y": 180
+        },
+        "part=dummy,facing=west": {
+            "model": "songcraft_instruments:block/koto",
+            "y": 270
         }
-
     }
 }

@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.block.blockentity;
 
+import com.stump.songcraft_instruments.block.blockentity.microphone.MicrophonePulse;
 import com.stump.songcraft_instruments.block.partial.InstrumentBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
@@ -12,9 +13,14 @@ public class MicrophoneStandBlockEntity extends InstrumentBlockEntity implements
 
     private final AnimatableInstanceCache cache =
             GeckoLibUtil.createInstanceCache(this);
+    private final MicrophonePulse micPulse = new MicrophonePulse();
 
     public MicrophoneStandBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MICROPHONE_STAND.get(), pos, state);
+    }
+
+    public MicrophonePulse getMicPulse() {
+        return micPulse;
     }
 
     @Override

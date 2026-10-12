@@ -5,7 +5,6 @@ import com.stump.songcraft_instruments.SCCreativeModeTabs;
 import com.stump.songcraft_instruments.block.ModBlocks;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableAccessoryInstrumentItem;
-import com.stump.songcraft_instruments.item.partial.instrument.CreditableBlockInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.InstrumentPacketUtil;
 import net.minecraft.resources.ResourceKey;
@@ -137,7 +136,7 @@ public class ModItems {
         ),
 
         KOTO = register("koto", () ->
-            new CreditableBlockInstrumentItem(
+            new KotoBlockItem(
                 ModBlocks.KOTO.get(), new Properties().stacksTo(1),
                 "DSK Asian DreamZ"
             ),
@@ -179,7 +178,7 @@ public class ModItems {
                 )
         )),
 
-        TROMBONE = register("trombone", () -> new WindInstrumentItem(
+        TROMBONE = register("trombone", () -> new TromboneItem(
             (player) -> InstrumentPacketUtil.sendOpenPacket(
                 player, loc("trombone")
             )

@@ -2,7 +2,6 @@ package com.stump.songcraft_instruments.util;
 
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
-import com.stump.songcraft_instruments.block.partial.IDoubleBlock;
 import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import net.minecraft.ChatFormatting;
@@ -19,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -146,14 +144,7 @@ public class LooperUtil {
     }
     @Nullable
     public static LooperBlockEntity getFromBlockInstrument(final Level level, final BlockEntity instrument) {
-        return getFromInstrument(level, LooperUtil.looperTag(instrument), () -> {
-            LooperUtil.remLooperTag(instrument);
-
-            final BlockPos pos = instrument.getBlockPos();
-            final BlockState state = level.getBlockState(pos);
-            if (state.getBlock() instanceof IDoubleBlock doubleBlock)
-                LooperUtil.remLooperTag(level.getBlockEntity(doubleBlock.getOtherBlock(state, pos, level)));
-        });
+        return getFromInstrument(level, LooperUtil.looperTag(instrument), () -> LooperUtil.remLooperTag(instrument));
     }
     /**
      * Attempts to get the looper pointed out by {@code looperData}. Removes its reference if not found,

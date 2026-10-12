@@ -3,7 +3,6 @@ package com.stump.songcraft_instruments.util;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.blockentity.SpeakerBlockEntity;
-import com.stump.songcraft_instruments.block.partial.IDoubleBlock;
 import com.stump.songcraft_instruments.block.partial.InstrumentBlockEntity;
 import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenProvider;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
@@ -25,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -63,7 +61,7 @@ public class SpeakerUtil {
         return pair(level, SCInstrumentMod.modTag(instrument), sbe, null, false);
     }
     /**
-     * pairs a block source: a block instrument (including the other half of a double block, like the Keyboard)
+     * pairs a block source: a block instrument
      * or a looper. a speaker accepts at most one looper.
      */
     public static PairResult pair(final Level level, final BlockEntity source, final SpeakerBlockEntity sbe) {
@@ -121,7 +119,7 @@ public class SpeakerUtil {
     }
 
     /**
-     * unpairs every speaker from a block instrument (and the other half of a double block) or a looper.
+     * unpairs every speaker from a block instrument or a looper.
      * speakers in unloaded chunks drop the instrument on their own once loaded,
      * since the instrument no longer lists them.
      * return how many speakers were unpaired
@@ -416,30 +414,12 @@ public class SpeakerUtil {
     }
 
     /**
-     * marks a block instrument as changed, mirrors its speaker data
-     * onto the other half of a double block (like the Keyboard),
+     * marks a block instrument as changed,
      * and syncs it to nearby clients so the instrument screen's speaker counter stays accurate.
      */
     private static void onBlockInstrumentChanged(final Level level, final BlockEntity instrument) {
         instrument.setChanged();
         syncToClients(level, instrument);
-
-        final BlockPos pos = instrument.getBlockPos();
-        final BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof IDoubleBlock doubleBlock))
-            return;
-
-        final BlockEntity other = level.getBlockEntity(doubleBlock.getOtherBlock(state, pos, level));
-        if (other == null)
-            return;
-
-        final CompoundTag modTag = SCInstrumentMod.modTag(instrument), otherModTag = SCInstrumentMod.modTag(other);
-        if (modTag.contains(SPEAKER_TAG, CompoundTag.TAG_COMPOUND))
-            otherModTag.put(SPEAKER_TAG, modTag.getCompound(SPEAKER_TAG).copy());
-        else
-            otherModTag.remove(SPEAKER_TAG);
-        other.setChanged();
-        syncToClients(level, other);
     }
     private static void syncToClients(final Level level, final BlockEntity instrument) {
         // Loopers don't show the counter, so only block instruments need syncing

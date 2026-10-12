@@ -32,7 +32,7 @@ public class ModBlockEntities {
     public static final RegistryObject<BlockEntityType<ModInstrumentBlockEntity>> INSTRUMENT =
         BLOCK_ENTITIES.register(SCInstrumentMod.MODID + "_instrument", () ->
                 BlockEntityType.Builder.of(ModInstrumentBlockEntity::new,
-                        ModBlocks.KOTO.get(), ModBlocks.MICROPHONE_STAND.get() ).build(null)
+                        ModBlocks.MICROPHONE_STAND.get() ).build(null)
         );
 
     public static final RegistryObject<BlockEntityType<KeyboardStandBlockEntity>> KEYBOARD_STAND =
@@ -51,6 +51,11 @@ public class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(KeyboardBlockEntity::new,
                             ModBlocks.KEYBOARD.get()).build(null));
 
+    public static final RegistryObject<BlockEntityType<KotoBlockEntity>> KOTO =
+            BLOCK_ENTITIES.register("koto",
+                    () -> BlockEntityType.Builder.of(KotoBlockEntity::new,
+                            ModBlocks.KOTO.get()).build(null));
+
     public static final RegistryObject<BlockEntityType<MicrophoneStandBlockEntity>> MICROPHONE_STAND =
             BLOCK_ENTITIES.register("microphone_stand",
                     () -> BlockEntityType.Builder.of(MicrophoneStandBlockEntity::new,
@@ -61,6 +66,7 @@ public class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             DummyBlockEntity::new,
                             ModBlocks.DRUMSET.get(),
-                            ModBlocks.KEYBOARD.get()
+                            ModBlocks.KEYBOARD.get(),
+                            ModBlocks.KOTO.get()
                     ).build(null));
 }
