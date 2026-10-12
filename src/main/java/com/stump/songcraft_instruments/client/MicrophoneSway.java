@@ -12,8 +12,16 @@ import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.item.ModItems;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
+import com.stump.songcraft_instruments.sound.SCSounds;
+import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -32,6 +40,7 @@ import java.util.UUID;
 /**
  * Sways players gently from side to side while they're singing into a microphone, be it held or on a stand.
  * The sway settles back to standing still once they've stopped singing for a moment.
+ * <p>When singing with Sky's Aurora voice, players also raise their free arm out to the side, like Aurora does.</p>
  */
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(bus = Bus.FORGE, modid = SCInstrumentMod.MODID, value = Dist.CLIENT)
@@ -49,13 +58,28 @@ public class MicrophoneSway {
     /** How long players keep swaying after their last note ends, in seconds */
     private static final double KEEP_SWAYING_TIME = 0.75;
 
+    /** How high players raise their free arm out to the side when singing as Aurora, in radians from hanging down */
+    private static final float ARM_RAISE_ANGLE = 2.2f;
+    /** How far forward the raised arm reaches, in radians */
+    private static final float ARM_FORWARD_ANGLE = 0.25f;
+    /** How far the raised arm waves up and down along with the sway, in radians */
+    private static final float ARM_WAVE_ANGLE = 0.12f;
+    /** How long the arm takes to raise as players start singing as Aurora, in seconds */
+    private static final double ARM_RAISE_TIME = 0.35;
+    /** How long the arm takes to lower back down after players stop singing, in seconds */
+    private static final double ARM_LOWER_TIME = 0.9;
+
     /** How much each player is swaying: 0 standing still and 1 swaying fully */
     private static final Map<UUID, Fade> FADES = new HashMap<>();
+    /** How far each player has raised their arm: 0 lowered and 1 raised fully */
+    private static final Map<UUID, Fade> ARM_FADES = new HashMap<>();
     /** The notes each player is singing into a microphone */
     private static final Map<UUID, Singing> SINGING = new HashMap<>();
 
     /** Whether the player being rendered was swayed, for its pose to be restored after */
     private static boolean swayed;
+    /** How far the player being rendered has their arm raised, and their age in ticks, for their arm to be posed by */
+    private static float renderedArmRaise, renderedAge;
 
     private static final class Fade {
         double amount, updatedAt = now();
@@ -66,6 +90,8 @@ public class MicrophoneSway {
         int heldNotes;
         /** When the last note was sung or let go of */
         double lastNoteAt = now();
+        /** Whether the last held note was sung with Sky's Aurora voice */
+        boolean aurora;
     }
 
 
@@ -83,6 +109,7 @@ public class MicrophoneSway {
                 singing.heldNotes--;
 
             singing.lastNoteAt = now();
+            singing.aurora = isAurora(event.sound());
         });
     }
 
@@ -101,19 +128,37 @@ public class MicrophoneSway {
     }
 
 
+    private static boolean isAurora(final HeldNoteSound sound) {
+        return SCSounds.SKY_AURORA[0].baseSoundLocation().equals(sound.baseSoundLocation());
+    }
+
+
     // Lowest priority, so that no other listener cancels the render after it was swayed
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPreRenderPlayer(final RenderPlayerEvent.Pre event) {
         final Player player = event.getEntity();
-        final double fade = updateFade(player);
+        final boolean singing = isSinging(player);
+
+        renderedAge = player.tickCount + event.getPartialTick();
+        renderedArmRaise = ease(updateFade(ARM_FADES, player,
+            singing && SINGING.get(player.getUUID()).aurora, ARM_RAISE_TIME, ARM_LOWER_TIME));
+
+        // Arm poses are set before this event and applied once the model is posed for rendering after it
+        if (renderedArmRaise > 0) {
+            final PlayerModel<AbstractClientPlayer> model = event.getRenderer().getModel();
+
+            if (getFreeArm(player) == HumanoidArm.RIGHT)
+                model.rightArmPose = ModArmPose.AURORA_RAISED;
+            else
+                model.leftArmPose = ModArmPose.AURORA_RAISED;
+        }
+
+        final double fade = updateFade(FADES, player, singing, FADE_IN_TIME, FADE_OUT_TIME);
         if (fade <= 0)
             return;
 
-        final float time = (player.tickCount + event.getPartialTick()) / 20f;
-        final float phase = time / SWAY_PERIOD * Mth.TWO_PI;
-        final float sway = Mth.sin(phase);
-        // Ease the fade so the sway starts and settles softly
-        final float amount = (float) (fade * fade * (3 - 2 * fade));
+        final float sway = Mth.sin(swayPhase(player.tickCount + event.getPartialTick()));
+        final float amount = ease(fade);
 
         final PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
@@ -140,34 +185,79 @@ public class MicrophoneSway {
     @SubscribeEvent
     public static void onLevelUnload(final LevelEvent.Unload event) {
         FADES.clear();
+        ARM_FADES.clear();
         SINGING.clear();
     }
 
 
     /**
-     * Moves the given player's sway towards whether they're singing
-     * @return How much the player is swaying now
+     * Raises the free arm of the player being rendered while singing as Aurora out to the side,
+     * waving gently along with their sway
+     * @param side Which of the player's arms is raised
      */
-    private static double updateFade(final Player player) {
-        final boolean singing = isSinging(player);
-        Fade fade = FADES.get(player.getUUID());
+    public static void raiseArm(final HumanoidModel<?> model, final HumanoidArm side) {
+        final ModelPart arm = (side == HumanoidArm.RIGHT) ? model.rightArm : model.leftArm;
+        final float outwards = (side == HumanoidArm.RIGHT) ? 1 : -1;
+
+        final float wave = Mth.sin(swayPhase(renderedAge)) * ARM_WAVE_ANGLE;
+
+        arm.xRot = Mth.lerp(renderedArmRaise, arm.xRot, -ARM_FORWARD_ANGLE);
+        arm.yRot = Mth.lerp(renderedArmRaise, arm.yRot, 0);
+        arm.zRot = Mth.lerp(renderedArmRaise, arm.zRot, (ARM_RAISE_ANGLE + wave) * outwards);
+    }
+
+    /**
+     * @return The arm the given player isn't holding their microphone with.
+     * On a stand, that's their off arm, leaving their main hand on the microphone.
+     */
+    private static HumanoidArm getFreeArm(final Player player) {
+        final HumanoidArm mainArm = player.getMainArm();
+
+        if (InstrumentOpenProvider.isItem(player) && InstrumentOpenProvider.getHand(player) == InteractionHand.OFF_HAND)
+            return mainArm;
+
+        return mainArm.getOpposite();
+    }
+
+
+    /**
+     * Moves the given player's fade in the given map towards whether it's on
+     * @return How far along the fade is now, from 0 to 1
+     */
+    private static double updateFade(final Map<UUID, Fade> fades, final Player player, final boolean on,
+                                     final double fadeInTime, final double fadeOutTime) {
+        Fade fade = fades.get(player.getUUID());
 
         if (fade == null) {
-            if (!singing)
+            if (!on)
                 return 0;
 
-            FADES.put(player.getUUID(), fade = new Fade());
+            fades.put(player.getUUID(), fade = new Fade());
         }
 
         final double now = now();
-        final double step = (now - fade.updatedAt) / (singing ? FADE_IN_TIME : FADE_OUT_TIME);
+        final double step = (now - fade.updatedAt) / (on ? fadeInTime : fadeOutTime);
         fade.updatedAt = now;
-        fade.amount = Mth.clamp(fade.amount + (singing ? step : -step), 0, 1);
+        fade.amount = Mth.clamp(fade.amount + (on ? step : -step), 0, 1);
 
         if (fade.amount <= 0)
-            FADES.remove(player.getUUID());
+            fades.remove(player.getUUID());
 
         return fade.amount;
+    }
+
+    /**
+     * Eases a fade so that what it fades starts and settles softly
+     */
+    private static float ease(final double fade) {
+        return (float) (fade * fade * (3 - 2 * fade));
+    }
+
+    /**
+     * @return How far along their sway a player of the given age in ticks is, in radians
+     */
+    private static float swayPhase(final float ageInTicks) {
+        return ageInTicks / 20f / SWAY_PERIOD * Mth.TWO_PI;
     }
 
     /**

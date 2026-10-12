@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.client;
 
+import com.stump.songcraft_instruments.client.saxophone.SaxophonePlaying;
 import net.minecraft.client.model.HumanoidModel.ArmPose;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.HumanoidArm;
@@ -50,6 +51,14 @@ public abstract class ModArmPose {
             defLeftWind(model.leftArm);
         }
     );
+    /** The wind instrument pose, moving along with the notes played */
+    public static final ArmPose PLAYING_SAXOPHONE = ArmPose.create("playing_saxophone", true,
+        (model, entity, arm) -> {
+            defRightWind(model.rightArm);
+            defLeftWind(model.leftArm);
+            SaxophonePlaying.moveArms(model, entity);
+        }
+    );
     public static final ArmPose PLAYING_NIGHTWIND_HORN_INSTRUMENT = ArmPose.create("playing_nightwind_horn_instrument", true,
         (model, entity, arm) -> {
             if (arm == HumanoidArm.RIGHT) {
@@ -66,6 +75,11 @@ public abstract class ModArmPose {
                 model.rightArm.yRot = 0;
             }
         }
+    );
+
+    /** The free arm of a player singing with Sky's Aurora voice, raised out to the side */
+    public static final ArmPose AURORA_RAISED = ArmPose.create("aurora_raised", false,
+        (model, entity, arm) -> MicrophoneSway.raiseArm(model, arm)
     );
 
     public static final ArmPose PLAYING_MICROPHONE = ArmPose.create("playing_microphone", false,

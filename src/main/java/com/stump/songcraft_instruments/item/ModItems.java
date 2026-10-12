@@ -183,7 +183,7 @@ public class ModItems {
                 player, loc("trombone")
             )
         )),
-        SAXOPHONE = register("saxophone", () -> new WindInstrumentItem(
+        SAXOPHONE = register("saxophone", () -> new SaxophoneItem(
             (player) -> InstrumentPacketUtil.sendOpenPacket(
                 player, loc("saxophone")
             )
