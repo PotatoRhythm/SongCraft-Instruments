@@ -164,6 +164,9 @@
     "button.songcraft_instruments.microphone.soundType.teto": "Not Teto",
     "button.songcraft_instruments.microphone.soundType.teto_sneaky": "Not Teto (Whisper)",
     "button.songcraft_instruments.microphone.soundType.sky_aurora": "Aurora (Sky)",
+    "button.songcraft_instruments.microphone.soundType.cat": "Cat",
+    "button.songcraft_instruments.microphone.soundType.dog": "Dog",
+    "button.songcraft_instruments.microphone.soundType.meatball_man": "Meatball Man",
 
     "button.songcraft_instruments.saxophone.soundType": "Sound",
     "button.songcraft_instruments.saxophone.soundType.hato_sax": "Sax (Hato)",

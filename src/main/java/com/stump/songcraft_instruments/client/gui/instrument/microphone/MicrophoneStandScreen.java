@@ -16,6 +16,12 @@ public class MicrophoneStandScreen extends LayoutGridInstrumentScreen implements
     public static final ResourceLocation INSTRUMENT_ID = new ResourceLocation(SCInstrumentMod.MODID, "microphone_stand");
     public static final ResourceLocation INSTRUMENT_THEME_ID = new ResourceLocation(SCInstrumentMod.MODID, "microphone");
 
+    public MicrophoneStandScreen() {
+        // The handheld microphone's hidden voices stay with it
+        if (ModClientConfigs.MICROPHONE_SOUND_TYPE.get().isEasterEgg())
+            initPreferredSoundType(MicrophoneSoundType.IRINA);
+    }
+
     @Override
     public ResourceLocation getInstrumentId() {
         return INSTRUMENT_ID;
@@ -23,7 +29,7 @@ public class MicrophoneStandScreen extends LayoutGridInstrumentScreen implements
 
     @Override
     public SoundTypeOption<MicrophoneSoundType> soundTypeOption() {
-        return new SoundTypeOption<>(MicrophoneSoundType.values(), ModClientConfigs.MICROPHONE_SOUND_TYPE,
+        return new SoundTypeOption<>(MicrophoneSoundType.regular(), ModClientConfigs.MICROPHONE_SOUND_TYPE,
             "button.songcraft_instruments.microphone.soundType");
     }
 

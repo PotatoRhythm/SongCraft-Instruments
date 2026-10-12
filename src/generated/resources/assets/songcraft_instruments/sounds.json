@@ -29707,6 +29707,762 @@
       }
     ]
   },
+  "microphone_cat_attack_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/0",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/1",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/10",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/11",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/12",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/13",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/14",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/15",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/16",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/17",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/18",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/19",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/2",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/20",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/3",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/4",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/5",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/6",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/7",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/8",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_attack_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/attack/9",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/0",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/1",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/10",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/11",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/12",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/13",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/14",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/15",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/16",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/17",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/18",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/19",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/2",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/20",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/3",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/4",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/5",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/6",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/7",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/8",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_cat_hold_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_cat/hold/9",
+        "volume": 0.7
+      }
+    ]
+  },
+  "microphone_dog_attack_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/0",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/1",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/10",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/11",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/12",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/13",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/14",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/15",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/16",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/17",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/18",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/19",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/2",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/20",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/4",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/5",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/6",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/7",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/8",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_attack_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/attack/9",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/0",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/1",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/10",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/11",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/12",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/13",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/14",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/15",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/16",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/17",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/18",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/19",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/2",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/20",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/4",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/5",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/6",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/7",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/8",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_dog_hold_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_dog/hold/9",
+        "volume": 0.8
+      }
+    ]
+  },
   "microphone_irina_brochin_attack_note_0": {
     "sounds": [
       {
@@ -30418,6 +31174,720 @@
       {
         "name": "songcraft_instruments:microphone_irina_brochin/hold/9.stereo",
         "volume": 0.3
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/0",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_0_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/0.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/1",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/10",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_10_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/10.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/11",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_11_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/11.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/12",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_12_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/12.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/13",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_13_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/13.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/14",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_14_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/14.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/15",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_15_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/15.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/16",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_16_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/16.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/17",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_17_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/17.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/18",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_18_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/18.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/19",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_19_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/19.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_1_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/1.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/2",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/20",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_20_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/20.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_2_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/2.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_3_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/3.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/4",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_4_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/4.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/5",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_5_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/5.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/6",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_6_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/6.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/7",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_7_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/7.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/8",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_8_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/8.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/attack/9",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_attack_note_9_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/attack/9.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_0": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/0",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_0_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/0.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_1": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/1",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_10": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/10",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_10_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/10.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_11": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/11",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_11_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/11.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_12": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/12",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_12_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/12.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_13": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/13",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_13_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/13.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_14": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/14",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_14_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/14.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_15": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/15",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_15_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/15.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_16": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/16",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_16_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/16.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_17": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/17",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_17_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/17.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_18": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/18",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_18_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/18.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_19": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/19",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_19_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/19.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_1_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/1.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_2": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/2",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_20": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/20",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_20_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/20.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_2_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/2.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_3": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_3_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/3.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_4": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/4",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_4_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/4.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_5": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/5",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_5_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/5.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_6": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/6",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_6_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/6.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_7": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/7",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_7_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/7.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_8": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/8",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_8_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/8.stereo",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_9": {
+    "sounds": [
+      {
+        "attenuation_distance": 64,
+        "name": "songcraft_instruments:microphone_meatball_man/hold/9",
+        "volume": 0.8
+      }
+    ]
+  },
+  "microphone_meatball_man_hold_note_9_stereo": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:microphone_meatball_man/hold/9.stereo",
+        "volume": 0.8
       }
     ]
   },

@@ -301,6 +301,36 @@ public class SCSounds {
                 .fullHoldFadeoutTime(2)
                 .decays(7)
                 .register(HOLD_DURATION),
+
+        // Easter egg voices of the microphone, see MicrophoneEasterEggs.
+        // The cat and dog are one-shots with silent holds; their slow release lets taps play out in full.
+        MICROPHONE_CAT = hnsr(loc("microphone_cat"))
+            .holdBuilder(SCSounds::threeOctaveMonoSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveMonoSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            .releaseFadeOut(FADE_TIME / 16)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
+            .register(HOLD_DURATION),
+        MICROPHONE_DOG = hnsr(loc("microphone_dog"))
+            .holdBuilder(SCSounds::threeOctaveMonoSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveMonoSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            .releaseFadeOut(FADE_TIME / 16)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
+            .register(HOLD_DURATION),
+        MICROPHONE_MEATBALL_MAN = hnsr(loc("microphone_meatball_man"))
+            .holdBuilder(SCSounds::threeOctaveSoundBuilder)
+            .attackBuilder(SCSounds::threeOctaveSoundBuilder)
+            .holdDelay(.03f)
+            .chainedHoldDelay(-FADE_TIME * 2)
+            .releaseFadeOut(FADE_TIME / 8)
+            .fullHoldFadeoutTime(2)
+            .decays(7)
+            .register(HOLD_DURATION),
         SAXOPHONE_BARITONE = hnsr(loc("saxophone_baritone"))
             .holdBuilder(SCSounds::threeOctaveSoundBuilder)
             .attackBuilder(SCSounds::threeOctaveSoundBuilder)
