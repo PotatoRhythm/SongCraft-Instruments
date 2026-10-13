@@ -404,6 +404,10 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
     //#region LooperPlayback.Host implementation
 
     @Override
+    public Level getHostLevel() {
+        return getLevel();
+    }
+    @Override
     public BlockPos getSoundPos() {
         return getBlockPos();
     }

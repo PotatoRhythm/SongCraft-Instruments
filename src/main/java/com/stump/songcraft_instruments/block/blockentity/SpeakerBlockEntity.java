@@ -30,6 +30,14 @@ public class SpeakerBlockEntity extends BlockEntity implements Speaker.Host {
     //#region Speaker.Host implementation
 
     @Override
+    public Level getHostLevel() {
+        return getLevel();
+    }
+    @Override
+    public void markHostChanged() {
+        setChanged();
+    }
+    @Override
     public BlockPos getSoundPos() {
         return getBlockPos();
     }

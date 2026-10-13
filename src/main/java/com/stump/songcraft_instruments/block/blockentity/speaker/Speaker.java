@@ -31,7 +31,7 @@ public class Speaker {
      * where a speaker lives: a speaker block, or a boat or minecart carrying one
      */
     public interface Host {
-        @Nullable Level getLevel();
+        @Nullable Level getHostLevel();
         /**
          * return the position notes are relayed from. may change over time for vehicles
          */
@@ -40,7 +40,7 @@ public class Speaker {
          * return how instruments find this speaker again
          */
         SpeakerAddress getAddress();
-        void setChanged();
+        void markHostChanged();
 
         /**
          * return whether the speaker shows as connected (the green front light)
@@ -118,7 +118,7 @@ public class Speaker {
     public void playNote(final NoteSound sound, final NoteSoundMetadata meta, final InitiatorID source) {
         final NoteSoundMetadata relocated = relocate(meta);
 
-        NoteSoundPacketUtil.sendPlayNotePackets(host.getLevel(), sound, relocated, source);
+        NoteSoundPacketUtil.sendPlayNotePackets(host.getHostLevel(), sound, relocated, source);
         emitNoteParticle(relocated.particleColor());
     }
 
@@ -131,13 +131,13 @@ public class Speaker {
         final HeldNoteKey key = new HeldNoteKey(sound, relocated.pitch(), source);
 
         if (phase == HeldSoundPhase.ATTACK) {
-            HeldNoteSoundPacketUtil.sendPlayNotePackets(host.getLevel(), sound, relocated, phase, speakerInitiatorID);
+            HeldNoteSoundPacketUtil.sendPlayNotePackets(host.getHostLevel(), sound, relocated, phase, speakerInitiatorID);
             sustainedNotes.put(key, relocated);
             emitNoteParticle(relocated.particleColor());
         } else if (phase == HeldSoundPhase.RELEASE) {
             // Release with the metadata the note started with, so clients match it to the right sound
             final NoteSoundMetadata attackMeta = sustainedNotes.remove(key);
-            HeldNoteSoundPacketUtil.sendPlayNotePackets(host.getLevel(), sound,
+            HeldNoteSoundPacketUtil.sendPlayNotePackets(host.getHostLevel(), sound,
                 (attackMeta != null) ? attackMeta : relocated, phase, speakerInitiatorID);
         }
     }
@@ -152,7 +152,7 @@ public class Speaker {
                 return false;
 
             HeldNoteSoundPacketUtil.sendPlayNotePackets(
-                host.getLevel(), entry.getKey().sound(), entry.getValue(), HeldSoundPhase.RELEASE, speakerInitiatorID
+                host.getHostLevel(), entry.getKey().sound(), entry.getValue(), HeldSoundPhase.RELEASE, speakerInitiatorID
             );
             return true;
         });
@@ -200,7 +200,7 @@ public class Speaker {
     }
 
     private void onPairingsChanged() {
-        host.setChanged();
+        host.markHostChanged();
         updateConnectedState();
     }
     /**
@@ -208,7 +208,7 @@ public class Speaker {
      * according to whether any instrument or looper is properly paired
      */
     private void updateConnectedState() {
-        final Level level = host.getLevel();
+        final Level level = host.getHostLevel();
         if (level == null || level.isClientSide)
             return;
 
@@ -274,7 +274,7 @@ public class Speaker {
             pairedLooperId = null;
 
         if (changed)
-            host.setChanged();
+            host.markHostChanged();
         updateConnectedState();
     }
 
@@ -322,7 +322,7 @@ public class Speaker {
     private void emitNoteParticle(final int rgb) {
         SCPacketHandler.sendToTracking(
             host.createParticlePacket(rgb, PARTICLE_SIZE),
-            (ServerLevel) host.getLevel(),
+            (ServerLevel) host.getHostLevel(),
             host.getSoundPos()
         );
     }
@@ -347,7 +347,7 @@ public class Speaker {
      * releases every held note sustained through this speaker, e.g. when it is removed or unloaded
      */
     public void releaseSustainedNotes() {
-        final Level level = host.getLevel();
+        final Level level = host.getHostLevel();
         if (level == null || level.isClientSide) {
             sustainedNotes.clear();
             return;

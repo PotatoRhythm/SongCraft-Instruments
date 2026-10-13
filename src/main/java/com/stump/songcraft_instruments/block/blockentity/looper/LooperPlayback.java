@@ -36,7 +36,7 @@ public class LooperPlayback {
      * What plays the notes: a looper block, or a boat or minecart carrying a looper
      */
     public interface Host {
-        @Nullable Level getLevel();
+        @Nullable Level getHostLevel();
         /**
          * @return The position notes are played from. May change over time for vehicles
          */
@@ -91,7 +91,7 @@ public class LooperPlayback {
 
         cachedHeldNotes.forEach((note) -> {
             HeldNoteSoundPacketUtil.sendPlayNotePackets(
-                looper.getLevel(),
+                looper.getHostLevel(),
                 note.sound(), note.meta(),
                 phase,
                 note.initiator()
@@ -104,7 +104,7 @@ public class LooperPlayback {
      * return the speakers paired to this looper, which relay everything it plays
      */
     private List<Speaker> getPairedSpeakers() {
-        final Level level = looper.getLevel();
+        final Level level = looper.getHostLevel();
         if (level == null || level.isClientSide)
             return List.of();
         return looper.getPairedSpeakers();
@@ -166,7 +166,7 @@ public class LooperPlayback {
         final InitiatorID initiator = getPerformerInitiatorID(note[Recording.PERFORMER]);
 
         NoteSoundPacketUtil.sendPlayNotePackets(
-                looper.getLevel(),
+                looper.getHostLevel(),
                 sound,
                 meta,
                 initiator
@@ -190,7 +190,7 @@ public class LooperPlayback {
         final InitiatorID initiator = getPerformerInitiatorID(note[Recording.PERFORMER]);
 
         HeldNoteSoundPacketUtil.sendPlayNotePackets(
-            looper.getLevel(), sound,
+            looper.getHostLevel(), sound,
             meta, phase, initiator
         );
         getPairedSpeakers().forEach((speaker) -> speaker.playHeldNote(sound, meta, phase, initiator));
@@ -221,7 +221,7 @@ public class LooperPlayback {
         cachedHeldNotes.removeIf((note) -> note.initiator().equals(initiator));
 
         SCPacketHandler.sendToTracking(
-                new S2CLooperDampenPacket(initiator), (ServerLevel) looper.getLevel(), looper.getSoundPos()
+                new S2CLooperDampenPacket(initiator), (ServerLevel) looper.getHostLevel(), looper.getSoundPos()
         );
     }
 
@@ -251,7 +251,7 @@ public class LooperPlayback {
 
         SCPacketHandler.sendToTracking(
                 looper.createParticlePacket(rgb, size),
-                (ServerLevel) looper.getLevel(),
+                (ServerLevel) looper.getHostLevel(),
                 looper.getSoundPos()
         );
     }

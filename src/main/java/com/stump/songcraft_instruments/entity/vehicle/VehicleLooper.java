@@ -313,7 +313,7 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
     //#region LooperPlayback.Host implementation
 
     @Override
-    public Level getLevel() {
+    public Level getHostLevel() {
         return vehicle.level();
     }
     /**

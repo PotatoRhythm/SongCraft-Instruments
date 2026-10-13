@@ -98,7 +98,7 @@ public class VehicleSpeaker implements Speaker.Host {
     //#region Speaker.Host implementation
 
     @Override
-    public Level getLevel() {
+    public Level getHostLevel() {
         return vehicle.level();
     }
     /**
@@ -118,7 +118,7 @@ public class VehicleSpeaker implements Speaker.Host {
     }
     // Saved along with the vehicle
     @Override
-    public void setChanged() {}
+    public void markHostChanged() {}
 
     @Override
     public boolean isConnected() {
