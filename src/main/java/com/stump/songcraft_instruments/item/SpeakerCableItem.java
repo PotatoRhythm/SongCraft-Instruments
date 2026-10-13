@@ -5,6 +5,8 @@ import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.block.SpeakerBlock;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.blockentity.SpeakerBlockEntity;
+import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
+import com.stump.songcraft_instruments.block.blockentity.speaker.SpeakerAddress;
 import com.stump.songcraft_instruments.block.partial.AbstractInstrumentBlock;
 import com.stump.songcraft_instruments.block.partial.InstrumentBlockEntity;
 import com.stump.songcraft_instruments.util.CommonUtil;
@@ -35,11 +37,13 @@ import java.util.List;
  * shift + right-click a source to unpair all of its speakers,
  * or only the speaker selected with this cable beforehand.
  * held instruments don't need a cable: they pair by right-clicking a speaker directly (see SpeakerBlock).
+ * speakers carried by boats and minecarts work the same way, see {@link #useOnSpeaker}.
  */
 public class SpeakerCableItem extends Item {
     private static final String CABLE_TAG = "speakerCable",
         SOURCE_POS_TAG = "source",
-        SPEAKER_POS_TAG = "speaker";
+        // The selected speaker's address
+        SPEAKER_TAG = "speaker";
 
     public SpeakerCableItem(Properties pProperties) {
         super(pProperties);
@@ -80,10 +84,9 @@ public class SpeakerCableItem extends Item {
             sourcePos = clickedPos;
             selectMessage = "item.songcraft_instruments.speaker_cable.looper.select";
         } else if (block instanceof SpeakerBlock) {
-            final boolean succeed = player.isShiftKeyDown()
-                ? unpairFromSpeaker(clickedPos, cableTag, player)
-                : handleSpeakerBlock(clickedPos, cableTag, player);
-            return succeed ? InteractionResult.SUCCESS : InteractionResult.CONSUME_PARTIAL;
+            if (!(level.getBlockEntity(clickedPos) instanceof SpeakerBlockEntity sbe))
+                return InteractionResult.CONSUME_PARTIAL;
+            return useOnSpeaker(pContext.getItemInHand(), player, sbe.speaker());
         } else {
             return InteractionResult.FAIL;
         }
@@ -95,9 +98,23 @@ public class SpeakerCableItem extends Item {
         return succeed ? InteractionResult.SUCCESS : InteractionResult.CONSUME_PARTIAL;
     }
 
+    /**
+     * right-click (or shift + right-click) on a speaker, be it a block or carried by a boat or minecart.
+     * server only.
+     */
+    public static InteractionResult useOnSpeaker(ItemStack cable, Player player, Speaker speaker) {
+        final CompoundTag cableTag = CommonUtil.getOrCreateElementTag(SCInstrumentMod.modTag(cable), CABLE_TAG);
+
+        final boolean succeed = player.isShiftKeyDown()
+            ? unpairFromSpeaker(speaker, cableTag, player)
+            : handleSpeaker(speaker, cableTag, player);
+        return succeed ? InteractionResult.SUCCESS : InteractionResult.CONSUME_PARTIAL;
+    }
+
     private static boolean handleSourceBlock(BlockPos sourcePos, CompoundTag cableTag, Player player, String selectMessage) {
-        if (cableTag.contains(SPEAKER_POS_TAG, Tag.TAG_COMPOUND))
-            return pairSpeakerToSource(cableTag, NbtUtils.readBlockPos(cableTag.getCompound(SPEAKER_POS_TAG)), sourcePos, player);
+        final Speaker selectedSpeaker = getSelectedSpeaker(player.level(), cableTag);
+        if (selectedSpeaker != null)
+            return pairSpeakerToSource(cableTag, selectedSpeaker, sourcePos, player);
 
         clearCable(cableTag);
         cableTag.put(SOURCE_POS_TAG, NbtUtils.writeBlockPos(sourcePos));
@@ -106,15 +123,14 @@ public class SpeakerCableItem extends Item {
         , true);
         return true;
     }
-    private static boolean handleSpeakerBlock(BlockPos speakerPos, CompoundTag cableTag, Player player) {
-        if (!(player.level().getBlockEntity(speakerPos) instanceof SpeakerBlockEntity))
-            return false;
-
+    private static boolean handleSpeaker(Speaker speaker, CompoundTag cableTag, Player player) {
         if (cableTag.contains(SOURCE_POS_TAG, Tag.TAG_COMPOUND))
-            return pairSpeakerToSource(cableTag, speakerPos, NbtUtils.readBlockPos(cableTag.getCompound(SOURCE_POS_TAG)), player);
+            return pairSpeakerToSource(cableTag, speaker, NbtUtils.readBlockPos(cableTag.getCompound(SOURCE_POS_TAG)), player);
 
         clearCable(cableTag);
-        cableTag.put(SPEAKER_POS_TAG, NbtUtils.writeBlockPos(speakerPos));
+        final CompoundTag speakerTag = new CompoundTag();
+        speaker.getAddress().write(speakerTag);
+        cableTag.put(SPEAKER_TAG, speakerTag);
         player.displayClientMessage(
             Component.translatable("item.songcraft_instruments.speaker_cable.speaker.select").withStyle(ChatFormatting.GREEN)
         , true);
@@ -131,16 +147,25 @@ public class SpeakerCableItem extends Item {
         return (be instanceof InstrumentBlockEntity || be instanceof LooperBlockEntity) ? be : null;
     }
 
-    private static boolean pairSpeakerToSource(CompoundTag cableTag, BlockPos speakerPos, BlockPos sourcePos, Player player) {
+    /**
+     * return the speaker selected with this cable, or null if there is none (or it isn't loaded)
+     */
+    @Nullable
+    private static Speaker getSelectedSpeaker(Level level, CompoundTag cableTag) {
+        final SpeakerAddress address = SpeakerAddress.read(cableTag.getCompound(SPEAKER_TAG));
+        return (address == null) ? null : address.resolve(level);
+    }
+
+    private static boolean pairSpeakerToSource(CompoundTag cableTag, Speaker speaker, BlockPos sourcePos, Player player) {
         final Level level = player.level();
         clearCable(cableTag);
 
         final BlockEntity source = getSource(level, sourcePos);
-        if (!(level.getBlockEntity(speakerPos) instanceof SpeakerBlockEntity sbe) || source == null)
+        if (source == null)
             return false;
 
         // also mirrors the pairing onto the other half of linked blocks (like the Keyboard), and syncs it to clients
-        final SpeakerUtil.PairResult result = SpeakerUtil.pair(level, source, sbe);
+        final SpeakerUtil.PairResult result = SpeakerUtil.pair(level, source, speaker);
         SpeakerUtil.sendPairMessage(player, result, SpeakerUtil.speakerCount(level, source));
 
         return true;
@@ -156,14 +181,12 @@ public class SpeakerCableItem extends Item {
         if (source == null)
             return false;
 
-        final BlockPos selectedSpeakerPos = cableTag.contains(SPEAKER_POS_TAG, Tag.TAG_COMPOUND)
-            ? NbtUtils.readBlockPos(cableTag.getCompound(SPEAKER_POS_TAG))
-            : null;
+        final Speaker selectedSpeaker = getSelectedSpeaker(level, cableTag);
         clearCable(cableTag);
 
-        if (selectedSpeakerPos != null && (level.getBlockEntity(selectedSpeakerPos) instanceof SpeakerBlockEntity sbe)) {
-            final boolean removed = SpeakerUtil.unpair(level, source, sbe);
-            SpeakerUtil.sendUnpairMessage(player, removed, SpeakerUtil.speakerCount(level, source), sbe);
+        if (selectedSpeaker != null) {
+            final boolean removed = SpeakerUtil.unpair(level, source, selectedSpeaker);
+            SpeakerUtil.sendUnpairMessage(player, removed, SpeakerUtil.speakerCount(level, source), selectedSpeaker);
         } else {
             SpeakerUtil.sendUnpairAllMessage(player, SpeakerUtil.unpairAll(level, source));
         }
@@ -175,10 +198,8 @@ public class SpeakerCableItem extends Item {
      * shift + right-click on a speaker. If a source (block instrument or looper) was selected with this cable first,
      * only that source is unpaired, otherwise everything paired to the speaker is (including held instruments).
      */
-    private static boolean unpairFromSpeaker(BlockPos speakerPos, CompoundTag cableTag, Player player) {
+    private static boolean unpairFromSpeaker(Speaker speaker, CompoundTag cableTag, Player player) {
         final Level level = player.level();
-        if (!(level.getBlockEntity(speakerPos) instanceof SpeakerBlockEntity sbe))
-            return false;
 
         final BlockEntity selectedSource = cableTag.contains(SOURCE_POS_TAG, Tag.TAG_COMPOUND)
             ? getSource(level, NbtUtils.readBlockPos(cableTag.getCompound(SOURCE_POS_TAG)))
@@ -186,10 +207,10 @@ public class SpeakerCableItem extends Item {
         clearCable(cableTag);
 
         if (selectedSource != null) {
-            final boolean removed = SpeakerUtil.unpair(level, selectedSource, sbe);
-            SpeakerUtil.sendUnpairMessage(player, removed, SpeakerUtil.speakerCount(level, selectedSource), sbe);
+            final boolean removed = SpeakerUtil.unpair(level, selectedSource, speaker);
+            SpeakerUtil.sendUnpairMessage(player, removed, SpeakerUtil.speakerCount(level, selectedSource), speaker);
         } else {
-            SpeakerUtil.sendSpeakerUnpairAllMessage(player, SpeakerUtil.unpairAllFromSpeaker(level, sbe));
+            SpeakerUtil.sendSpeakerUnpairAllMessage(player, SpeakerUtil.unpairAllFromSpeaker(level, speaker));
         }
 
         return true;

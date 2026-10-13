@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "looper_boat",
+    "ingredients": [
+        {
+            "item": "minecraft:acacia_boat"
+        },
+        {
+            "item": "songcraft_instruments:looper"
+        }
+    ],
+    "result": {
+        "item": "songcraft_instruments:acacia_looper_boat",
+        "count": 1
+    }
+}

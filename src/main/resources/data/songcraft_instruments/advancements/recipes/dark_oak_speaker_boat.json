@@ -1,0 +1,27 @@
+{
+    "parent": "songcraft_instruments:recipes/root",
+    "criteria": {
+        "has_item": {
+            "conditions": {
+                "items": [
+                    {
+                        "items": [
+                            "songcraft_instruments:speaker"
+                        ]
+                    }
+                ]
+            },
+            "trigger": "minecraft:inventory_changed"
+        }
+    },
+    "requirements": [
+        [
+            "has_item"
+        ]
+    ],
+    "rewards": {
+        "recipes": [
+            "songcraft_instruments:dark_oak_speaker_boat"
+        ]
+    }
+}

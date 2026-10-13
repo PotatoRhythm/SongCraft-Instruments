@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "looper_minecart",
+    "ingredients": [
+        {
+            "item": "minecraft:minecart"
+        },
+        {
+            "item": "songcraft_instruments:looper"
+        }
+    ],
+    "result": {
+        "item": "songcraft_instruments:looper_minecart",
+        "count": 1
+    }
+}

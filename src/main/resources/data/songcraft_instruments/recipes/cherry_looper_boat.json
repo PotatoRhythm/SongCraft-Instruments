@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "looper_boat",
+    "ingredients": [
+        {
+            "item": "minecraft:cherry_boat"
+        },
+        {
+            "item": "songcraft_instruments:looper"
+        }
+    ],
+    "result": {
+        "item": "songcraft_instruments:cherry_looper_boat",
+        "count": 1
+    }
+}

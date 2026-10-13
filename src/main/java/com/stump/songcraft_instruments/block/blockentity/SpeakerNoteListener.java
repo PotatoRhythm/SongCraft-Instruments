@@ -1,6 +1,7 @@
 package com.stump.songcraft_instruments.block.blockentity;
 
 import com.stump.songcraft_instruments.SCInstrumentMod;
+import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
 import com.stump.songcraft_instruments.event.HeldNoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
@@ -41,7 +42,7 @@ public class SpeakerNoteListener {
      * an actual player performance, and prevents a speaker's own relayed sound
      * (which is not player-initiated) from re-triggering itself.
      */
-    private static List<SpeakerBlockEntity> getMatchingSpeakers(final InstrumentPlayedEvent<?> event) {
+    private static List<Speaker> getMatchingSpeakers(final InstrumentPlayedEvent<?> event) {
         if (!event.isByPlayer() || event.level().isClientSide)
             return List.of();
 

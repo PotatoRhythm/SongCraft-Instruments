@@ -1,8 +1,7 @@
 package com.stump.songcraft_instruments.block.blockentity.looper;
 
 import com.mojang.logging.LogUtils;
-import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
-import com.stump.songcraft_instruments.block.blockentity.SpeakerBlockEntity;
+import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CLooperDampenPacket;
@@ -16,7 +15,6 @@ import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import com.stump.songcraft_instruments.sound.registrar.HeldNoteSoundRegistrar;
 import com.stump.songcraft_instruments.sound.registrar.NoteSoundRegistrar;
-import com.stump.songcraft_instruments.util.SpeakerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +32,29 @@ import java.util.Optional;
 public class LooperPlayback {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private final LooperBlockEntity looper;
+    /**
+     * What plays the notes: a looper block, or a boat or minecart carrying a looper
+     */
+    public interface Host {
+        @Nullable Level getLevel();
+        /**
+         * @return The position notes are played from. May change over time for vehicles
+         */
+        BlockPos getSoundPos();
+        /**
+         * @return The speakers relaying everything played. Server only
+         */
+        List<Speaker> getPairedSpeakers();
+
+        /**
+         * @return The packet spawning a note particle above the looper
+         */
+        default S2CLooperParticlePacket createParticlePacket(final int rgb, final double size) {
+            return new S2CLooperParticlePacket(getSoundPos(), rgb, size);
+        }
+    }
+
+    private final Host looper;
     private final InitiatorID looperInitiatorID;
     private int heldParticleTimer = 0;
 
@@ -45,11 +65,12 @@ public class LooperPlayback {
     private final HashSet<CachedHeldNote> cachedHeldNotes = new HashSet<>();
     private record CachedHeldNote(HeldNoteSound sound, NoteSoundMetadata meta, int particleRgb, InitiatorID initiator) {}
 
-    public LooperPlayback(final LooperBlockEntity looper, final BlockPos pos) {
+    /**
+     * @param initiatorID The initiator the first performer's notes are played back with
+     */
+    public LooperPlayback(final Host looper, final InitiatorID initiatorID) {
         this.looper = looper;
-        this.looperInitiatorID = new InitiatorID("block",
-            String.format("x%sy%sz%s", pos.getX(), pos.getY(), pos.getZ())
-        );
+        this.looperInitiatorID = initiatorID;
     }
 
 
@@ -59,7 +80,7 @@ public class LooperPlayback {
     }
 
     public void notifyHeldNotesPhase(final HeldSoundPhase phase) {
-        final List<SpeakerBlockEntity> speakers = getPairedSpeakers();
+        final List<Speaker> speakers = getPairedSpeakers();
 
         cachedHeldNotes.forEach((note) -> {
             HeldNoteSoundPacketUtil.sendPlayNotePackets(
@@ -75,11 +96,11 @@ public class LooperPlayback {
     /**
      * return the speakers paired to this looper, which relay everything it plays
      */
-    private List<SpeakerBlockEntity> getPairedSpeakers() {
+    private List<Speaker> getPairedSpeakers() {
         final Level level = looper.getLevel();
         if (level == null || level.isClientSide)
             return List.of();
-        return SpeakerUtil.getFromBlock(level, looper);
+        return looper.getPairedSpeakers();
     }
 
     /**
@@ -112,7 +133,7 @@ public class LooperPlayback {
                     break;
             }
         } catch (Exception e) {
-            LOGGER.error("Attempted to play a looper note at {}, but met with an exception", looper.getBlockPos(), e);
+            LOGGER.error("Attempted to play a looper note at {}, but met with an exception", looper.getSoundPos(), e);
         }
     }
 
@@ -174,9 +195,10 @@ public class LooperPlayback {
             triggerEmitNoteParticle(rgb);
 
         } else if (phase == HeldSoundPhase.RELEASE) {
+            // The looper may have moved since the note started (if carried by a vehicle), so ignore the position
             cachedHeldNotes.removeIf((cached) ->
                     cached.sound().equals(sound) &&
-                            cached.meta().equals(meta) &&
+                            cached.meta().equals(atPos(meta, cached.meta().pos())) &&
                             cached.initiator().equals(initiator)
             );
         }
@@ -191,7 +213,7 @@ public class LooperPlayback {
         cachedHeldNotes.removeIf((note) -> note.initiator().equals(initiator));
 
         SCPacketHandler.sendToTracking(
-                new S2CLooperDampenPacket(initiator), (ServerLevel) looper.getLevel(), looper.getBlockPos()
+                new S2CLooperDampenPacket(initiator), (ServerLevel) looper.getLevel(), looper.getSoundPos()
         );
     }
 
@@ -204,12 +226,15 @@ public class LooperPlayback {
             return null;
 
         return new NoteSoundMetadata(
-            looper.getBlockPos(),
+            looper.getSoundPos(),
             note[Recording.PITCH],
             note[Recording.VOLUME],
             note[Recording.PARTICLE_COLOR],
             instrumentId, Optional.empty()
         );
+    }
+    private static NoteSoundMetadata atPos(final NoteSoundMetadata meta, final BlockPos pos) {
+        return new NoteSoundMetadata(pos, meta.pitch(), meta.volume(), meta.particleColor(), meta.instrumentId(), meta.noteIdentifier());
     }
 
     public void triggerEmitNoteParticle(int rgb) {
@@ -217,13 +242,9 @@ public class LooperPlayback {
         double size = 0.2;
 
         SCPacketHandler.sendToTracking(
-                new S2CLooperParticlePacket(
-                        looper.getBlockPos(),
-                        rgb,
-                        size
-                ),
+                looper.createParticlePacket(rgb, size),
                 (ServerLevel) looper.getLevel(),
-                looper.getBlockPos()
+                looper.getSoundPos()
         );
     }
 

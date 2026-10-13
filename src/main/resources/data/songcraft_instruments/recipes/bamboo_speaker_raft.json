@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "speaker_boat",
+    "ingredients": [
+        {
+            "item": "minecraft:bamboo_raft"
+        },
+        {
+            "item": "songcraft_instruments:speaker"
+        }
+    ],
+    "result": {
+        "item": "songcraft_instruments:bamboo_speaker_raft",
+        "count": 1
+    }
+}

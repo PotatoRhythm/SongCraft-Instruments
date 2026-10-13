@@ -36,7 +36,7 @@ public class SpeakerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     /**
      * whether at least one instrument is paired to this speaker; switches the front texture.
-     * managed by SpeakerBlockEntity's pair count.
+     * managed by the speaker's pair count.
      */
     public static final BooleanProperty CONNECTED = BooleanProperty.create("connected");
 
@@ -74,7 +74,7 @@ public class SpeakerBlock extends Block implements EntityBlock {
     public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
         super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
         if (!pLevel.isClientSide && pLevel.getBlockEntity(pPos) instanceof SpeakerBlockEntity sbe)
-            sbe.resetPairings();
+            sbe.speaker().resetPairings();
     }
 
     @Override
@@ -104,15 +104,7 @@ public class SpeakerBlock extends Block implements EntityBlock {
         if (!(pLevel.getBlockEntity(pPos) instanceof SpeakerBlockEntity sbe))
             return InteractionResult.FAIL;
 
-        // shift + right-click unpairs this speaker, right-click pairs it
-        if (pPlayer.isShiftKeyDown()) {
-            final boolean removed = SpeakerUtil.unpair(pLevel, heldStack, sbe);
-            SpeakerUtil.sendUnpairMessage(pPlayer, removed, SpeakerUtil.speakerCount(pLevel, heldStack), sbe);
-        } else {
-            final SpeakerUtil.PairResult result = SpeakerUtil.pair(pLevel, heldStack, sbe);
-            SpeakerUtil.sendPairMessage(pPlayer, result, SpeakerUtil.speakerCount(pLevel, heldStack));
-        }
-
+        SpeakerUtil.useHeldInstrument(pLevel, pPlayer, heldStack, sbe.speaker());
         return InteractionResult.SUCCESS;
     }
 }

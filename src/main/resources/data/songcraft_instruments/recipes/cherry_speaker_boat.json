@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "speaker_boat",
+    "ingredients": [
+        {
+            "item": "minecraft:cherry_boat"
+        },
+        {
+            "item": "songcraft_instruments:speaker"
+        }
+    ],
+    "result": {
+        "item": "songcraft_instruments:cherry_speaker_boat",
+        "count": 1
+    }
+}

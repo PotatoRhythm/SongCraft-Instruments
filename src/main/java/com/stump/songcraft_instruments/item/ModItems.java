@@ -3,6 +3,10 @@ package com.stump.songcraft_instruments.item;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.SCCreativeModeTabs;
 import com.stump.songcraft_instruments.block.ModBlocks;
+import com.stump.songcraft_instruments.entity.vehicle.LooperBoat;
+import com.stump.songcraft_instruments.entity.vehicle.LooperMinecart;
+import com.stump.songcraft_instruments.entity.vehicle.SpeakerBoat;
+import com.stump.songcraft_instruments.entity.vehicle.SpeakerMinecart;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableAccessoryInstrumentItem;
 import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
@@ -10,6 +14,7 @@ import com.stump.songcraft_instruments.networking.packet.instrument.util.Instrum
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,7 +28,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.stump.songcraft_instruments.networking.packet.instrument.util.InstrumentPacketUtil.sendOpenPacket;
@@ -334,8 +341,36 @@ public class ModItems {
 
         RECORD_WRITABLE = register("record_writable", () -> new WritableRecordItem(new Properties()),
             CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
+        ),
+
+        LOOPER_MINECART = register("looper_minecart",
+            () -> new ModMinecartItem(LooperMinecart::new, new Properties().stacksTo(1)),
+            CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
+        ),
+        SPEAKER_MINECART = register("speaker_minecart",
+            () -> new ModMinecartItem(SpeakerMinecart::new, new Properties().stacksTo(1)),
+            CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
         )
     ;
+
+    /**
+     * Boats carrying a looper or speaker, one for each type of boat (a raft for bamboo), like the chest boats
+     */
+    public static final Map<Boat.Type, RegistryObject<Item>>
+        LOOPER_BOATS = registerBoats("looper", LooperBoat::new),
+        SPEAKER_BOATS = registerBoats("speaker", SpeakerBoat::new);
+
+    private static Map<Boat.Type, RegistryObject<Item>> registerBoats(final String carried, final ModBoatItem.BoatFactory factory) {
+        final Map<Boat.Type, RegistryObject<Item>> boats = new EnumMap<>(Boat.Type.class);
+        for (final Boat.Type type : Boat.Type.values()) {
+            final String name = type.getName() + "_" + carried + ((type == Boat.Type.BAMBOO) ? "_raft" : "_boat");
+            boats.put(type, register(name,
+                () -> new ModBoatItem(type, factory, new Properties().stacksTo(1)),
+                CreativeModeTabs.TOOLS_AND_UTILITIES, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()
+            ));
+        }
+        return boats;
+    }
 
     private static ResourceLocation loc(final String path) {
         return new ResourceLocation(SCInstrumentMod.MODID, path);

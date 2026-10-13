@@ -1,0 +1,27 @@
+{
+    "parent": "songcraft_instruments:recipes/root",
+    "criteria": {
+        "has_item": {
+            "conditions": {
+                "items": [
+                    {
+                        "items": [
+                            "songcraft_instruments:looper"
+                        ]
+                    }
+                ]
+            },
+            "trigger": "minecraft:inventory_changed"
+        }
+    },
+    "requirements": [
+        [
+            "has_item"
+        ]
+    ],
+    "rewards": {
+        "recipes": [
+            "songcraft_instruments:bamboo_looper_raft"
+        ]
+    }
+}

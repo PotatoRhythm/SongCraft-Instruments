@@ -8,6 +8,8 @@ import com.stump.songcraft_instruments.sound.SCSounds;
 import com.stump.songcraft_instruments.util.CommonUtil;
 import com.stump.songcraft_instruments.block.ModBlocks;
 import com.stump.songcraft_instruments.block.blockentity.ModBlockEntities;
+import com.stump.songcraft_instruments.entity.ModEntities;
+import com.stump.songcraft_instruments.menu.ModMenus;
 import com.stump.songcraft_instruments.criteria.ModCriteria;
 import com.stump.songcraft_instruments.item.crafting.ModRecipeSerializers;
 import net.minecraft.nbt.CompoundTag;
@@ -59,6 +61,8 @@ public class SCInstrumentMod
         ModItems.register(bus);
         ModBlocks.register(bus);
         ModBlockEntities.register(bus);
+        ModEntities.register(bus);
+        ModMenus.register(bus);
         ModRecipeSerializers.register(bus);
         ModParticles.register(bus);
 

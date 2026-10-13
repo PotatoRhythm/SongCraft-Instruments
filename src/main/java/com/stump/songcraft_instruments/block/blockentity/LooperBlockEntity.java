@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.block.blockentity.looper.LooperConnection
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperPlayback;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperRecordWriter;
 import com.stump.songcraft_instruments.block.blockentity.looper.RecordingSession;
+import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
 import com.mojang.logging.LogUtils;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
@@ -14,7 +15,9 @@ import com.stump.songcraft_instruments.recording.Recording;
 import com.stump.songcraft_instruments.recording.RecordingBuilder;
 import com.stump.songcraft_instruments.recording.RecordingCodec;
 import com.stump.songcraft_instruments.recording.RecordingStore;
+import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import com.stump.songcraft_instruments.util.LooperUtil;
+import com.stump.songcraft_instruments.util.SpeakerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -33,12 +36,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * The looper's record slot, block state and timeline. Recording, connections, note writing and playback
  * are each handled by their own part: {@link #session()}, {@link #connections()}, {@link #writer()} and {@link #playback()}.
  */
-public class LooperBlockEntity extends BlockEntity implements ContainerSingleItem {
+public class LooperBlockEntity extends BlockEntity implements ContainerSingleItem, LooperPlayback.Host {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final String
@@ -315,13 +319,29 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
 
     public LooperBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(ModBlockEntities.LOOPER.get(), pPos, pBlockState);
-        this.playback = new LooperPlayback(this, pPos);
+        this.playback = new LooperPlayback(this, new InitiatorID("block",
+            String.format("x%sy%sz%s", pPos.getX(), pPos.getY(), pPos.getZ())
+        ));
 
         final CompoundTag data = getPersistentData();
 
         if (!data.contains(TICKS_TAG, CompoundTag.TAG_INT))
             setTicks(0);
     }
+
+
+    //#region LooperPlayback.Host implementation
+
+    @Override
+    public BlockPos getSoundPos() {
+        return getBlockPos();
+    }
+    @Override
+    public List<Speaker> getPairedSpeakers() {
+        return SpeakerUtil.getFromBlock(level, this);
+    }
+
+    //#endregion
 
 
     public void setTicks(final int ticks) {

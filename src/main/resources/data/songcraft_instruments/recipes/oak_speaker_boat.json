@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "speaker_boat",
+    "ingredients": [
+        {
+            "item": "minecraft:oak_boat"
+        },
+        {
+            "item": "songcraft_instruments:speaker"
+        }
+    ],
+    "result": {
+        "item": "songcraft_instruments:oak_speaker_boat",
+        "count": 1
+    }
+}

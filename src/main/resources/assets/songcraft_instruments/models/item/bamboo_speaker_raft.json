@@ -1,0 +1,7 @@
+{
+    "parent": "minecraft:item/generated",
+    "textures": {
+        "layer0": "minecraft:item/bamboo_raft",
+        "layer1": "songcraft_instruments:item/speaker_raft_overlay"
+    }
+}

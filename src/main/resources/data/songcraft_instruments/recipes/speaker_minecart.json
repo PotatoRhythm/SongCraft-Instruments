@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "group": "speaker_minecart",
+    "ingredients": [
+        {
+            "item": "minecraft:minecart"
+        },
+        {
+            "item": "songcraft_instruments:speaker"
+        }
+    ],
+    "result": {
+        "item": "songcraft_instruments:speaker_minecart",
+        "count": 1
+    }
+}
