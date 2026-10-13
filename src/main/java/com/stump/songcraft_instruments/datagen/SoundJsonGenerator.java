@@ -2,6 +2,8 @@ package com.stump.songcraft_instruments.datagen;
 
 import com.stump.songcraft_instruments.sound.NoteSound;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.SoundDefinition;
 import net.minecraftforge.common.data.SoundDefinitionsProvider;
@@ -10,16 +12,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class SoundJsonGenerator extends SoundDefinitionsProvider {
 
+    private static final String STEREO_SUFFIX = ".stereo";
+
+    private final ExistingFileHelper fileHelper;
+
     public SoundJsonGenerator(PackOutput output, ExistingFileHelper fileHelper) {
         super(output, "songcraft_instruments", fileHelper);
+        this.fileHelper = fileHelper;
     }
 
     @Override
     public void registerSounds() {
+        trackMissingTwins();
+
         registerInstrument("windsong_lyre", 20, 0.8f, false, true);
 
         registerInstrument("vintage_lyre", 20, 0.90f, false, false);
@@ -393,40 +404,25 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
     private void addSoundVariants(String event, String soundPath, float volume, boolean supportsStereo) {
         String[] parts = soundPath.split(":", 2);
 
-        Path soundDirectory = Paths.get(System.getProperty("user.dir"), "..",
-                "src", "main", "resources", "assets", parts[0], "sounds", parts[1]).normalize();
+        Path soundDirectory = soundsDirectory(parts[0]).resolve(parts[1]);
 
         SoundDefinition monoDefinition = definition();
         SoundDefinition stereoDefinition = supportsStereo ? definition() : null;
 
-        try {
-            Files.list(soundDirectory)
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().toLowerCase().endsWith(".ogg"))
-                    .sorted(Comparator.comparing(Path::toString))
-                    .forEach(path -> {
-                        String fileName = path.getFileName().toString();
+        // A variant may only ship one of its Mono & Stereo files, the other being its twin (see ChannelTwinSounds)
+        Set<String> variantNames = new TreeSet<>();
+
+        try (Stream<Path> files = Files.list(soundDirectory)) {
+            files.filter(Files::isRegularFile)
+                    .map(path -> path.getFileName().toString())
+                    .filter(fileName -> fileName.toLowerCase().endsWith(".ogg"))
+                    .map(fileName -> {
                         String soundName = fileName.substring(0, fileName.length() - 4);
-
-                        boolean isStereo = soundName.endsWith(".stereo");
-
-                        if (isStereo) {
-                            if (!supportsStereo)
-                                return;
-
-                            stereoDefinition.with(
-                                    sound(soundPath + "/" + soundName)
-                                            .volume(volume)
-                            );
-                        }
-                        else {
-                            monoDefinition.with(
-                                    sound(soundPath + "/" + soundName)
-                                            .volume(volume)
-                                            .attenuationDistance(MONO_DISTANCE)
-                            );
-                        }
-                    });
+                        return soundName.endsWith(STEREO_SUFFIX)
+                                ? soundName.substring(0, soundName.length() - STEREO_SUFFIX.length())
+                                : soundName;
+                    })
+                    .forEach(variantNames::add);
         } catch (IOException e) {
             throw new RuntimeException(
                     "Failed to parse sound directory: " + soundDirectory,
@@ -434,9 +430,59 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
             );
         }
 
+        for (String variantName : variantNames) {
+            monoDefinition.with(
+                    sound(soundPath + "/" + variantName)
+                            .volume(volume)
+                            .attenuationDistance(MONO_DISTANCE)
+            );
+
+            if (supportsStereo) {
+                stereoDefinition.with(
+                        sound(soundPath + "/" + variantName + STEREO_SUFFIX)
+                                .volume(volume)
+                );
+            }
+        }
+
         add(event, monoDefinition);
 
         if (supportsStereo)
             add(event + "_stereo", stereoDefinition);
+    }
+
+    /**
+     * Marks the Mono/Stereo twin of every sound file that only ships one of them as existing,
+     * since the game creates the missing twin from the other file (see ChannelTwinSounds).
+     */
+    private void trackMissingTwins() {
+        String namespace = "songcraft_instruments";
+        Path soundDirectory = soundsDirectory(namespace);
+
+        try (Stream<Path> files = Files.walk(soundDirectory)) {
+            files.filter(Files::isRegularFile)
+                    .map(path -> soundDirectory.relativize(path).toString().replace('\\', '/'))
+                    .filter(path -> path.endsWith(".ogg"))
+                    .forEach(path -> {
+                        String soundName = path.substring(0, path.length() - 4);
+                        String twinName = soundName.endsWith(STEREO_SUFFIX)
+                                ? soundName.substring(0, soundName.length() - STEREO_SUFFIX.length())
+                                : soundName + STEREO_SUFFIX;
+
+                        if (!Files.exists(soundDirectory.resolve(twinName + ".ogg")))
+                            fileHelper.trackGenerated(new ResourceLocation(namespace, twinName),
+                                    PackType.CLIENT_RESOURCES, ".ogg", "sounds");
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Failed to parse sound directory: " + soundDirectory,
+                    e
+            );
+        }
+    }
+
+    private static Path soundsDirectory(String namespace) {
+        return Paths.get(System.getProperty("user.dir"), "..",
+                "src", "main", "resources", "assets", namespace, "sounds").normalize();
     }
 }
