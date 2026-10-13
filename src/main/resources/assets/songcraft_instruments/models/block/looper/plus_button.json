@@ -1,0 +1,32 @@
+{
+	"textures": {
+		"controls": "songcraft_instruments:block/looper_controls",
+		"particle": "songcraft_instruments:block/looper_controls"
+	},
+	"elements": [
+		{
+			"from": [14.375, 12.53125, 1.875],
+			"to": [16.375, 13.53125, 2.15625],
+			"rotation": {"angle": 0, "axis": "y", "origin": [14.375, 11.53125, 0.15625]},
+			"faces": {
+				"north": {"uv": [0, 2, 4, 4], "texture": "#controls"},
+				"east": {"uv": [4, 4, 6, 6], "texture": "#controls"},
+				"south": {"uv": [0, 4, 4, 6], "texture": "#controls"},
+				"up": {"uv": [0, 6, 4, 8], "texture": "#controls"},
+				"down": {"uv": [4, 2, 8, 4], "texture": "#controls"}
+			}
+		},
+		{
+			"from": [14.375, 12.89063, 1.51563],
+			"to": [16.375, 13.17188, 2.51563],
+			"rotation": {"angle": 0, "axis": "x", "origin": [15.375, 13.03125, 2.01563]},
+			"faces": {
+				"north": {"uv": [4, 2, 8, 4], "rotation": 180, "texture": "#controls"},
+				"east": {"uv": [4, 4, 6, 6], "rotation": 270, "texture": "#controls"},
+				"south": {"uv": [0, 6, 4, 8], "texture": "#controls"},
+				"up": {"uv": [0, 2, 4, 4], "rotation": 180, "texture": "#controls"},
+				"down": {"uv": [0, 4, 4, 6], "texture": "#controls"}
+			}
+		}
+	]
+}

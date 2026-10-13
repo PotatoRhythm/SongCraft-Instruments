@@ -1,3 +1,29 @@
 {
-    "parent": "songcraft_instruments:block/looper/idle_not_looping"
+    "parent": "minecraft:block/block",
+    "loader": "forge:composite",
+    "textures": {
+        "particle": "songcraft_instruments:block/speaker_bottom"
+    },
+    "children": {
+        "body": { "parent": "songcraft_instruments:block/looper/idle_not_looping" },
+        "plus": { "parent": "songcraft_instruments:block/looper/plus_button" },
+        "minus": { "parent": "songcraft_instruments:block/looper/minus_button" },
+        "indicator": {
+            "textures": {
+                "controls": "songcraft_instruments:block/looper_controls"
+            },
+            "elements": [
+                {
+                    "from": [13.8125, 11.90625, 3.28125],
+                    "to": [14.96875, 13.4375, 3.6625],
+                    "faces": {
+                        "north": {"uv": [10, 0, 12, 3], "texture": "#controls"},
+                        "east": {"uv": [10, 4, 11, 7], "texture": "#controls"},
+                        "south": {"uv": [12, 0, 14, 3], "texture": "#controls"},
+                        "up": {"uv": [12, 4, 14, 5], "texture": "#controls"}
+                    }
+                }
+            ]
+        }
+    }
 }

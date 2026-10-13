@@ -4,6 +4,7 @@ import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperConnections;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperPlayback;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperRecordWriter;
+import com.stump.songcraft_instruments.block.blockentity.looper.LooperVolumeControls;
 import com.stump.songcraft_instruments.block.blockentity.looper.RecordingSession;
 import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
 import com.mojang.logging.LogUtils;
@@ -22,6 +23,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -51,7 +54,9 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         // The looper synced with this one through the looper adapter
         SYNCED_LOOPER_TAG = "SyncedLooper",
         // The notes recorded so far onto an empty record, in the recording file format
-        DRAFT_TAG = "Draft"
+        DRAFT_TAG = "Draft",
+        // The volume set with the buttons on the looper's side, in percent
+        VOLUME_TAG = "Volume"
     ;
 
     private ItemStack recordIn = ItemStack.EMPTY;
@@ -69,6 +74,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
     private final LooperConnections connections = new LooperConnections(this);
     private final LooperRecordWriter writer = new LooperRecordWriter(this);
     private final LooperPlayback playback;
+    private final LooperVolumeControls volumeControls = new LooperVolumeControls();
 
     public RecordingSession session() {
         return session;
@@ -81,6 +87,9 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
     }
     public LooperPlayback playback() {
         return playback;
+    }
+    public LooperVolumeControls volumeControls() {
+        return volumeControls;
     }
 
 
@@ -233,6 +242,7 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         updateRecording(pTag.contains(DRAFT_TAG, Tag.TAG_BYTE_ARRAY) ? pTag.getByteArray(DRAFT_TAG) : null);
         connections.load();
         session.load();
+        volumeControls.setVolume(pTag.contains(VOLUME_TAG, Tag.TAG_INT) ? pTag.getInt(VOLUME_TAG) : LooperVolumeControls.MAX_VOLUME);
     }
 
     @Override
@@ -242,7 +252,68 @@ public class LooperBlockEntity extends BlockEntity implements ContainerSingleIte
         // Never sent to clients.
         if (draft != null && !draft.isEmpty())
             pTag.putByteArray(DRAFT_TAG, RecordingCodec.encode(draft.build(-1)));
+        pTag.putInt(VOLUME_TAG, volumeControls.getVolume());
     }
+
+    //#region Volume
+
+    /**
+     * Changes the volume by one step, updating the clients. Server only.
+     * @return Whether the volume changed; not when it is already at 0% or 100%
+     */
+    public boolean stepVolume(final boolean up) {
+        if (!volumeControls.stepVolume(up))
+            return false;
+
+        setChanged();
+        getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        return true;
+    }
+
+    @Override
+    public int getVolume() {
+        return volumeControls.getVolume();
+    }
+
+    /**
+     * Only the volume is sent to clients, for the indicator to show it
+     */
+    @Override
+    public CompoundTag getUpdateTag() {
+        final CompoundTag tag = new CompoundTag();
+        tag.putInt(VOLUME_TAG, volumeControls.getVolume());
+        return tag;
+    }
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+    @Override
+    public void handleUpdateTag(final CompoundTag tag) {
+        volumeControls.syncVolume(tag.getInt(VOLUME_TAG));
+    }
+    @Override
+    public void onDataPacket(final Connection net, final ClientboundBlockEntityDataPacket pkt) {
+        final CompoundTag tag = pkt.getTag();
+        if (tag != null)
+            handleUpdateTag(tag);
+    }
+
+    /**
+     * Triggered by {@link LooperBlock#triggerEvent}, to animate a volume button being pressed
+     */
+    @Override
+    public boolean triggerEvent(final int id, final int param) {
+        if (id == LooperBlock.PLUS_PRESSED_EVENT || id == LooperBlock.MINUS_PRESSED_EVENT) {
+            if (level != null && level.isClientSide)
+                volumeControls.onButtonPressed(id == LooperBlock.PLUS_PRESSED_EVENT);
+            return true;
+        }
+
+        return super.triggerEvent(id, param);
+    }
+
+    //#endregion
 
     //#region ContainerSingleItem implementation
 

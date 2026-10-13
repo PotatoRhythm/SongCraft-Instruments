@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
  * The record slot of a looper carried by a boat or minecart, with buttons to play or pause it and toggle looping.
  */
 public class LooperVehicleMenu extends AbstractContainerMenu {
-    public static final int BUTTON_PLAY = 0, BUTTON_LOOPING = 1;
+    public static final int BUTTON_PLAY = 0, BUTTON_LOOPING = 1, BUTTON_VOLUME_DOWN = 2, BUTTON_VOLUME_UP = 3;
 
     public static final int RECORD_SLOT_X = 17, RECORD_SLOT_Y = 21;
     public static final int INVENTORY_Y = 70;
@@ -72,6 +72,9 @@ public class LooperVehicleMenu extends AbstractContainerMenu {
     public int getLengthSeconds() {
         return data.get(VehicleLooper.DATA_LENGTH);
     }
+    public int getVolume() {
+        return data.get(VehicleLooper.DATA_VOLUME);
+    }
 
     @Override
     public boolean clickMenuButton(final Player player, final int id) {
@@ -81,6 +84,8 @@ public class LooperVehicleMenu extends AbstractContainerMenu {
         switch (id) {
             case BUTTON_PLAY -> looper.cyclePlaying();
             case BUTTON_LOOPING -> looper.cycleLooping();
+            case BUTTON_VOLUME_DOWN -> looper.stepVolume(player, false);
+            case BUTTON_VOLUME_UP -> looper.stepVolume(player, true);
             default -> {
                 return false;
             }

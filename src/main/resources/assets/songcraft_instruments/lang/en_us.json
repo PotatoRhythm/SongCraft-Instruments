@@ -476,10 +476,11 @@
     "gui.songcraft_instruments.looper_vehicle.pause": "Pause",
     "gui.songcraft_instruments.looper_vehicle.looping_on": "Loop: On",
     "gui.songcraft_instruments.looper_vehicle.looping_off": "Loop: Off",
-    "gui.songcraft_instruments.looper_vehicle.no_record": "Insert a burned record",
     "gui.songcraft_instruments.looper_vehicle.empty": "This record has nothing recorded",
     "gui.songcraft_instruments.looper_vehicle.missing": "This record's recording isn't in this world",
     "gui.songcraft_instruments.looper_vehicle.time": "%s / %s",
+    "gui.songcraft_instruments.looper_vehicle.volume_down": "Volume down",
+    "gui.songcraft_instruments.looper_vehicle.volume_up": "Volume up",
     "songcraft_instruments.speaker.paired": "%s of %s speakers connected!",
     "songcraft_instruments.speaker.already_paired": "This speaker is already connected (%s of %s speakers)",
     "songcraft_instruments.speaker.full": "Already at the maximum of %s connected speakers",
@@ -495,6 +496,7 @@
 
     "songcraft_instruments.looper.pair_conflict": "This record already has burned footage!",
     "songcraft_instruments.looper.no_record": "No record inserted",
+    "songcraft_instruments.looper.volume": "Looper volume: %s%%",
     "songcraft_instruments.looper.connections_locked": "This looper is recording. Wait for it to finish before connecting",
 
     "songcraft_instruments.record.no_footage": "This record has no footage! Use an instrument to start recording",

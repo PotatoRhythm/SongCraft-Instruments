@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 public class LooperParticlePacketUtil {
 
     public static void spawnLooperParticle(BlockPos pos, int rgb, double size) {
-        spawnParticle(new Vec3(pos.getX() + 0.5, pos.getY() + 1.25, pos.getZ() + 0.5), rgb, size);
+        spawnParticle(new Vec3(pos.getX() + 0.5, pos.getY() + 1 + CarriedBlockVehicle.PARTICLE_HEIGHT, pos.getZ() + 0.5), rgb, size);
     }
 
     /**

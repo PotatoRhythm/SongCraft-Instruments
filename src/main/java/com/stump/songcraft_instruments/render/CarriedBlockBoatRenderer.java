@@ -2,7 +2,9 @@ package com.stump.songcraft_instruments.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.entity.vehicle.CarriedBlockVehicle;
+import com.stump.songcraft_instruments.entity.vehicle.LooperBoat;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.BoatRenderer;
@@ -10,6 +12,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Quaternionf;
 
 /**
@@ -53,7 +56,10 @@ public class CarriedBlockBoatRenderer extends BoatRenderer {
         // The block's front faces north, towards the passenger
         poseStack.translate(-0.5F, 0.0F, -0.5F);
 
-        blockRenderer.renderSingleBlock(vehicle.getCarriedBlockState(), poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
+        final BlockState state = vehicle.getCarriedBlockState();
+        blockRenderer.renderSingleBlock(state, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
+        if (boat instanceof LooperBoat looperBoat && state.getBlock() instanceof LooperBlock)
+            LooperRenderer.renderControls(state, looperBoat.looper().volumeControls(), poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
 
         poseStack.popPose();
     }

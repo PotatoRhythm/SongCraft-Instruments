@@ -52,6 +52,13 @@ public class LooperPlayback {
         default S2CLooperParticlePacket createParticlePacket(final int rgb, final double size) {
             return new S2CLooperParticlePacket(getSoundPos(), rgb, size);
         }
+
+        /**
+         * @return The volume everything is played back at, in percent of the recorded volume
+         */
+        default int getVolume() {
+            return LooperVolumeControls.MAX_VOLUME;
+        }
     }
 
     private final Host looper;
@@ -195,10 +202,11 @@ public class LooperPlayback {
             triggerEmitNoteParticle(rgb);
 
         } else if (phase == HeldSoundPhase.RELEASE) {
-            // The looper may have moved since the note started (if carried by a vehicle), so ignore the position
+            // The looper may have moved since the note started (if carried by a vehicle), and its volume changed,
+            // so ignore both
             cachedHeldNotes.removeIf((cached) ->
                     cached.sound().equals(sound) &&
-                            cached.meta().equals(atPos(meta, cached.meta().pos())) &&
+                            cached.meta().equals(atPosAndVolume(meta, cached.meta().pos(), cached.meta().volume())) &&
                             cached.initiator().equals(initiator)
             );
         }
@@ -228,13 +236,13 @@ public class LooperPlayback {
         return new NoteSoundMetadata(
             looper.getSoundPos(),
             note[Recording.PITCH],
-            note[Recording.VOLUME],
+            note[Recording.VOLUME] * looper.getVolume() / LooperVolumeControls.MAX_VOLUME,
             note[Recording.PARTICLE_COLOR],
             instrumentId, Optional.empty()
         );
     }
-    private static NoteSoundMetadata atPos(final NoteSoundMetadata meta, final BlockPos pos) {
-        return new NoteSoundMetadata(pos, meta.pitch(), meta.volume(), meta.particleColor(), meta.instrumentId(), meta.noteIdentifier());
+    private static NoteSoundMetadata atPosAndVolume(final NoteSoundMetadata meta, final BlockPos pos, final int volume) {
+        return new NoteSoundMetadata(pos, meta.pitch(), volume, meta.particleColor(), meta.instrumentId(), meta.noteIdentifier());
     }
 
     public void triggerEmitNoteParticle(int rgb) {

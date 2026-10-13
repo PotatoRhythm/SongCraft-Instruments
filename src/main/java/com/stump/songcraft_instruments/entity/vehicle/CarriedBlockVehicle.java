@@ -22,9 +22,9 @@ public interface CarriedBlockVehicle {
     float MINECART_MODEL_Y = 0.375F;
 
     /**
-     * How far above the carried block's top note particles spawn
+     * How far above the carried block's top note particles spawn; the same as above a placed looper or speaker
      */
-    double PARTICLE_HEIGHT = 0.4;
+    double PARTICLE_HEIGHT = 0.3;
 
     BlockState getCarriedBlockState();
 

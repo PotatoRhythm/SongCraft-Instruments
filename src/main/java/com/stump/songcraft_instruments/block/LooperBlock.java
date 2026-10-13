@@ -12,6 +12,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,6 +34,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.redstone.Redstone;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Function;
@@ -43,6 +46,10 @@ public class LooperBlock extends Block implements EntityBlock {
     public static final BooleanProperty REDSTONE_TRIGGERED = BooleanProperty.create("redstone_triggered");
     public static final BooleanProperty LOOPING = BooleanProperty.create("looping");
 
+    /**
+     * Block events animating the volume buttons being pressed, see {@link LooperBlockEntity#triggerEvent}
+     */
+    public static final int PLUS_PRESSED_EVENT = 0, MINUS_PRESSED_EVENT = 1;
 
     public LooperBlock(Properties properties) {
         super(properties);
@@ -116,6 +123,7 @@ public class LooperBlock extends Block implements EntityBlock {
 
         return performChainedInteractions(
             List.of(
+                this::pressVolumeButton,
                 this::insertRecord,
                 this::cycleLooping,
                 this::validateRecordPresence,
@@ -143,6 +151,52 @@ public class LooperBlock extends Block implements EntityBlock {
 
         return InteractionResult.FAIL;
     }
+    /**
+     * Turns the volume up or down by 10%, provided the player right-clicked on the plus or minus button
+     * on {@link LooperBlock#getControlsDir the looper's side}.
+     */
+    protected InteractionResult pressVolumeButton(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer,
+                                                  LooperBlockEntity lbe, ItemStack heldStack, BlockHitResult pHit) {
+        if (pHit.getDirection() != getControlsDir(pState))
+            return InteractionResult.FAIL;
+
+        // Where the side was clicked, in the model's pixels: z counts from the front face, y from the bottom
+        final Vec3 local = pHit.getLocation().subtract(Vec3.atLowerCornerOf(pPos)).subtract(0.5, 0, 0.5);
+        final Direction front = pState.getValue(FACING);
+        final double z = (0.5 - (local.x * front.getStepX() + local.z * front.getStepZ())) * 16;
+        final double y = local.y * 16;
+
+        // The buttons are 1 pixel across; give them a 4 pixel square around that
+        if (y < 11 || y > 15)
+            return InteractionResult.FAIL;
+
+        final boolean plus;
+        if (z >= 0 && z <= 4)
+            plus = true;
+        else if (z >= 12 && z <= 16)
+            plus = false;
+        else
+            return InteractionResult.FAIL;
+
+        lbe.stepVolume(plus);
+
+        pLevel.blockEvent(pPos, this, plus ? PLUS_PRESSED_EVENT : MINUS_PRESSED_EVENT, 0);
+        pLevel.playSound(null, pPos, SoundEvents.STONE_BUTTON_CLICK_ON, SoundSource.BLOCKS, 0.3f, plus ? 0.7f : 0.6f);
+
+        pPlayer.displayClientMessage(
+            Component.translatable("songcraft_instruments.looper.volume", lbe.getVolume()),
+            true
+        );
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public boolean triggerEvent(BlockState pState, Level pLevel, BlockPos pPos, int pId, int pParam) {
+        super.triggerEvent(pState, pLevel, pPos, pId, pParam);
+        final BlockEntity be = pLevel.getBlockEntity(pPos);
+        return (be != null) && be.triggerEvent(pId, pParam);
+    }
+
     /**
      * Attempts to cycle the {@link LooperBlock#LOOPING looping} state of the looper,
      * provided the player right-clicked on {@link LooperBlock#getLoopDir the correct face}.
@@ -277,6 +331,12 @@ public class LooperBlock extends Block implements EntityBlock {
     }
     public Direction getPlayDir(final BlockState state) {
         return state.getValue(FACING);
+    }
+    /**
+     * @return The side the volume buttons and scale are on
+     */
+    public Direction getControlsDir(final BlockState state) {
+        return state.getValue(FACING).getClockWise();
     }
 
     @Override

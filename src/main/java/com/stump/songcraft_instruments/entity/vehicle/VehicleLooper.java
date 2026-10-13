@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.entity.vehicle;
 import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.block.ModBlocks;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperPlayback;
+import com.stump.songcraft_instruments.block.blockentity.looper.LooperVolumeControls;
 import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
@@ -14,6 +15,8 @@ import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CLoope
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -35,7 +38,8 @@ import java.util.List;
  * Its record slot is a single slot container, shown through {@link LooperVehicleMenu}.
  */
 public class VehicleLooper implements Container, LooperPlayback.Host {
-    private static final String RECORD_TAG = "Record", TICKS_TAG = "Ticks", PLAYING_TAG = "Playing", LOOPING_TAG = "Looping";
+    private static final String RECORD_TAG = "Record", TICKS_TAG = "Ticks", PLAYING_TAG = "Playing", LOOPING_TAG = "Looping",
+        VOLUME_TAG = "Volume";
 
     // The looks of the carried looper, synced to clients as flags
     public static final byte FLAG_RECORD_IN = 1, FLAG_PLAYING = 2, FLAG_LOOPING = 4;
@@ -49,10 +53,16 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
         // In seconds, as container data is synced as shorts
         DATA_ELAPSED = 3,
         DATA_LENGTH = 4,
-        DATA_COUNT = 5;
+        // In percent
+        DATA_VOLUME = 5,
+        DATA_COUNT = 6;
 
     private final Entity vehicle;
     private final LooperPlayback playback;
+    /**
+     * The volume, set through the menu. On the client, animates the buttons and indicator of the carried looper.
+     */
+    private final LooperVolumeControls volumeControls = new LooperVolumeControls();
 
     private ItemStack recordIn = ItemStack.EMPTY;
     /**
@@ -77,6 +87,7 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
                     final Recording recording = getRecording();
                     yield (recording == null) ? 0 : recording.length() / 20;
                 }
+                case DATA_VOLUME -> volumeControls.getVolume();
                 default -> 0;
             };
         }
@@ -95,6 +106,9 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
 
     public ContainerData data() {
         return data;
+    }
+    public LooperVolumeControls volumeControls() {
+        return volumeControls;
     }
 
 
@@ -224,6 +238,31 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
     }
 
     /**
+     * Turns the volume up or down by 10%, clicking like the looper block's buttons. Server only.
+     */
+    public void stepVolume(final Player player, final boolean up) {
+        volumeControls.stepVolume(up);
+
+        vehicle.level().playSound(null, vehicle.getX(), vehicle.getY(), vehicle.getZ(),
+            SoundEvents.STONE_BUTTON_CLICK_ON, SoundSource.BLOCKS, 0.3f, up ? 0.7f : 0.6f);
+        player.displayClientMessage(
+            Component.translatable("songcraft_instruments.looper.volume", volumeControls.getVolume()),
+            true
+        );
+    }
+
+    /**
+     * Shows a volume synced from the server on the carried looper, pressing the button that changed it. Client only.
+     */
+    public void onVolumeSynced(final int volume) {
+        final int prevVolume = volumeControls.getVolume();
+        volumeControls.syncVolume(volume);
+
+        if (volumeControls.getVolume() != prevVolume)
+            volumeControls.onButtonPressed(volumeControls.getVolume() > prevVolume);
+    }
+
+    /**
      * Server only
      */
     public void tick() {
@@ -287,6 +326,10 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
     @Override
     public BlockPos getSoundPos() {
         return soundPos(vehicle);
+    }
+    @Override
+    public int getVolume() {
+        return volumeControls.getVolume();
     }
     /**
      * Loopers carried by vehicles can't be paired to speakers
@@ -379,6 +422,7 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
         tag.putInt(TICKS_TAG, ticks);
         tag.putBoolean(PLAYING_TAG, playing);
         tag.putBoolean(LOOPING_TAG, looping);
+        tag.putInt(VOLUME_TAG, volumeControls.getVolume());
     }
     public void load(final CompoundTag tag) {
         recordIn = ItemStack.of(tag.getCompound(RECORD_TAG));
@@ -388,5 +432,6 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
         ticks = tag.getInt(TICKS_TAG);
         playing = tag.getBoolean(PLAYING_TAG);
         looping = !tag.contains(LOOPING_TAG) || tag.getBoolean(LOOPING_TAG);
+        volumeControls.setVolume(tag.contains(VOLUME_TAG) ? tag.getInt(VOLUME_TAG) : LooperVolumeControls.MAX_VOLUME);
     }
 }

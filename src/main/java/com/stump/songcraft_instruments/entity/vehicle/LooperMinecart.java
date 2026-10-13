@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.entity.vehicle;
 
+import com.stump.songcraft_instruments.block.blockentity.looper.LooperVolumeControls;
 import com.stump.songcraft_instruments.entity.ModEntities;
 import com.stump.songcraft_instruments.item.ModItems;
 import net.minecraft.nbt.CompoundTag;
@@ -23,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class LooperMinecart extends AbstractMinecart implements CarriedBlockVehicle {
     private static final EntityDataAccessor<Byte> DATA_LOOPER_FLAGS = SynchedEntityData.defineId(LooperMinecart.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Integer> DATA_LOOPER_VOLUME = SynchedEntityData.defineId(LooperMinecart.class, EntityDataSerializers.INT);
 
     private final VehicleLooper looper = new VehicleLooper(this);
 
@@ -37,6 +39,19 @@ public class LooperMinecart extends AbstractMinecart implements CarriedBlockVehi
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(DATA_LOOPER_FLAGS, (byte) 0);
+        entityData.define(DATA_LOOPER_VOLUME, LooperVolumeControls.MAX_VOLUME);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(final EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        // Called before the looper is created, while the synced data is defined
+        if (looper != null && level().isClientSide && DATA_LOOPER_VOLUME.equals(key))
+            looper.onVolumeSynced(entityData.get(DATA_LOOPER_VOLUME));
+    }
+
+    public VehicleLooper looper() {
+        return looper;
     }
 
     /**
@@ -53,6 +68,7 @@ public class LooperMinecart extends AbstractMinecart implements CarriedBlockVehi
         if (!level().isClientSide) {
             looper.tick();
             entityData.set(DATA_LOOPER_FLAGS, looper.getFlags());
+            entityData.set(DATA_LOOPER_VOLUME, looper.getVolume());
         }
     }
 

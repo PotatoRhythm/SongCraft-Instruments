@@ -1,0 +1,20 @@
+{
+	"textures": {
+		"controls": "songcraft_instruments:block/looper_controls",
+		"particle": "songcraft_instruments:block/looper_controls"
+	},
+	"elements": [
+		{
+			"from": [14.375, 12.82813, 13.45313],
+			"to": [16.375, 13.17188, 14.45313],
+			"rotation": {"angle": 0, "axis": "x", "origin": [15.375, 12.96875, 13.95313]},
+			"faces": {
+				"north": {"uv": [8, 11, 12, 12], "texture": "#controls"},
+				"east": {"uv": [12, 9, 14, 10], "texture": "#controls"},
+				"south": {"uv": [12, 7, 16, 8], "texture": "#controls"},
+				"up": {"uv": [8, 7, 12, 9], "texture": "#controls"},
+				"down": {"uv": [8, 9, 12, 11], "texture": "#controls"}
+			}
+		}
+	]
+}

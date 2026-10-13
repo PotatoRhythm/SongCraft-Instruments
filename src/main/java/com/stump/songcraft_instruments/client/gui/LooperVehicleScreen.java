@@ -3,7 +3,9 @@ package com.stump.songcraft_instruments.client.gui;
 import com.stump.songcraft_instruments.entity.vehicle.LooperVehicleMenu;
 import com.stump.songcraft_instruments.entity.vehicle.VehicleLooper;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +27,10 @@ public class LooperVehicleScreen extends AbstractContainerScreen<LooperVehicleMe
 
     private static final int BUTTON_Y = 19, BUTTON_WIDTH = 62, BUTTON_HEIGHT = 20;
     private static final int PLAY_BUTTON_X = 40, LOOPING_BUTTON_X = 106;
-    private static final int STATUS_Y = 45;
+    // The row below: the volume between its - and + buttons, then the time played, right-aligned
+    private static final int VOLUME_Y = 41, VOLUME_BUTTON_SIZE = 14;
+    private static final int VOLUME_DOWN_X = 40, VOLUME_TEXT_WIDTH = 30, VOLUME_UP_X = VOLUME_DOWN_X + VOLUME_BUTTON_SIZE + VOLUME_TEXT_WIDTH;
+    private static final int TIME_RIGHT_X = 168;
 
     private Button playButton, loopingButton;
 
@@ -46,6 +51,16 @@ public class LooperVehicleScreen extends AbstractContainerScreen<LooperVehicleMe
         );
         loopingButton = addRenderableWidget(Button.builder(Component.empty(), (button) -> pressButton(LooperVehicleMenu.BUTTON_LOOPING))
             .bounds(leftPos + LOOPING_BUTTON_X, topPos + BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT)
+            .build()
+        );
+        addRenderableWidget(Button.builder(Component.literal("-"), (button) -> pressButton(LooperVehicleMenu.BUTTON_VOLUME_DOWN))
+            .bounds(leftPos + VOLUME_DOWN_X, topPos + VOLUME_Y, VOLUME_BUTTON_SIZE, VOLUME_BUTTON_SIZE)
+            .tooltip(Tooltip.create(Component.translatable("gui.songcraft_instruments.looper_vehicle.volume_down")))
+            .build()
+        );
+        addRenderableWidget(Button.builder(Component.literal("+"), (button) -> pressButton(LooperVehicleMenu.BUTTON_VOLUME_UP))
+            .bounds(leftPos + VOLUME_UP_X, topPos + VOLUME_Y, VOLUME_BUTTON_SIZE, VOLUME_BUTTON_SIZE)
+            .tooltip(Tooltip.create(Component.translatable("gui.songcraft_instruments.looper_vehicle.volume_up")))
             .build()
         );
         updateButtons();
@@ -79,6 +94,23 @@ public class LooperVehicleScreen extends AbstractContainerScreen<LooperVehicleMe
         renderBackground(gui);
         super.render(gui, mouseX, mouseY, partialTick);
         renderTooltip(gui, mouseX, mouseY);
+        renderRecordProblem(gui, mouseX, mouseY);
+    }
+
+    /**
+     * Explains why the inserted record can't be played, when hovering over it
+     */
+    private void renderRecordProblem(final GuiGraphics gui, final int mouseX, final int mouseY) {
+        final String key = switch (menu.getStatus()) {
+            case VehicleLooper.STATUS_EMPTY -> "gui.songcraft_instruments.looper_vehicle.empty";
+            case VehicleLooper.STATUS_MISSING -> "gui.songcraft_instruments.looper_vehicle.missing";
+            default -> null;
+        };
+        if (key == null || !isHovering(LooperVehicleMenu.RECORD_SLOT_X, LooperVehicleMenu.RECORD_SLOT_Y, 16, 16, mouseX, mouseY))
+            return;
+
+        // Below the record's own tooltip
+        gui.renderTooltip(font, Component.translatable(key).withStyle(ChatFormatting.RED), mouseX, mouseY + 24);
     }
 
     @Override
@@ -100,18 +132,18 @@ public class LooperVehicleScreen extends AbstractContainerScreen<LooperVehicleMe
     @Override
     protected void renderLabels(final GuiGraphics gui, final int mouseX, final int mouseY) {
         super.renderLabels(gui, mouseX, mouseY);
-        gui.drawString(font, getStatusText(), titleLabelX, STATUS_Y, STATUS_COLOR, false);
-    }
 
-    private Component getStatusText() {
-        return switch (menu.getStatus()) {
-            case VehicleLooper.STATUS_NO_RECORD -> Component.translatable("gui.songcraft_instruments.looper_vehicle.no_record");
-            case VehicleLooper.STATUS_EMPTY -> Component.translatable("gui.songcraft_instruments.looper_vehicle.empty");
-            case VehicleLooper.STATUS_MISSING -> Component.translatable("gui.songcraft_instruments.looper_vehicle.missing");
-            default -> Component.translatable("gui.songcraft_instruments.looper_vehicle.time",
-                formatTime(menu.getElapsedSeconds()), formatTime(menu.getLengthSeconds())
-            );
-        };
+        final int textY = VOLUME_Y + (VOLUME_BUTTON_SIZE - font.lineHeight) / 2 + 1;
+        final String volume = menu.getVolume() + "%";
+        gui.drawString(font, volume, VOLUME_DOWN_X + VOLUME_BUTTON_SIZE + (VOLUME_TEXT_WIDTH - font.width(volume)) / 2,
+            textY, STATUS_COLOR, false);
+
+        // Nothing has been played yet when there is no playable record
+        final boolean ready = menu.getStatus() == VehicleLooper.STATUS_READY;
+        final Component time = Component.translatable("gui.songcraft_instruments.looper_vehicle.time",
+            formatTime(ready ? menu.getElapsedSeconds() : 0), formatTime(ready ? menu.getLengthSeconds() : 0)
+        );
+        gui.drawString(font, time, TIME_RIGHT_X - font.width(time), textY, STATUS_COLOR, false);
     }
     private static String formatTime(final int seconds) {
         return String.format("%d:%02d", seconds / 60, seconds % 60);
