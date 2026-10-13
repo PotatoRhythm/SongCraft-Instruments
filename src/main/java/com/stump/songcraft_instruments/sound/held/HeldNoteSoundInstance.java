@@ -99,7 +99,7 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
             relative = true;
             x = y = z = 0;
 
-            monoCrossfade = new CrossfadeMonoSoundInstance(sound.getMono(), this, pitch, false);
+            monoCrossfade = new CrossfadeMonoSoundInstance(sound.getMono(), this, pitch);
             crossfadePos = getSourcePos();
             updateCrossfade();
         } else if (distFromSourceSqr() < Mth.square(NoteSound.LOCAL_RANGE)) {
@@ -344,10 +344,10 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
         z = initiator.get().getZ();
     }
 
-    // We don't want to randomly distort this stuff unlike the parent
+    // The parent applies the volume defined in sounds.json, which balances instruments and notes
     @Override
     public float getVolume() {
-        return volume * distanceGain;
+        return super.getVolume() * distanceGain;
     }
     /**
      * @return The volume of this note, without any distance-based fading

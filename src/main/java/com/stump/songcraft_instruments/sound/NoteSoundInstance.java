@@ -66,7 +66,7 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
             this.y = 0;
             this.z = 0;
 
-            this.monoCrossfade = new CrossfadeMonoSoundInstance(noteSound.getMono(), this, pitch, true);
+            this.monoCrossfade = new CrossfadeMonoSoundInstance(noteSound.getMono(), this, pitch);
             updateCrossfade();
         } else if (playDistSqr <= NoteSound.LOCAL_RANGE * NoteSound.LOCAL_RANGE) {
             this.attenuation = Attenuation.NONE;

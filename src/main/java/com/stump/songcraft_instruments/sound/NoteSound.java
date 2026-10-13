@@ -49,9 +49,13 @@ public class NoteSound {
      */
     public static final int MONO_DISTANCE = 64;
     /**
-     * A volume multiplier for Stereo sounds, for balancing them against their Mono counterparts
+     * A volume multiplier for Stereo sounds, for balancing them against their Mono counterparts.
+     * <p>OpenAL Soft plays a Mono sound at the listener at -4.5 dB in each speaker,
+     * while a Stereo sound plays its channels at full volume. -4.5 dB makes a Stereo file with identical channels
+     * exactly as loud as its Mono file, so the crossfade between them keeps a steady volume.
+     * Stereo files whose channels differ are matched to their Mono files in sounds.json.</p>
      */
-    public static final float STEREO_VOLUME = 1f;
+    public static final float STEREO_VOLUME = 0.596f;
     /**
      * The range from which players will hear instruments from their local sound output rather than the level's
      */
