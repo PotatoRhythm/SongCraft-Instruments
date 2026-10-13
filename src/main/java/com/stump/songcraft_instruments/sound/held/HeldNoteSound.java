@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.event.HeldNoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
 import com.stump.songcraft_instruments.sound.InstrumentSoundSet;
+import com.stump.songcraft_instruments.sound.NearestCopyFilter;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.registrar.HeldNoteSoundRegistrar;
 import net.minecraft.client.Minecraft;
@@ -147,24 +148,35 @@ public record HeldNoteSound (
 
     @OnlyIn(Dist.CLIENT)
     private void attackFromServer(InitiatorID initiatorID, NoteSoundMetadata meta) {
-        if (initiatorID.type().equals("entity")) {
-            // Play as an entity
-            startPlaying(
-                meta.pitch(), meta.particleColor(), meta.volume() / 100f,
-                Minecraft.getInstance().level.getEntity(
-                    Integer.parseInt(initiatorID.identifier())
-                ),
-                meta.instrumentId()
-            );
-        } else {
-            // Play as other
-            startPlaying(
-                meta.pitch(), meta.particleColor(), meta.volume() / 100f,
-                meta.pos(),
-                initiatorID, meta.instrumentId()
-            );
-        }
+        // Play as an entity, or as other
+        final @Nullable Entity initiator = initiatorID.type().equals("entity")
+            ? Minecraft.getInstance().level.getEntity(Integer.parseInt(initiatorID.identifier()))
+            : null;
+        final @Nullable BlockPos pos = (initiator == null) ? meta.pos() : null;
+        if (initiator == null && initiatorID.type().equals("entity"))
+            return;
+
+        // Speakers relay held notes with their own initiator, so copies are matched by everything else
+        NearestCopyFilter.offer(
+            new RelayKey(this, meta.pitch(), meta.volume(), meta.particleColor(), meta.instrumentId()),
+            HeldNoteSoundInstance.distFromSourceSqr(pos, initiator),
+            initiatorID,
+            (dropped) -> {
+                final HeldNoteSoundInstance instance = new HeldNoteSoundInstance(
+                    this, Phase.ATTACK,
+                    meta.pitch(), meta.particleColor(), meta.volume() / 100f, meta.volume() / 100f,
+                    initiator, pos,
+                    initiatorID, meta.instrumentId()
+                );
+                // Releasing or dampening any of the dropped copies does so to the one played
+                instance.addMergedInitiators(dropped);
+                instance.queueAndAddInstance();
+            }
+        );
     }
+    private record RelayKey(HeldNoteSound sound, int pitch, int volume, int particleColor,
+                            ResourceLocation instrumentId) {}
+
     @OnlyIn(Dist.CLIENT)
     private void releaseFromServer(InitiatorID initiatorID, NoteSoundMetadata meta) {
         HeldNoteSounds.release(initiatorID, this, meta.pitch());

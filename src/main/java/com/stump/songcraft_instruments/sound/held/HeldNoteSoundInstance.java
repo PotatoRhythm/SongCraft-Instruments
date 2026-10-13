@@ -4,6 +4,7 @@ import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.particle.ModParticles;
 import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.DampenableSoundInstance;
+import com.stump.songcraft_instruments.sound.NearestCopyFilter;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.WorldOriginSoundInstance;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound.Phase;
@@ -19,7 +20,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
@@ -32,6 +35,11 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
 
     public final Optional<Entity> initiator;
     public final InitiatorID initiatorId;
+    /**
+     * The initiators of other copies of this note that were dropped in favor of this one, see {@link NearestCopyFilter}.
+     * The note is also stored under these, so their releases and dampens reach it.
+     */
+    private final Set<InitiatorID> mergedInitiators = new HashSet<>();
 
     /**
      * The origin of the sound. May be empty
@@ -160,9 +168,18 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
      */
     public void addSoundInstance() {
         HeldNoteSounds.put(initiatorId, heldSoundContainer, notePitch, this);
+        mergedInitiators.forEach((merged) -> HeldNoteSounds.put(merged, heldSoundContainer, notePitch, this));
     }
     protected void removeSoundInstance() {
         HeldNoteSounds.release(initiatorId, heldSoundContainer, notePitch, this);
+        mergedInitiators.forEach((merged) -> HeldNoteSounds.release(merged, heldSoundContainer, notePitch, this));
+    }
+
+    /**
+     * Also stores this note under the given initiators. Must be called before {@link #queueAndAddInstance()}
+     */
+    public void addMergedInitiators(final Set<InitiatorID> initiators) {
+        mergedInitiators.addAll(initiators);
     }
 
     /**
@@ -322,12 +339,14 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
         if (nextVolume <= 0)
             return;
 
-        new HeldNoteSoundInstance(
+        final HeldNoteSoundInstance next = new HeldNoteSoundInstance(
             heldSoundContainer, Phase.HOLD, notePitch, particleColor, startVolume, nextVolume,
             initiator.orElse(null), soundOrigin.orElse(null),
             initiatorId, instrumentId,
             overallTimeAlive, released
-        ).queueAndAddInstance();
+        );
+        next.addMergedInitiators(mergedInitiators);
+        next.queueAndAddInstance();
     }
 
     protected void toInitiatorPos() {

@@ -212,14 +212,19 @@ public class NoteSound {
 
         final float mcPitch = getPitchByNoteOffset(clampPitch(meta.pitch()));
 
-        playLocally(
-                mcPitch,
-                meta,
+        // Relays of the note (by a looper's or player's speakers) share all but the position.
+        // A player's own copy names them by entity ID, while relays name them by initiator ID
+        final InitiatorID source = oInitiatorId.orElseGet(() ->
+                new InitiatorID("entity", String.valueOf(initiatorId.orElse(-1))));
+        NearestCopyFilter.offer(
+                new RelayKey(this, meta.pitch(), meta.volume(), meta.instrumentId(), source),
                 playDistSqr,
-                initiatorId,
-                oInitiatorId
+                source,
+                (dropped) -> playLocally(mcPitch, meta, playDistSqr, initiatorId, oInitiatorId)
         );
     }
+    private record RelayKey(NoteSound sound, int pitch, int volume, ResourceLocation instrumentId,
+                            InitiatorID source) {}
 
 
     /**
@@ -373,5 +378,9 @@ public class NoteSound {
 
         // Mono is enough to determine if the sounds are the same
         return baseSoundLocation.equals(other.baseSoundLocation) && (index == other.index);
+    }
+    @Override
+    public int hashCode() {
+        return 31 * baseSoundLocation.hashCode() + index;
     }
 }

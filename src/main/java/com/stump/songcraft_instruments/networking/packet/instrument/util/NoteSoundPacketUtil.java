@@ -8,9 +8,11 @@ import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -52,6 +54,22 @@ public class NoteSoundPacketUtil {
             NoteSoundMetadata soundMeta, InitiatorID initiatorID) {
         fireGenericEvent(level, InstrumentPacketUtil.sendPlayNotePackets(
                     level, sound, soundMeta, toReg(initiatorID)
+                )
+        );
+    }
+
+    /**
+     * Sends a speaker's relay of a note to everyone in {@link InstrumentPacketUtil#PLAY_DISTANCE}
+     * except whoever played it, who already hears their own copy where they are
+     * @param source Who played the note (a player or looper)
+     */
+    public static void sendRelayedNotePackets(Level level, NoteSound sound,
+            NoteSoundMetadata soundMeta, InitiatorID source) {
+        final List<Player> listeners = InstrumentPacketUtil.noteListeners(level, soundMeta.pos());
+        listeners.removeIf((player) -> InitiatorID.fromEntity(player).equals(source));
+
+        fireGenericEvent(level, InstrumentPacketUtil.sendPlayNotePackets(
+                    level, sound, soundMeta, toReg(source), listeners
                 )
         );
     }

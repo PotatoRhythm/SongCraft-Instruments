@@ -18,6 +18,7 @@ public class NoteSoundInstances {
     }
 
     public static void dampenAll(final int initiatorId) {
+        NearestCopyFilter.flush();
         for (NoteSoundInstance instance : new ArrayList<>(INSTANCES)) {
             if (instance.getInitiatorId().orElse(-1) == initiatorId) {
                 instance.dampen();
@@ -26,6 +27,7 @@ public class NoteSoundInstances {
     }
 
     public static void dampenAll(final InitiatorID initiatorId) {
+        NearestCopyFilter.flush();
         for (NoteSoundInstance instance : new ArrayList<>(INSTANCES)) {
             if (instance.getOInitiatorId().map(initiatorId::equals).orElse(false)) {
                 instance.dampen();
@@ -34,6 +36,7 @@ public class NoteSoundInstances {
     }
 
     public static void clear() {
+        NearestCopyFilter.discard();
         for (NoteSoundInstance instance : new ArrayList<>(INSTANCES)) {
             instance.stopNote();
         }

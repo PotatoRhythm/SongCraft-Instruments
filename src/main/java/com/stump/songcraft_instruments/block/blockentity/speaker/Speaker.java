@@ -118,7 +118,7 @@ public class Speaker {
     public void playNote(final NoteSound sound, final NoteSoundMetadata meta, final InitiatorID source) {
         final NoteSoundMetadata relocated = relocate(meta);
 
-        NoteSoundPacketUtil.sendPlayNotePackets(host.getHostLevel(), sound, relocated, source);
+        NoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound, relocated, source);
         emitNoteParticle(relocated.particleColor());
     }
 
@@ -131,14 +131,14 @@ public class Speaker {
         final HeldNoteKey key = new HeldNoteKey(sound, relocated.pitch(), source);
 
         if (phase == HeldSoundPhase.ATTACK) {
-            HeldNoteSoundPacketUtil.sendPlayNotePackets(host.getHostLevel(), sound, relocated, phase, speakerInitiatorID);
+            HeldNoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound, relocated, phase, speakerInitiatorID, source);
             sustainedNotes.put(key, relocated);
             emitNoteParticle(relocated.particleColor());
         } else if (phase == HeldSoundPhase.RELEASE) {
             // Release with the metadata the note started with, so clients match it to the right sound
             final NoteSoundMetadata attackMeta = sustainedNotes.remove(key);
-            HeldNoteSoundPacketUtil.sendPlayNotePackets(host.getHostLevel(), sound,
-                (attackMeta != null) ? attackMeta : relocated, phase, speakerInitiatorID);
+            HeldNoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound,
+                (attackMeta != null) ? attackMeta : relocated, phase, speakerInitiatorID, source);
         }
     }
 
@@ -151,8 +151,9 @@ public class Speaker {
             if (!entry.getKey().source().equals(source))
                 return false;
 
-            HeldNoteSoundPacketUtil.sendPlayNotePackets(
-                host.getHostLevel(), entry.getKey().sound(), entry.getValue(), HeldSoundPhase.RELEASE, speakerInitiatorID
+            HeldNoteSoundPacketUtil.sendRelayedNotePackets(
+                host.getHostLevel(), entry.getKey().sound(), entry.getValue(), HeldSoundPhase.RELEASE, speakerInitiatorID,
+                source
             );
             return true;
         });

@@ -1,13 +1,14 @@
 {
+	"format_version": "26.3",
 	"credit": "Made with Blockbench",
 	"parent": "minecraft:block/block",
 	"textures": {
 		"front": "#playing",
 		"top": "#record",
 		"back": "#looping",
+		"particle": "songcraft_instruments:block/speaker_bottom",
 		"side": "songcraft_instruments:block/speaker_bottom",
-		"controls": "songcraft_instruments:block/looper_controls",
-		"particle": "#side"
+		"controls": "songcraft_instruments:block/looper_controls"
 	},
 	"elements": [
 		{
@@ -35,9 +36,8 @@
 			}
 		},
 		{
-			"from": [0.03125, 12, 3],
-			"to": [13.03125, 14, 13],
-			"rotation": {"angle": 0, "axis": "y", "origin": [0.03125, 0, 0]},
+			"from": [0, 12, 3],
+			"to": [13, 14, 13],
 			"faces": {
 				"north": {"uv": [3.00231, 2, 16, 4], "texture": "#front"},
 				"east": {"uv": [3, 2, 13, 4], "texture": "#side"},
@@ -48,9 +48,8 @@
 			}
 		},
 		{
-			"from": [13.03125, 12, 3],
-			"to": [14.09375, 14, 13],
-			"rotation": {"angle": 0, "axis": "y", "origin": [0.03125, 0, 0]},
+			"from": [13, 12, 3],
+			"to": [15.05, 14, 13],
 			"faces": {
 				"east": {"uv": [0, 0, 10, 2], "texture": "#controls"}
 			}

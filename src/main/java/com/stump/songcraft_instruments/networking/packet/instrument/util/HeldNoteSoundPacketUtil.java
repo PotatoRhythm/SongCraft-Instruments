@@ -105,6 +105,25 @@ public class HeldNoteSoundPacketUtil {
     }
 
     /**
+     * Sends a speaker's relay of a held note, like {@link #sendPlayNotePackets(Level, HeldNoteSound, NoteSoundMetadata, HeldSoundPhase, InitiatorID)},
+     * except to whoever played it, who already hears their own copy where they are
+     * @param initiatorID The speaker's initiator, the note is played with
+     * @param source Who played the note (a player or looper)
+     */
+    public static void sendRelayedNotePackets(Level level, HeldNoteSound sound, NoteSoundMetadata soundMeta,
+                                              HeldSoundPhase phase, InitiatorID initiatorID, InitiatorID source) {
+        final List<? extends Player> listeners = listeners(level, soundMeta.pos(), phase).stream()
+            .filter((player) -> !InitiatorID.fromEntity(player).equals(source))
+            .toList();
+
+        fireGenericEvent(level,
+            InstrumentPacketUtil.sendPlayNotePackets(
+                level, sound, soundMeta, toReg(initiatorID, phase), listeners
+            )
+        );
+    }
+
+    /**
      * Held notes are started within {@link InstrumentPacketUtil#PLAY_DISTANCE}, but released for everyone in the level:
      * a player who heard a note start may have since moved out of range, and would otherwise keep holding it.
      * Those who don't hold the note ignore its release.

@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIde
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.c2s.C2SHeldNoteSoundPacket;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
+import com.stump.songcraft_instruments.sound.NearestCopyFilter;
 import com.stump.songcraft_instruments.util.MultTuple;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -120,6 +121,7 @@ public abstract class HeldNoteSounds {
      * @return The released sounds
      */
     public static List<HeldNoteSoundInstance> releaseAll() {
+        NearestCopyFilter.flush();
         final List<HeldNoteSoundInstance> released = new ArrayList<>();
 
         SOUND_INSTANCES.values().forEach((k2p2i) ->
@@ -139,6 +141,7 @@ public abstract class HeldNoteSounds {
       @return The released sounds
      */
     public static List<HeldNoteSoundInstance> release(InitiatorID initiatorId) {
+        NearestCopyFilter.flush();
         if (!SOUND_INSTANCES.containsKey(initiatorId))
             return List.of();
 
@@ -159,6 +162,7 @@ public abstract class HeldNoteSounds {
       @return The released sounds
      */
     public static List<HeldNoteSoundInstance> release(InitiatorID initiatorId, HeldNoteSound sound) {
+        NearestCopyFilter.flush();
         if (!SOUND_INSTANCES.containsKey(initiatorId))
             return List.of();
 
@@ -181,6 +185,7 @@ public abstract class HeldNoteSounds {
       @return The released sounds
      */
     public static List<HeldNoteSoundInstance> release(InitiatorID initiatorId, HeldNoteSound sound, int notePitch) {
+        NearestCopyFilter.flush();
         if (!SOUND_INSTANCES.containsKey(initiatorId))
             return List.of();
 
@@ -227,6 +232,7 @@ public abstract class HeldNoteSounds {
     }
 
     public static void dampenAll(final InitiatorID initiatorId) {
+        NearestCopyFilter.flush();
         final Map<HeldNoteSound, Map<Integer, List<HeldNoteSoundInstance>>> sounds =
                 SOUND_INSTANCES.get(initiatorId);
 
