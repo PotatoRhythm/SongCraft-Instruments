@@ -4,7 +4,6 @@ import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.util.LooperSessionState;
 import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenProvider;
-import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
 import com.stump.songcraft_instruments.recording.Recording;
 import com.stump.songcraft_instruments.recording.RecordingStore;
@@ -21,15 +20,14 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The recording state of a looper, for both solo and group recordings.
+ * The recording state of a looper.
  * <p>
- * A solo recording is started by its player pressing record, and locks the looper to them once they play their first note.
- * A group recording is started with multiple players connected: it counts in with beeps, then records every participant
- * from the first note played after the final beep.
+ * Recording always goes through a session, be it with one connected player or many: it counts in with beeps,
+ * then records every participant from the first note played after the final beep.
  * <p>
- * A looper holding an empty record, synced to a looper holding a burned one, records over it: recording always
- * goes through a session, even with a single participant. On the final beep, the burned record plays from its start
- * (once) and the recording begins. The burned record's notes are burned into the new record along with the new part.
+ * A looper holding an empty record, synced to a looper holding a burned one, records over it.
+ * On the final beep, the burned record plays from its start (once) and the recording begins.
+ * The burned record's notes are burned into the new record along with the new part.
  */
 public class RecordingSession {
     public static final String
@@ -52,13 +50,10 @@ public class RecordingSession {
 
     private final LooperBlockEntity looper;
 
-    // Solo recording
     private boolean locked = false;
-    private Player lockedBy = null;
 
     /**
-     * The state of the current group recording session. {@link LooperSessionState#IDLE} when there is none,
-     * in which case recording is done solo.
+     * The state of the current recording session. {@link LooperSessionState#IDLE} when there is none.
      */
     private LooperSessionState groupState = LooperSessionState.IDLE;
     private int countdownTicks = 0;
@@ -89,10 +84,7 @@ public class RecordingSession {
 
 
     public LooperSessionState getState() {
-        if (isGroupSession())
-            return groupState;
-
-        return isRecording() ? LooperSessionState.RECORDING : LooperSessionState.IDLE;
+        return groupState;
     }
 
     public boolean isRecording() {
@@ -107,10 +99,10 @@ public class RecordingSession {
     }
 
     /**
-     * New connections are refused while a recording is in progress, or a group recording's countdown started.
+     * New connections are refused while a recording session is in progress.
      */
     public boolean canAcceptConnections() {
-        return getState() == LooperSessionState.IDLE && !isSoloArmed();
+        return getState() == LooperSessionState.IDLE;
     }
 
     public boolean isInRecordRange(final Player player) {
@@ -122,7 +114,6 @@ public class RecordingSession {
      */
     public void onFinalized() {
         locked = true;
-        lockedBy = null;
         // Silently end the group session; the connections' removal will sync it
         groupState = LooperSessionState.IDLE;
         absentTicks = -1;
@@ -134,7 +125,6 @@ public class RecordingSession {
      */
     public void reset() {
         locked = false;
-        lockedBy = null;
 
         if (isOverdub()) {
             stopBacking();
@@ -148,64 +138,9 @@ public class RecordingSession {
     }
 
 
-    //#region Solo recording
-
-    public void setLockedBy(final Player player) {
-        lockedBy = player;
-    }
-
     public boolean isLocked() {
-        return lockedByAnyone() || locked;
+        return locked;
     }
-
-    public boolean isAllowedToRecord(final Player player) {
-        return !lockedByAnyone() || isLockedBy(player);
-    }
-    public boolean lockedByAnyone() {
-        return lockedBy != null;
-    }
-    public boolean isLockedBy(final Player player) {
-        return player.equals(lockedBy);
-    }
-
-    /**
-     * @return Whether a connected player pressed record for a solo recording, but has not yet played a note
-     */
-    private boolean isSoloArmed() {
-        if (looper.getLevel() == null || looper.getLevel().getServer() == null)
-            return false;
-
-        return looper.connections().getPlayerIds().stream()
-            .map(looper.getLevel().getServer().getPlayerList()::getPlayer)
-            .anyMatch((player) -> player != null
-                && RecordingCapabilityProvider.isRecording(player)
-                && looper.getBlockPos().equals(RecordingCapabilityProvider.getLooperPos(player))
-            );
-    }
-
-    /**
-     * Discards everything recorded so far (if anything), going back to waiting for the recording player's first note.
-     * A single beep signals the restart.
-     * @param player A player who pressed record on this looper
-     * @return Whether the recording was restarted
-     */
-    public boolean restartSoloRecording(final Player player) {
-        if (isGroupSession() || (isRecording() && !isLockedBy(player)))
-            return false;
-
-        if (isRecording()) {
-            looper.writer().clearRecordedNotes();
-            // The next note played by the player locks the looper again
-            lockedBy = null;
-            locked = false;
-            setRecording(false);
-        }
-
-        playCountdownBeep(true);
-        return true;
-    }
-
-    //#endregion
 
 
     //#region Group recording

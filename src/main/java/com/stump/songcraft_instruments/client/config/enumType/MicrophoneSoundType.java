@@ -20,8 +20,8 @@ public enum MicrophoneSoundType implements LayoutSoundType {
     SKY_AURORA(2, () -> new SoundOption(SCSounds.SKY_AURORA)),
 
     // Hidden voices, only offered by the handheld microphone when unlocked. See MicrophoneEasterEggs
-    CAT(3, () -> new SoundOption(SCSounds.MICROPHONE_CAT), Voice.CAT),
-    DOG(3, () -> new SoundOption(SCSounds.MICROPHONE_DOG), Voice.DOG),
+    CAT(2, () -> new SoundOption(SCSounds.MICROPHONE_CAT), Voice.CAT),
+    DOG(2, () -> new SoundOption(SCSounds.MICROPHONE_DOG), Voice.DOG),
     MEATBALL_MAN(3, () -> new SoundOption(SCSounds.MICROPHONE_MEATBALL_MAN), Voice.MEATBALL_MAN);
 
     private final int rows;

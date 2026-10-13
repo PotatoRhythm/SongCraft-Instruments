@@ -172,8 +172,8 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("microphone_not_miku", 20, 0.85f, true, true);
         registerInstrument("microphone_not_teto", 20, 0.9f, true, true);
         registerInstrument("microphone_not_teto_sneaky", 20, 1.0f, true, true);
-        registerInstrument("microphone_cat", 20, 0.7f, true, false);
-        registerInstrument("microphone_dog", 20, 0.8f, true, false);
+        registerInstrument("microphone_cat", 13, 0.7f, false, false);
+        registerInstrument("microphone_dog", 13, 1.0f, false, false);
         registerInstrument("microphone_meatball_man", 20, 0.8f, true, true);
 
         registerInstrument("gw2_bass", 13, 1f, false, true);

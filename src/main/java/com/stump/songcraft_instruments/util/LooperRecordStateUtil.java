@@ -25,23 +25,27 @@ public class LooperRecordStateUtil {
      *                         rather than by pressing the record button
      */
     public static void handle(ServerPlayer player, Optional<InteractionHand> hand, boolean recording, boolean instrumentClosed) {
-        // Group participants may control the session from any instrument
+        // Participants may control the session from any instrument
         final Optional<LooperBlockEntity> groupLooper = LooperConnections.getGroupSessionLooper(player);
         if (groupLooper.isPresent()) {
-            // Only the record button stops a group session; closing the instrument does not
+            // Only the record button stops a session; closing the instrument does not
             if (!recording && !instrumentClosed)
                 groupLooper.get().session().stopGroupSession();
             return;
         }
 
+        // Without a session, there is nothing to stop
+        if (!recording)
+            return;
+
         if (hand.isPresent()) {
-            LooperRecordStateUtil.handleItem(player, hand.get(), recording, instrumentClosed);
+            LooperRecordStateUtil.handleItem(player, hand.get());
         } else {
-            LooperRecordStateUtil.handleBlock(player, recording, instrumentClosed);
+            LooperRecordStateUtil.handleBlock(player);
         }
     }
 
-    public static void handleBlock(ServerPlayer player, boolean recording, boolean instrumentClosed) {
+    public static void handleBlock(ServerPlayer player) {
         final BlockPos instrumentBlockPos = InstrumentOpenProvider.getBlockPos(player);
 
         final BlockEntity instrumentBlock = player.level().getBlockEntity(instrumentBlockPos);
@@ -58,11 +62,11 @@ public class LooperRecordStateUtil {
             return;
         }
 
-        changeRecordingState(player, lbe, () -> LooperUtil.remLooperTag(instrumentBlock), recording, instrumentClosed);
+        startRecording(player, lbe);
         SCPacketHandler.sendToClient(new SyncModTagPacket(SCInstrumentMod.modTag(instrumentBlock), instrumentBlockPos), player);
     }
 
-    public static void handleItem(ServerPlayer player, InteractionHand hand, boolean recording, boolean instrumentClosed) {
+    public static void handleItem(ServerPlayer player, InteractionHand hand) {
         final ItemStack instrumentItem = player.getItemInHand(hand);
         final CompoundTag looperTag = LooperUtil.looperTag(instrumentItem);
 
@@ -78,79 +82,30 @@ public class LooperRecordStateUtil {
             return;
         }
 
-        changeRecordingState(player, lbe, () -> LooperUtil.remLooperTag(instrumentItem), recording, instrumentClosed);
-    }
-
-    public static void changeRecordingState(ServerPlayer player, LooperBlockEntity lbe,
-                                            Runnable looperTagRemover,
-                                            boolean recording, boolean instrumentClosed) {
-
-        // A group session the player is not participating in
-        if (lbe.session().isGroupSession())
-            return;
-
-        // With multiple players connected, recording is done as a group
-        // by those on their connected instrument's screen.
-        // Recording over a synced looper's record is done as one too, to count in with it.
-        final boolean overdub = lbe.getBackingLooper() != null;
-        if (recording && (overdub || lbe.connections().getAll().size() > 1)) {
-            lbe.connections().disconnectAbsentPlayers();
-
-            if (overdub || lbe.connections().getAll().size() > 1) {
-                if (!lbe.session().startGroupSession())
-                    notifyLooperUnplayable(player);
-                return;
-            }
-            // Nobody else is present; record solo
-        }
-
-        if (recording) {
-            if (lbe.session().isLocked() && !lbe.session().isLockedBy(player)) {
-                notifyLooperUnplayable(player);
-                return;
-            }
-
-            LooperUtil.setRecording(player, lbe.getBlockPos());
-        } else {
-            if (!lbe.session().isLockedBy(player)) {
-                // Never started recording; disarm so the looper accepts connections again
-                LooperUtil.setNotRecording(player);
-                return;
-            }
-
-            lbe.lock();
-
-            player.level().setBlockAndUpdate(
-                lbe.getBlockPos(),
-                lbe.setPlaying(true, lbe.getBlockState())
-            );
-
-            looperTagRemover.run();
-
-            LooperUtil.setNotRecording(player);
-        }
+        startRecording(player, lbe);
     }
 
     /**
-     * Restarts the recording the player is taking part in, be it a group or solo recording.
+     * Starts a recording session's countdown, be it with one player or many.
+     * Its participants are those on their connected instrument's screen.
+     */
+    public static void startRecording(ServerPlayer player, LooperBlockEntity lbe) {
+        // A session the player is not participating in
+        if (lbe.session().isGroupSession())
+            return;
+
+        lbe.connections().disconnectAbsentPlayers();
+
+        if (!lbe.session().startGroupSession())
+            notifyLooperUnplayable(player);
+    }
+
+    /**
+     * Restarts the recording session the player is taking part in.
      */
     public static void handleRestart(final ServerPlayer player) {
-        final Optional<LooperBlockEntity> groupLooper = LooperConnections.getGroupSessionLooper(player);
-        if (groupLooper.isPresent()) {
-            groupLooper.get().session().restartGroupSession();
-            return;
-        }
-
-        if (!LooperUtil.isRecording(player))
-            return;
-
-        final BlockPos looperPos = LooperUtil.getRecordingLooperPos(player);
-        if (looperPos == null || !player.level().isLoaded(looperPos))
-            return;
-
-        final LooperBlockEntity lbe = LooperUtil.getFromPos(player.level(), looperPos);
-        if (lbe != null)
-            lbe.session().restartSoloRecording(player);
+        LooperConnections.getGroupSessionLooper(player)
+            .ifPresent((lbe) -> lbe.session().restartGroupSession());
     }
 
     private static void notifyLooperUnplayable(final ServerPlayer player) {

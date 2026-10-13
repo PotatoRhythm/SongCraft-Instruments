@@ -25,13 +25,14 @@ public class LooperConnectionsPacket implements IModPacket {
     /**
      * @param present Whether the player is on their connected instrument's screen.
      *                Before a group recording starts, only present players take part in it.
+     * @param volume The player's instrument volume in percent, or -1 if unknown
      */
-    public record Entry(UUID playerId, String playerName, boolean online, boolean present) {}
+    public record Entry(UUID playerId, String playerName, boolean online, boolean present, int volume) {}
 
     private final BlockPos looperPos;
     private final List<Entry> connections;
     private final LooperSessionState state;
-    // Distinguishes a group recording from a solo one, as both share the RECORDING state
+    // Whether a recording session is in progress
     private final boolean groupSession;
     // The name of the synced looper's record that is (or would be) recorded over, if any
     private final @Nullable Component backingName;
@@ -47,7 +48,7 @@ public class LooperConnectionsPacket implements IModPacket {
     }
     public LooperConnectionsPacket(final FriendlyByteBuf buf) {
         looperPos = buf.readBlockPos();
-        connections = buf.readList((fbb) -> new Entry(fbb.readUUID(), fbb.readUtf(), fbb.readBoolean(), fbb.readBoolean()));
+        connections = buf.readList((fbb) -> new Entry(fbb.readUUID(), fbb.readUtf(), fbb.readBoolean(), fbb.readBoolean(), fbb.readVarInt()));
         state = buf.readEnum(LooperSessionState.class);
         groupSession = buf.readBoolean();
         backingName = buf.readNullable(FriendlyByteBuf::readComponent);
@@ -61,6 +62,7 @@ public class LooperConnectionsPacket implements IModPacket {
             fbb.writeUtf(entry.playerName());
             fbb.writeBoolean(entry.online());
             fbb.writeBoolean(entry.present());
+            fbb.writeVarInt(entry.volume());
         });
         buf.writeEnum(state);
         buf.writeBoolean(groupSession);

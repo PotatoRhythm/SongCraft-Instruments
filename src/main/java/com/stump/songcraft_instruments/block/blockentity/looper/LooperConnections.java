@@ -241,7 +241,8 @@ public class LooperConnections {
 
                 return new LooperConnectionsPacket.Entry(
                     connection.playerId(), connection.playerName(), online,
-                    player != null && isOnConnectedInstrument(player)
+                    player != null && isOnConnectedInstrument(player),
+                    (player != null) ? RecordingCapabilityProvider.getVolume(player) : -1
                 );
             })
             .toList();
@@ -261,18 +262,6 @@ public class LooperConnections {
     @SubscribeEvent
     public static void onPlayerLeave(final PlayerLoggedOutEvent event) {
         final Player player = event.getEntity();
-
-        if (RecordingCapabilityProvider.isRecording(player)) {
-            player.level()
-                .getBlockEntity(RecordingCapabilityProvider.getLooperPos(player), ModBlockEntities.LOOPER.get())
-                .filter((lbe) -> lbe.session().isLockedBy(player))
-                .ifPresent((lbe) -> {
-                    lbe.reset();
-                    lbe.getPersistentData().putBoolean(RecordingSession.RECORDING_TAG, false);
-                });
-
-            LooperUtil.setNotRecording(player);
-        }
 
         // Show the player as offline to the rest of their looper's players
         getConnectedLooper(player).ifPresent((lbe) -> {

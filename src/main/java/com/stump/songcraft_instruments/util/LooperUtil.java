@@ -3,7 +3,6 @@ package com.stump.songcraft_instruments.util;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityProvider;
-import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -108,35 +107,6 @@ public class LooperUtil {
             : new CompoundTag();
     }
 
-
-    public static CompoundTag getLooperTagFromEvent(final InstrumentPlayedEvent<?> event) {
-        if (!event.isByPlayer())
-            return new CompoundTag();
-
-        final InstrumentPlayedEvent<?>.EntityInfo entityInfo = event.entityInfo().get();
-        final Player player = (Player) entityInfo.entity;
-
-        return (!entityInfo.isBlockInstrument())
-            ? looperTag(player.getItemInHand(entityInfo.hand.get()))
-            : looperTag(event.level().getBlockEntity(event.soundMeta().pos()));
-    }
-
-    @Nullable
-    public static LooperBlockEntity getFromEvent(final InstrumentPlayedEvent<?> event) {
-        if (!event.isByPlayer())
-            return null;
-
-        final InstrumentPlayedEvent<?>.EntityInfo entityInfo = event.entityInfo().get();
-        final Player player = (Player) entityInfo.entity;
-        final Level level = event.level();
-
-        if (entityInfo.isItemInstrument())
-            return getFromItemInstrument(level, player.getItemInHand(entityInfo.hand.get()));
-        else if (entityInfo.isBlockInstrument())
-            return getFromBlockInstrument(level, level.getBlockEntity(event.soundMeta().pos()));
-
-        return null;
-    }
 
     @Nullable
     public static LooperBlockEntity getFromItemInstrument(final Level level, final ItemStack instrument) {
@@ -291,21 +261,6 @@ public class LooperUtil {
     public static BlockPos getLooperPos(final CompoundTag looperTag) {
         final CompoundTag looperPosTag = looperTag.getCompound(POS_TAG);
         return (looperPosTag == null) ? null : NbtUtils.readBlockPos(looperPosTag);
-    }
-
-    public static void setRecording(final Player player, final BlockPos looperPos) {
-        RecordingCapabilityProvider.setRecording(player, looperPos);
-    }
-    public static void setNotRecording(final Player player) {
-        RecordingCapabilityProvider.setNotRecording(player);
-    }
-    public static boolean isRecording(final Player player) {
-        return RecordingCapabilityProvider.isRecording(player);
-    }
-
-
-    public static BlockPos getRecordingLooperPos(final Player player) {
-        return RecordingCapabilityProvider.getLooperPos(player);
     }
     
 }

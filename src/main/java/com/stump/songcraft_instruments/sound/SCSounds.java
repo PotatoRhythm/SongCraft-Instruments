@@ -65,6 +65,11 @@ public class SCSounds {
         SKY_SPIRIT_MANTA_CALL = nsr(loc("sky_spirit_manta_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_MOTH_CALL = nsr(loc("sky_moth_call")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_BELLS = nsr(loc("sky_bells")).stereo().registerGrid(2, 4),
+
+        // Easter egg voices of the microphone, see MicrophoneEasterEggs.
+        // Unlike its other voices, these are short one-shots rather than held notes.
+        MICROPHONE_CAT = nsr(loc("microphone_cat")).registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        MICROPHONE_DOG = nsr(loc("microphone_dog")).registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_SMALL_BELL = nsr(loc("sky_small_bell")).stereo().registerGrid(2, 4),
         SKY_HANDPAN = nsr(loc("sky_handpan")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         SKY_TRIUMPH_HANDPAN = nsr(loc("sky_triumph_handpan")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
@@ -302,32 +307,13 @@ public class SCSounds {
                 .decays(7)
                 .register(HOLD_DURATION),
 
-        // Easter egg voices of the microphone, see MicrophoneEasterEggs.
-        // The cat and dog are one-shots with silent holds; their slow release lets taps play out in full.
-        MICROPHONE_CAT = hnsr(loc("microphone_cat"))
-            .holdBuilder(SCSounds::threeOctaveMonoSoundBuilder)
-            .attackBuilder(SCSounds::threeOctaveMonoSoundBuilder)
-            .holdDelay(.03f)
-            .chainedHoldDelay(-FADE_TIME * 2)
-            .releaseFadeOut(FADE_TIME / 16)
-            .fullHoldFadeoutTime(2)
-            .decays(7)
-            .register(HOLD_DURATION),
-        MICROPHONE_DOG = hnsr(loc("microphone_dog"))
-            .holdBuilder(SCSounds::threeOctaveMonoSoundBuilder)
-            .attackBuilder(SCSounds::threeOctaveMonoSoundBuilder)
-            .holdDelay(.03f)
-            .chainedHoldDelay(-FADE_TIME * 2)
-            .releaseFadeOut(FADE_TIME / 16)
-            .fullHoldFadeoutTime(2)
-            .decays(7)
-            .register(HOLD_DURATION),
+        // Easter egg voice of the microphone, see MicrophoneEasterEggs
         MICROPHONE_MEATBALL_MAN = hnsr(loc("microphone_meatball_man"))
             .holdBuilder(SCSounds::threeOctaveSoundBuilder)
             .attackBuilder(SCSounds::threeOctaveSoundBuilder)
             .holdDelay(.03f)
             .chainedHoldDelay(-FADE_TIME * 2)
-            .releaseFadeOut(FADE_TIME / 8)
+            .releaseFadeOut(FADE_TIME / 5)
             .fullHoldFadeoutTime(2)
             .decays(7)
             .register(HOLD_DURATION),

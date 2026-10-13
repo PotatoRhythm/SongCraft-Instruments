@@ -81,9 +81,6 @@ Sound types are listed in the order they appear in game.
 - **Not Teto** — Generated with the [Synthesizer V AI Kasane Teto](https://www.ah-soft.com/synth-v/teto/) voice database. Kasane Teto © TWINDRILL, voice database by AH-Software, Synthesizer V by Dreamtonics
 - **Not Teto (Whisper)** — Generated with the [Synthesizer V AI Kasane Teto](https://www.ah-soft.com/synth-v/teto/) voice database. Kasane Teto © TWINDRILL, voice database by AH-Software, Synthesizer V by Dreamtonics
 - **Aurora (Sky)** — See [Sky](#sky) under Game Sounds.
-- **Cat** — Made from the [Small mewing of a cat](https://bigsoundbank.com/small-mewing-of-a-cat-s0098.html) recording by Joseph Sardin on BigSoundBank, released under [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Pitched into individual notes for this mod.
-- **Dog** — The dog sound from Mario Paint (Nintendo, 1992), the same one used in Undertale's Dogsong. Taken from the soundset3.sf2 soundfont of [Super Mario Paint](https://github.com/DC37/Super-Mario-Paint) by DC37. Pitched into individual notes for this mod.
-- **Meatball Man** — Made from the Meatball Man Scream soundfont by Smecko Geck, with audio by Gooseworx. Rendered into individual notes for this mod.
 
 ### Drumset
 

@@ -43,22 +43,6 @@ public class RecordingCapabilityProvider implements ICapabilityProvider, INBTSer
     }
 
 
-    public static boolean isRecording(final Player player) {
-        return getProp(player, RecordingCapability::isRecording, false);
-    }
-    public static BlockPos getLooperPos(final Player player) {
-        return getProp(player, RecordingCapability::getLooperPos, null);
-    }
-
-    public static void setRecording(final Player player, final BlockPos looperPos) {
-        player.getCapability(CAPABILITY).ifPresent((cap) ->
-            cap.setRecording(looperPos)
-        );
-    }
-    public static void setNotRecording(final Player player) {
-        player.getCapability(CAPABILITY).ifPresent(RecordingCapability::setNotRecording);
-    }
-
     public static void setConnection(final Player player, final BlockPos looperPos, final UUID connectionId) {
         player.getCapability(CAPABILITY).ifPresent((cap) -> cap.setConnection(looperPos, connectionId));
     }
@@ -74,6 +58,13 @@ public class RecordingCapabilityProvider implements ICapabilityProvider, INBTSer
     }
     public static int[] getParticleColors(final Player player) {
         return getProp(player, RecordingCapability::getParticleColors, new int[0]);
+    }
+
+    public static void setVolume(final Player player, final int volume) {
+        player.getCapability(CAPABILITY).ifPresent((cap) -> cap.setVolume(volume));
+    }
+    public static int getVolume(final Player player) {
+        return getProp(player, RecordingCapability::getVolume, -1);
     }
 
 

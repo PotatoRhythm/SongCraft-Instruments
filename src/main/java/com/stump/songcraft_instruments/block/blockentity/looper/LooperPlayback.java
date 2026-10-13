@@ -84,7 +84,7 @@ public class LooperPlayback {
 
     /**
      * @return The initiator a performer's notes are played back with.
-     * The first performer (and solo recordings) use the looper's own initiator.
+     * The first performer uses the looper's own initiator.
      */
     private InitiatorID getPerformerInitiatorID(final int performerIndex) {
         return (performerIndex == 0)

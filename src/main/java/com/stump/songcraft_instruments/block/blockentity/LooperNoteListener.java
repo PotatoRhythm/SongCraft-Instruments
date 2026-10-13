@@ -2,7 +2,6 @@ package com.stump.songcraft_instruments.block.blockentity;
 
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperConnections;
 import com.stump.songcraft_instruments.SCInstrumentMod;
-import com.stump.songcraft_instruments.util.LooperUtil;
 import com.stump.songcraft_instruments.event.HeldNoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
@@ -71,43 +70,16 @@ public class LooperNoteListener {
 
         final Level level = player.level();
 
-        // Group participants are recorded on whichever instrument they play
+        // Participants are recorded on whichever instrument they play
         final Optional<LooperBlockEntity> groupLooper = LooperConnections.getGroupSessionLooper(player);
-        if (groupLooper.isPresent()) {
-            final LooperBlockEntity looperBE = groupLooper.get();
-            // Out of range participants remain in the session, but are not recorded
-            if (!looperBE.isWritable() || looperBE.writer().isCapped(level) || !looperBE.session().isInRecordRange(player))
-                return Optional.empty();
-
-            return looperBE.session().acceptGroupNote() ? groupLooper : Optional.empty();
-        }
-
-        final LooperBlockEntity looperBE = LooperUtil.getFromEvent(event);
-        // Omit if record is not writable (or absent)
-        if (looperBE == null || !looperBE.isWritable() || looperBE.writer().isCapped(level))
+        if (groupLooper.isEmpty())
             return Optional.empty();
 
-        // Only record players playing their own connected instrument
-        if (!LooperUtil.isConnectedBy(looperBE, LooperUtil.getLooperTagFromEvent(event), player))
+        final LooperBlockEntity looperBE = groupLooper.get();
+        // Out of range participants remain in the session, but are not recorded
+        if (!looperBE.isWritable() || looperBE.writer().isCapped(level) || !looperBE.session().isInRecordRange(player))
             return Optional.empty();
 
-        // A group session the player is not participating in
-        if (looperBE.session().isGroupSession())
-            return Optional.empty();
-
-        // Solo recording requires the player to have pressed record
-        if (!LooperUtil.isRecording(player))
-            return Optional.empty();
-
-
-        if (looperBE.session().isLocked()) {
-            if (!looperBE.session().isRecording() || !looperBE.session().isAllowedToRecord(player))
-                return Optional.empty();
-        } else {
-            looperBE.session().setLockedBy(player);
-            looperBE.session().setRecording(true);
-        }
-
-        return Optional.of(looperBE);
+        return looperBE.session().acceptGroupNote() ? groupLooper : Optional.empty();
     }
 }

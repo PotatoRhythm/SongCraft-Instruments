@@ -11,6 +11,7 @@ import com.stump.songcraft_instruments.networking.packet.DoesLooperExistPacket;
 import com.stump.songcraft_instruments.networking.packet.LooperConnectionsPacket;
 import com.stump.songcraft_instruments.networking.packet.LooperRecordStatePacket;
 import com.stump.songcraft_instruments.networking.packet.LooperRestartPacket;
+import com.stump.songcraft_instruments.networking.packet.instrument.c2s.C2SInstrumentVolumePacket;
 import com.stump.songcraft_instruments.util.LooperUtil;
 import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenProvider;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentScreen;
@@ -34,6 +35,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -60,8 +62,13 @@ public class LooperOverlayInjector {
         CONNECTION_COLOR = 0xFFFFFF,
         CONNECTION_SELF_COLOR = 0xFFFF55,
         CONNECTION_OFFLINE_COLOR = 0x808080,
-        CONNECTION_RECORD_COLOR = 0x55FFFF
+        CONNECTION_RECORD_COLOR = 0x55FFFF,
+        CONNECTION_VOLUME_COLOR = 0xCCCCCC
     ;
+    // The speaker icon shown before a connected player's volume
+    private static final ResourceLocation SPEAKER_ICON =
+        new ResourceLocation(SCInstrumentMod.MODID, "textures/gui/sprites/speaker.png");
+    private static final int SPEAKER_ICON_SIZE = 9, VOLUME_GAP = 4;
 
     private static InstrumentScreen screen = null;
     private static boolean isRecording = false;
@@ -87,6 +94,10 @@ public class LooperOverlayInjector {
      * as opposed to only showing it for being in a group session
      */
     private static boolean screenInstrumentConnected = false;
+    /**
+     * The instrument volume last sent to the server, or -1 to send it again
+     */
+    private static int sentVolume = -1;
 
     @SuppressWarnings("resource")
     @SubscribeEvent
@@ -122,6 +133,7 @@ public class LooperOverlayInjector {
         );
 
         LooperOverlayInjector.screen = instrumentScreen;
+        sentVolume = -1;
         if (groupLooperPos != null) {
             // Keep the session state we already know of until the server responds
             isRecording = sessionState != LooperSessionState.IDLE;
@@ -210,7 +222,6 @@ public class LooperOverlayInjector {
                                              final @Nullable Component syncedBackingName) {
         final UUID selfId = Minecraft.getInstance().player.getUUID();
         final boolean selfConnected = syncedConnections.stream().anyMatch((entry) -> entry.playerId().equals(selfId));
-        final boolean wasGroupSession = syncedLooperPos.equals(groupLooperPos);
 
         // A group recording we participate in is starting; credit us with our current particle colors
         if (selfConnected && syncedGroupSession && (syncedState == LooperSessionState.COUNTDOWN))
@@ -238,10 +249,8 @@ public class LooperOverlayInjector {
             return;
         }
 
-        // The server is the source of truth for group sessions, as any participant may start or stop them.
-        // This includes a session cancelled down to a single player, who goes back to an idle solo looper.
-        if (isGroup() || wasGroupSession)
-            isRecording = syncedState != LooperSessionState.IDLE;
+        // The server is the source of truth for sessions, as any participant may start or stop them
+        isRecording = syncedState != LooperSessionState.IDLE;
 
         updateRecordButtonLabel();
     }
@@ -295,9 +304,6 @@ public class LooperOverlayInjector {
     public static void onScreenRender(final ScreenEvent.Render.Post event) {
         if (event.getScreen() != screen || recordBtn == null || !screen.instrumentRenders())
             return;
-        // A record recorded over is listed as a participant too
-        if (!isGroup() && backingName == null)
-            return;
 
         final GuiGraphics gui = event.getGuiGraphics();
         final Font font = Minecraft.getInstance().font;
@@ -340,8 +346,46 @@ public class LooperOverlayInjector {
             else
                 color = CONNECTION_COLOR;
 
-            gui.drawString(font, "- " + entry.playerName(), CONNECTIONS_X, y, color);
+            final String name = "- " + entry.playerName();
+            gui.drawString(font, name, CONNECTIONS_X, y, color);
+
+            if (entry.online() && entry.volume() >= 0)
+                renderVolume(gui, font, CONNECTIONS_X + font.width(name) + VOLUME_GAP, y, entry.volume());
         }
+    }
+
+    /**
+     * Renders a speaker icon followed by the volume, in grey.
+     * The icon gets a shadow like the text's: a quarter as bright, one pixel down and to the right.
+     */
+    private static void renderVolume(final GuiGraphics gui, final Font font, final int x, final int y, final int volume) {
+        final float grey = (CONNECTION_VOLUME_COLOR & 0xFF) / 255f;
+
+        gui.setColor(grey / 4, grey / 4, grey / 4, 1);
+        blitSpeakerIcon(gui, x + 1, y);
+        gui.setColor(grey, grey, grey, 1);
+        blitSpeakerIcon(gui, x, y - 1);
+        gui.setColor(1, 1, 1, 1);
+
+        gui.drawString(font, " " + volume + "%", x + SPEAKER_ICON_SIZE + 1, y, CONNECTION_VOLUME_COLOR);
+    }
+    private static void blitSpeakerIcon(final GuiGraphics gui, final int x, final int y) {
+        gui.blit(SPEAKER_ICON, x, y, 0, 0, SPEAKER_ICON_SIZE, SPEAKER_ICON_SIZE, SPEAKER_ICON_SIZE, SPEAKER_ICON_SIZE);
+    }
+
+    /**
+     * Keeps the server updated on our instrument volume while a looper is shown, for the other players to see
+     */
+    @SubscribeEvent
+    public static void onClientTick(final TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || screen == null || looperPos == null)
+            return;
+
+        if (screen.volume == sentVolume)
+            return;
+
+        sentVolume = screen.volume;
+        SCPacketHandler.sendToServer(new C2SInstrumentVolumePacket(sentVolume));
     }
 
     private static MutableComponent appendRecordKeyHint(final MutableComponent component) {
@@ -386,15 +430,10 @@ public class LooperOverlayInjector {
             InstrumentOpenProvider.getHand(Minecraft.getInstance().player)
             : null;
 
-        final boolean wasRecording = isRecording;
         isRecording = !isRecording;
 
-        // Group participants keep their button until the server syncs the session's end
-        if (wasRecording && !isGroup()) {
-            removeRecordButton();
-            screen = null;
-        } else
-            updateRecordButtonLabel();
+        // Participants keep their button until the server syncs the session's end
+        updateRecordButtonLabel();
         // A recording is starting; credit the player with their current particle colors
         if (isRecording)
             ColorSetManager.sendActiveSetToServer();
