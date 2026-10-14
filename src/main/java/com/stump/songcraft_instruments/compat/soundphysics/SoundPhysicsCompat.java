@@ -5,7 +5,9 @@ import com.mojang.logging.LogUtils;
 import com.sonicether.soundphysics.SoundPhysics;
 import com.sonicether.soundphysics.SoundPhysicsMod;
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
+import com.stump.songcraft_instruments.sound.ChannelSource;
 import com.stump.songcraft_instruments.sound.NoteSound;
+import com.stump.songcraft_instruments.sound.UnderwaterMuffling;
 import com.stump.songcraft_instruments.sound.WorldOriginSoundInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -43,6 +45,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * is kept above a minimum so notes never vanish.</p>
  * <p>Changes in environment are crossfaded into through a twin source (see {@link SoundPair}),
  * as OpenAL changing a filter at once is heard as a click.</p>
+ * <p>While Sound Physics is enabled, it applies the direct filters of instrument sounds (even those it is bypassed for),
+ * so their {@link UnderwaterMuffling} is applied to the environment we give it. Its underwater effects go through
+ * auxiliary sends of its own, which it also applies to twin sources.</p>
  * <p>Only reached through the {@code mixins.songcraft_instruments.soundphysics.json} mixins,
  * which only apply when Sound Physics Remastered is installed.</p>
  */
@@ -72,7 +77,7 @@ public class SoundPhysicsCompat {
     /**
      * The most high frequencies a filter lets through, just short of all of them (-0.009dB); see onSetEnvironment
      */
-    private static final float MAX_CUTOFF = 0.999f;
+    private static final float MAX_CUTOFF = UnderwaterMuffling.MAX_CUTOFF;
     /**
      * The environment of a sound heard dry: no reverb sends, no muffling. See {@link TrackedSound#bypass}
      */
@@ -109,6 +114,22 @@ public class SoundPhysicsCompat {
      */
     private static final ThreadLocal<Processing> PROCESSING = new ThreadLocal<>();
 
+    static {
+        UnderwaterMuffling.setExternalFilters(new UnderwaterMuffling.ExternalFilters() {
+            @Override
+            public boolean ownsDirectFilter(int source) {
+                final TrackedSound tracked = SOURCES.get(source);
+                return (tracked != null) && tracked.filtersOwned;
+            }
+
+            @Override
+            public int twinOf(int source) {
+                final SoundPair pair = pairOf(source);
+                return (pair == null) ? 0 : pair.twin;
+            }
+        });
+    }
+
     /**
      * @param auxOnly Whether only the reverb of the sound is processed; its direct sound is then intentionally silenced
      */
@@ -121,6 +142,11 @@ public class SoundPhysicsCompat {
          * Sound Physics then doesn't process it at all, and it is heard dry from its real position.
          */
         private final boolean bypass;
+        /**
+         * Whether Sound Physics was enabled when this sound started, and so applies its filters.
+         * Set before the sound plays. Sound thread only.
+         */
+        private boolean filtersOwned;
         /**
          * The distance a linearly attenuated sound fully fades out at, or -1 if it is not linearly attenuated
          */
@@ -190,9 +216,11 @@ public class SoundPhysicsCompat {
             // No twin when Sound Physics is disabled or bypassed (it applies no environment to crossfade through)
             // or when its processSound could not be bridged. We still track the sound, as Sound Physics changes its
             // distance falloff even when disabled.
-            final boolean crossfade = !tracked.bypass
-                && SoundPhysicsMod.CONFIG.enabled.get() && SoundPhysicsApi.isAvailable();
+            tracked.filtersOwned = SoundPhysicsMod.CONFIG.enabled.get() && SoundPhysicsApi.isAvailable();
+            final boolean crossfade = !tracked.bypass && tracked.filtersOwned;
             tracked.pair = crossfade ? SoundPair.create(source) : null;
+            if (tracked.pair != null)
+                UnderwaterMuffling.onTwinCreated(source, tracked.pair.twin);
             SOURCES.put(source, tracked);
 
             if (debugLogging())
@@ -432,7 +460,8 @@ public class SoundPhysicsCompat {
         restoreAttenuation(tracked, source);
 
         if (tracked.bypass) {
-            applyDryEnvironment(tracked, source);
+            // Clears whatever environment Sound Physics left on its source, which may be reused from another sound
+            updateEnvironment(tracked, source);
             return;
         }
 
@@ -486,42 +515,55 @@ public class SoundPhysicsCompat {
 
     /**
      * Moves a sound towards the environment of its emitter: by crossfading into it through its {@link SoundPair},
-     * or (if it has none) by gliding to it.
+     * or (if it has none) by gliding to it. A bypassed sound is kept dry.
+     * Either way, its environment is muffled by its {@link UnderwaterMuffling}.
      */
     private static void updateEnvironment(TrackedSound tracked, int source) {
-        if (tracked.bypass)
+        // Otherwise, Sound Physics applies no environments (and UnderwaterMuffling its own filter)
+        if (!tracked.filtersOwned)
             return;
 
-        final boolean evaluated = tracked.environment.isEvaluated();
-
-        if (tracked.pair != null) {
-            tracked.pair.update(evaluated ? tracked.environment.target() : null);
+        final float[] environment;
+        if (tracked.bypass) {
+            environment = DRY_ENVIRONMENT;
+        } else if (!tracked.environment.isEvaluated()) {
+            if (tracked.pair != null)
+                tracked.pair.update(null);
             return;
+        } else {
+            environment = (tracked.pair != null) ? tracked.environment.target() : tracked.environment.advance();
         }
 
-        if (!evaluated)
-            return;
+        final float[] v = muffled(environment, UnderwaterMuffling.muffleOf(source));
 
-        final float[] v = tracked.environment.advance();
+        if (tracked.pair != null) {
+            tracked.pair.update(v);
+            return;
+        }
 
         // Re-applying it re-attaches the source's filters, which is needless (and may be heard)
         if (Arrays.equals(v, tracked.appliedEnvironment))
             return;
-        tracked.appliedEnvironment = v.clone();
+        tracked.appliedEnvironment = v;
 
         setEnvironmentOf(source, v);
     }
 
     /**
-     * Clears whatever environment Sound Physics left on a bypassed sound's source, which may be reused from another sound
+     * @return A copy of the given environment, muffled by the given muffling: its direct sound cut the same as
+     * {@link UnderwaterMuffling} cuts it without Sound Physics. Its reverb (of the air around it) is cut along with it,
+     * leaving the underwater effects UnderwaterMuffling sends the sound through itself.
      */
-    private static void applyDryEnvironment(TrackedSound tracked, int source) {
-        // When disabled, Sound Physics applies no environments to clear
-        if (!SoundPhysicsMod.CONFIG.enabled.get() || Arrays.equals(DRY_ENVIRONMENT, tracked.appliedEnvironment))
-            return;
-        tracked.appliedEnvironment = DRY_ENVIRONMENT.clone();
+    private static float[] muffled(float[] environment, UnderwaterMuffling.Muffle muffle) {
+        final float[] v = environment.clone();
 
-        setEnvironmentOf(source, DRY_ENVIRONMENT);
+        for (int i = 0; i < EmitterEnvironment.FIRST_CUTOFF; i++)
+            v[i] *= muffle.directGain();
+        for (int i = EmitterEnvironment.FIRST_CUTOFF; i <= EmitterEnvironment.DIRECT_CUTOFF; i++)
+            v[i] = Math.min(v[i] * muffle.directCutoff(), MAX_CUTOFF);
+        v[EmitterEnvironment.DIRECT_GAIN] *= muffle.directGain();
+
+        return v;
     }
 
     /**

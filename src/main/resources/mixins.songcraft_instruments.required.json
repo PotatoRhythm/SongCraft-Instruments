@@ -5,6 +5,8 @@
 	"refmap": "mixins.songcraft_instruments.refmap.json",
 	"client": [
         "ScreenAccessor",
+        "ChannelSourceMixin",
+        "LibraryMixin",
 		"SoundEngineMixin",
 		"SoundManagerPreparationsMixin",
 		"SoundBufferLibraryMixin"

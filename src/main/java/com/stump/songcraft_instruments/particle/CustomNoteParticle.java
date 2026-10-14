@@ -40,6 +40,12 @@ public class CustomNoteParticle extends TextureSheetParticle {
         this.setColor(r, g, b);
 
         this.setSpriteFromAge(sprites);
+
+        NoteParticleRenderer.add(this);
+    }
+
+    ClientLevel getLevel() {
+        return level;
     }
 
     @Override
@@ -48,8 +54,12 @@ public class CustomNoteParticle extends TextureSheetParticle {
         this.setSpriteFromAge(sprites);
     }
 
+    /**
+     * Skipped by the particle engine's rendering, as {@link NoteParticleRenderer} renders these
+     * (as {@link ParticleRenderType#PARTICLE_SHEET_OPAQUE}) before water instead
+     */
     @Override
     public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+        return ParticleRenderType.NO_RENDER;
     }
 }

@@ -19,14 +19,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -37,13 +41,17 @@ import com.stump.songcraft_instruments.block.blockentity.KeyboardStandBlockEntit
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-public class KeyboardStandBlock extends AbstractInstrumentBlock {
+/**
+ * Can hold water, so it can be placed underwater (and isn't washed away by flowing water or lava)
+ */
+public class KeyboardStandBlock extends AbstractInstrumentBlock implements SimpleWaterloggedBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty HAS_KEYBOARD = BooleanProperty.create("has_keyboard");
     /**
      * Whether the keyboard faces the back of the stand, rather than its front
      */
     public static final BooleanProperty KEYBOARD_FLIPPED = BooleanProperty.create("keyboard_flipped");
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
 
     // The stand is as wide and deep as the keyboard
@@ -96,6 +104,7 @@ public class KeyboardStandBlock extends AbstractInstrumentBlock {
             .setValue(FACING, Direction.NORTH)
             .setValue(HAS_KEYBOARD, false)
             .setValue(KEYBOARD_FLIPPED, false)
+            .setValue(WATERLOGGED, false)
         );
     }
 
@@ -220,7 +229,23 @@ public class KeyboardStandBlock extends AbstractInstrumentBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
+        return defaultBlockState()
+            .setValue(FACING, pContext.getHorizontalDirection().getOpposite())
+            .setValue(WATERLOGGED, pContext.getLevel().getFluidState(pContext.getClickedPos()).getType() == Fluids.WATER);
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState state) {
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+    }
+
+    @Override
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+                                  LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+        if (state.getValue(WATERLOGGED))
+            level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @Override
@@ -230,7 +255,7 @@ public class KeyboardStandBlock extends AbstractInstrumentBlock {
 
     @Override
     protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(FACING, HAS_KEYBOARD, KEYBOARD_FLIPPED);
+        pBuilder.add(FACING, HAS_KEYBOARD, KEYBOARD_FLIPPED, WATERLOGGED);
     }
 
 }

@@ -7,7 +7,9 @@
 	"client": [
         "ChannelMixin",
         "SoundEngineMixin",
-        "SoundPhysicsMixin"
+        "SoundPhysicsMixin",
+        "SoundPhysicsProcessSoundMixin",
+        "SoundPhysicsProcessSoundLegacyMixin"
     ],
 	"minVersion": "0.8"
 }

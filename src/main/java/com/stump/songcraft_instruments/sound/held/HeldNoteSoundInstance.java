@@ -241,6 +241,11 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
     }
 
     @Override
+    public @Nullable Entity getOriginEntity() {
+        return soundOrigin.isEmpty() ? initiator.orElse(null) : null;
+    }
+
+    @Override
     public Vec3 getWorldOrigin() {
         if (!relative)
             return new Vec3(x, y, z);

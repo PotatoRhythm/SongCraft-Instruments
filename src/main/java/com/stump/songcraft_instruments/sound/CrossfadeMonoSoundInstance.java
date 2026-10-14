@@ -3,9 +3,12 @@ package com.stump.songcraft_instruments.sound;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import javax.annotation.Nullable;
 
 /**
  * A positioned Mono sound that plays alongside a Stereo note, so the note can
@@ -50,5 +53,10 @@ public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance im
     @Override
     public Vec3 getWorldOrigin() {
         return new Vec3(x, y, z);
+    }
+
+    @Override
+    public @Nullable Entity getOriginEntity() {
+        return (stereo instanceof WorldOriginSoundInstance origin) ? origin.getOriginEntity() : null;
     }
 }

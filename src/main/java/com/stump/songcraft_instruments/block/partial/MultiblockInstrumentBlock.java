@@ -13,18 +13,28 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.*;
 
-public abstract class MultiblockInstrumentBlock extends AbstractInstrumentBlock {
+/**
+ * An instrument made of several blocks. Each of them can hold water, so the instrument can be placed underwater
+ * (and isn't washed away by flowing water or lava).
+ */
+public abstract class MultiblockInstrumentBlock extends AbstractInstrumentBlock implements SimpleWaterloggedBlock {
 
     public enum Part implements StringRepresentable {
         CONTROLLER,
@@ -38,6 +48,7 @@ public abstract class MultiblockInstrumentBlock extends AbstractInstrumentBlock 
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     // prevent double break recursion
     private static final Set<BlockPos> ACTIVE_BREAKS = new HashSet<>();
@@ -52,11 +63,33 @@ public abstract class MultiblockInstrumentBlock extends AbstractInstrumentBlock 
 
         registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(PART, Part.CONTROLLER));
+                .setValue(PART, Part.CONTROLLER)
+                .setValue(WATERLOGGED, false));
     }
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, PART);
+        builder.add(FACING, PART, WATERLOGGED);
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState state) {
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+    }
+
+    @Override
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+                                  LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+        if (state.getValue(WATERLOGGED))
+            level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+    }
+
+    /**
+     * @return Whether the given position holds water for a part placed there to keep
+     */
+    private static boolean isWater(Level level, BlockPos pos) {
+        return level.getFluidState(pos).getType() == Fluids.WATER;
     }
 
     @Override
@@ -66,7 +99,8 @@ public abstract class MultiblockInstrumentBlock extends AbstractInstrumentBlock 
 
         BlockState state = defaultBlockState()
                 .setValue(FACING, ctx.getHorizontalDirection().getOpposite())
-                .setValue(PART, Part.CONTROLLER);
+                .setValue(PART, Part.CONTROLLER)
+                .setValue(WATERLOGGED, isWater(level, pos));
 
         Direction facing = state.getValue(FACING);
 
@@ -95,7 +129,7 @@ public abstract class MultiblockInstrumentBlock extends AbstractInstrumentBlock 
         for (BlockPos local : getLayoutOffsets()) {
             BlockPos target = pos.offset(rotate(facing, local));
 
-            level.setBlock(target, dummyState(state), 3);
+            level.setBlock(target, dummyState(state).setValue(WATERLOGGED, isWater(level, target)), 3);
             placed.add(target);
         }
 
@@ -175,10 +209,10 @@ public abstract class MultiblockInstrumentBlock extends AbstractInstrumentBlock 
                 Block.popResource(level, controller, stack);
             }
 
-            // remove all blocks
+            // remove all blocks, leaving the water they held
             for (BlockPos p : toBreak) {
                 if (level.getBlockState(p).getBlock() == this) {
-                    level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+                    level.setBlock(p, level.getFluidState(p).createLegacyBlock(), 3);
                 }
             }
 

@@ -3,10 +3,13 @@ package com.stump.songcraft_instruments.sound;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -30,6 +33,10 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
     private final Optional<InitiatorID> oInitiatorId;
 
     private final Vec3 sourcePos;
+    /**
+     * The player playing this note on a held instrument, or null if it comes from a block
+     */
+    private final @Nullable Entity originEntity;
     private @Nullable CrossfadeMonoSoundInstance monoCrossfade;
 
     public NoteSoundInstance(NoteSound noteSound, float pitch, NoteSoundMetadata meta, double playDistSqr,
@@ -56,6 +63,12 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
         this.oInitiatorId = oInitiatorId;
 
         this.sourcePos = meta.pos().getCenter();
+        // A held instrument's notes come from where its player is; other notes come from their block
+        final ClientLevel level = Minecraft.getInstance().level;
+        this.originEntity = initiatorId
+                .map((id) -> (level == null) ? null : level.getEntity(id))
+                .filter((entity) -> entity.blockPosition().equals(meta.pos()))
+                .orElse(null);
 
         if (noteSound.usesStereo(playDistSqr)) {
             // Stereo plays in the listener's head, and crossfades into a positioned Mono with distance
@@ -122,6 +135,11 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
     @Override
     public Vec3 getWorldOrigin() {
         return sourcePos;
+    }
+
+    @Override
+    public @Nullable Entity getOriginEntity() {
+        return originEntity;
     }
 
     @Override

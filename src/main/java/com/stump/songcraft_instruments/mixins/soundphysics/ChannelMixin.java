@@ -2,14 +2,12 @@ package com.stump.songcraft_instruments.mixins.soundphysics;
 
 import com.mojang.blaze3d.audio.Channel;
 import com.mojang.blaze3d.audio.SoundBuffer;
-import com.stump.songcraft_instruments.compat.soundphysics.ChannelSource;
 import com.stump.songcraft_instruments.compat.soundphysics.SoundPhysicsCompat;
 import net.minecraft.client.sounds.AudioStream;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -21,16 +19,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * onto their twin sources (see {@code SoundPair}). These hooks do nothing for other channels.
  */
 @Mixin(Channel.class)
-public abstract class ChannelMixin implements ChannelSource {
+public abstract class ChannelMixin {
     @Shadow
     @Final
     private int source;
-
-    @Unique
-    @Override
-    public int songcraft_instruments$getSource() {
-        return source;
-    }
 
     @ModifyVariable(method = "setSelfPosition", at = @At("HEAD"), argsOnly = true)
     private Vec3 songcraft_instruments$updateInstrumentSound(Vec3 pos) {
