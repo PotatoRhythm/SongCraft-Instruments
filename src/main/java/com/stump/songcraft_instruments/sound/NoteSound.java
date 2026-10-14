@@ -38,16 +38,16 @@ public class NoteSound {
     /**
      * The range at which Stereo starts crossfading into Mono.
      */
-    public static final double STEREO_FADE_START = 8;
+    public static final double STEREO_FADE_START = 4;
     /**
      * The range at which players will only hear Mono instead of Stereo.
      * Between {@link #STEREO_FADE_START} and this range, both are heard as a crossfade.
     */
-    public static final double STEREO_RANGE = 16;
+    public static final double STEREO_RANGE = 8;
     /**
      * The distance at which Mono sounds fully fade out (their sounds.json attenuation distance)
      */
-    public static final int MONO_DISTANCE = 64;
+    public static final int MONO_DISTANCE = 32;
     /**
      * A volume multiplier for Stereo sounds, for balancing them against their Mono counterparts.
      * <p>OpenAL Soft plays a Mono sound at the listener at -4.5 dB in each speaker,

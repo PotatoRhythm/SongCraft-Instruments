@@ -31,7 +31,7 @@ import java.util.Optional;
  * Server-side.
  */
 public class InstrumentPacketUtil {
-    public static final int PLAY_DISTANCE = 64;
+    public static final int PLAY_DISTANCE = 32;
 
     //#region Generic Note Sound impls
 
