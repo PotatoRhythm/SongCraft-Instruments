@@ -1,6 +1,141 @@
 {
-  "parent": "songcraft_instruments:item/instrument",
-  "textures": {
-    "layer0": "songcraft_instruments:item/gw2_bass"
-  }
+	"parent": "builtin/entity",
+	"textures": {
+		"particle": "songcraft_instruments:item/gw2_bass"
+	},
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [
+				-147.09000000000015,
+				-82.36000000000013,
+				-147.23000000000002
+			],
+			"translation": [
+				-7,
+				2.25,
+				3.75
+			],
+			"scale": [
+				1.7,
+				1.7,
+				1.7
+			]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [
+				-26.86999999999989,
+				4.110000000000127,
+				1.0100000000002183
+			],
+			"translation": [
+				-7.75,
+				3,
+				3.25
+			],
+			"scale": [
+				1.83,
+				1.7,
+				1.7
+			]
+		},
+		"firstperson_righthand": {
+			"rotation": [
+				-90,
+				-72,
+				0
+			],
+			"translation": [
+				-2,
+				3.75,
+				4.75
+			]
+		},
+		"firstperson_lefthand": {
+			"rotation": [
+				-90,
+				28,
+				0
+			],
+			"translation": [
+				-7.5,
+				7,
+				10
+			],
+			"scale": [
+				0.25,
+				0.25,
+				0.25
+			]
+		},
+		"ground": {
+			"translation": [
+				0,
+				-1,
+				0
+			],
+			"scale": [
+				1.2,
+				1.2,
+				1.2
+			]
+		},
+		"gui": {
+			"rotation": [
+				90,
+				86,
+				0
+			],
+			"translation": [
+				0.25,
+				0,
+				0
+			],
+			"scale": [
+				1.16,
+				1.16,
+				1.16
+			]
+		},
+		"head": {
+			"scale": [
+				0,
+				0,
+				0
+			]
+		},
+		"fixed": {
+			"rotation": [
+				-89.65000000000009,
+				-10.239999999999782,
+				0.8200000000001637
+			],
+			"translation": [
+				0.5,
+				0,
+				0.25
+			],
+			"scale": [
+				1.2,
+				1.2,
+				1.2
+			]
+		},
+		"on_shelf": {
+			"rotation": [
+				-90.40999999999985,
+				51.5,
+				175.34000000000015
+			],
+			"translation": [
+				-0.5,
+				-0.5,
+				-1
+			],
+			"scale": [
+				1.7,
+				1.7,
+				1.7
+			]
+		}
+	}
 }

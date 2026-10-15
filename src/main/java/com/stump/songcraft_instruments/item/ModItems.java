@@ -8,8 +8,6 @@ import com.stump.songcraft_instruments.entity.vehicle.LooperMinecart;
 import com.stump.songcraft_instruments.entity.vehicle.SpeakerBoat;
 import com.stump.songcraft_instruments.entity.vehicle.SpeakerMinecart;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
-import com.stump.songcraft_instruments.item.partial.instrument.CreditableAccessoryInstrumentItem;
-import com.stump.songcraft_instruments.item.partial.instrument.CreditableInstrumentItem;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.InstrumentPacketUtil;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -112,17 +110,15 @@ public class ModItems {
         ),
         VIOLIN = register("violin", ViolinItem::new, DEFAULT_INSTRUMENTS_TABS, VIOLIN_BOW),
 
-        GUITAR = register("guitar", () -> new CreditableInstrumentItem(
+        GUITAR = register("guitar", () -> new InstrumentItem(
             (player) -> InstrumentPacketUtil.sendOpenPacket(
                 player, loc("guitar")
-            ),
-            "Philharmonia"
+            )
         )),
-        PIPA = register("pipa", () -> new CreditableInstrumentItem(
+        PIPA = register("pipa", () -> new InstrumentItem(
             (player) -> InstrumentPacketUtil.sendOpenPacket(
                 player, loc("pipa")
-            ),
-            "DSK Asian DreamZ"
+            )
         )),
 
         BACHI = register("bachi",
@@ -131,12 +127,11 @@ public class ModItems {
             )
         ),
         SHAMISEN = register("shamisen",
-            () -> new CreditableAccessoryInstrumentItem(
+            () -> new AccessoryInstrumentItem(
                 (player) -> InstrumentPacketUtil.sendOpenPacket(
                     player, loc("shamisen")
                 ),
-                (InstrumentAccessoryItem) BACHI.get(),
-                "Roland SC-88"
+                (InstrumentAccessoryItem) BACHI.get()
             ),
             DEFAULT_INSTRUMENTS_TABS,
             BACHI
@@ -144,8 +139,7 @@ public class ModItems {
 
         KOTO = register("koto", () ->
             new KotoBlockItem(
-                ModBlocks.KOTO.get(), new Properties().stacksTo(1),
-                "DSK Asian DreamZ"
+                ModBlocks.KOTO.get(), new Properties().stacksTo(1)
             ),
             DEFAULT_INSTRUMENT_BLOCK_TABS
         ),
@@ -246,7 +240,7 @@ public class ModItems {
         )),
 
         GW2_BASS = register("gw2_bass", () ->
-                new InstrumentItem(
+                new Gw2BassItem(
                             (player) -> sendOpenPacket(player, loc("gw2_bass"))
                 )
         ),

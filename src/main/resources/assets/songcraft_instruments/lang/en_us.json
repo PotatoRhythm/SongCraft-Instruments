@@ -577,5 +577,8 @@
     "songcraft_instruments.keymaps.octave_mode.note_b": "Note B",
     "songcraft_instruments.keymaps.octave_mode.note_high_c": "Note High C",
     "songcraft_instruments.keymaps.octave_mode.octave_down": "Octave Down",
-    "songcraft_instruments.keymaps.octave_mode.octave_up": "Octave Up"
+    "songcraft_instruments.keymaps.octave_mode.octave_up": "Octave Up",
+
+    "tooltip.songcraft_instruments.credit.model": "Model by: %s",
+    "tooltip.songcraft_instruments.credit.sprite": "Sprite by: %s"
 }
