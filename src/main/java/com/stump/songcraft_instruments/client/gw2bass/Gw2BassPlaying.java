@@ -8,6 +8,7 @@ import com.stump.songcraft_instruments.client.ModArmPose;
 import com.stump.songcraft_instruments.client.gui.instrument.gw2_bass.Gw2BassScreen;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.item.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -52,9 +53,12 @@ public class Gw2BassPlaying {
     // Angles are in radians for model parts and degrees for the whole body, and timings are in seconds
 
     /** Where the bass is held, as the rotation of the arm holding it, for it to hang across the body */
-    private static final float[] RIGHT_ANCHOR = {-0.15f, 0.2f, 0}, LEFT_ANCHOR = {-0.15f, -0.05f, 0.15f};
-    /** Where the plucking arm rests over the strings, when the bass is held in the right and left hand */
-    private static final float[] RIGHT_PLUCK = {-0.917f, 0, -0.613f}, LEFT_PLUCK = {-0.809f, 0, 0.823f};
+    private static final float[] RIGHT_ANCHOR = {-0.15f, 0.2f, 0}, LEFT_ANCHOR = {-0.15f, -0.2f, 0};
+    /**
+     * Where the plucking arm rests over the strings, when the bass is held in the right and left hand.
+     * It plucks about a fifth of the way up the strings from the bridge, over the bass's body.
+     */
+    private static final float[] RIGHT_PLUCK = {-1.056f, 0, -0.393f}, LEFT_PLUCK = {-0.887f, 0, 0.304f};
     /**
      * The fretting arm's rotations along the neck, evenly spaced from the lowest note up near the headstock
      * to the highest down near the body, when the bass is held in the right and left hand.
@@ -62,22 +66,22 @@ public class Gw2BassPlaying {
      */
     private static final float[][]
         RIGHT_FRETS = {
-            {-1.596f, -0.348f, 0.390f},
-            {-1.489f, -0.320f, 0.427f},
-            {-1.390f, -0.280f, 0.461f},
-            {-1.297f, -0.264f, 0.501f},
-            {-1.204f, -0.250f, 0.555f},
-            {-1.109f, -0.252f, 0.624f},
-            {-1.011f, -0.265f, 0.699f}
+            {-1.880f, -0.308f, 0.456f},
+            {-1.725f, -0.261f, 0.388f},
+            {-1.615f, -0.226f, 0.359f},
+            {-1.510f, -0.180f, 0.384f},
+            {-1.398f, -0.132f, 0.453f},
+            {-1.297f, -0.106f, 0.546f},
+            {-1.204f, -0.081f, 0.649f}
         },
         LEFT_FRETS = {
-            {-2.226f, 0.128f, -0.955f},
-            {-2.087f, 0.189f, -0.928f},
-            {-1.941f, 0.248f, -0.900f},
-            {-1.782f, 0.283f, -0.854f},
-            {-1.618f, 0.304f, -0.790f},
-            {-1.448f, 0.306f, -0.730f},
-            {-1.275f, 0.300f, -0.671f}
+            {-1.629f, 0.416f, -0.232f},
+            {-1.526f, 0.337f, -0.283f},
+            {-1.425f, 0.280f, -0.339f},
+            {-1.335f, 0.250f, -0.397f},
+            {-1.244f, 0.221f, -0.459f},
+            {-1.147f, 0.194f, -0.522f},
+            {-1.046f, 0.173f, -0.581f}
         };
 
     /** Where along the neck the fretting hand rests before the first note, from 0 lowest to 1 highest */
@@ -360,6 +364,11 @@ public class Gw2BassPlaying {
         holdOffsetY = pluckArm.yRot - anchor[1];
         holdOffsetZ = pluckArm.zRot - anchor[2];
 
+        // Vanilla sways both arms gently once they're posed, which would rock the bass into the fretting hand
+        final float age = entity.tickCount + Minecraft.getInstance().getFrameTime();
+        cancelIdleSway(model.rightArm, age, 1);
+        cancelIdleSway(model.leftArm, age, -1);
+
         if (playing == null)
             return;
 
@@ -371,6 +380,16 @@ public class Gw2BassPlaying {
         // The roll is set rather than added onto, as nothing resets it between frames
         model.head.zRot = -towardsNeck * HEAD_TILT * playing.engaged;
         cockedModel = model;
+    }
+
+    /**
+     * Takes away ahead of time the idle sway vanilla adds onto a posed arm
+     * (see {@link net.minecraft.client.model.AnimationUtils#bobModelPart}), so that the arm ends up where it was posed
+     * @param side 1 for the right arm, -1 for the left
+     */
+    private static void cancelIdleSway(final ModelPart arm, final float age, final float side) {
+        arm.zRot -= side * (Mth.cos(age * 0.09f) * 0.05f + 0.05f);
+        arm.xRot -= side * Mth.sin(age * 0.067f) * 0.05f;
     }
 
     /**
