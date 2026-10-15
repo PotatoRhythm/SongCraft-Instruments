@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.client;
 
+import com.stump.songcraft_instruments.client.gw2bass.Gw2BassPlaying;
 import com.stump.songcraft_instruments.client.saxophone.SaxophonePlaying;
 import net.minecraft.client.model.HumanoidModel.ArmPose;
 import net.minecraft.client.model.geom.ModelPart;
@@ -75,6 +76,11 @@ public abstract class ModArmPose {
                 model.rightArm.yRot = 0;
             }
         }
+    );
+
+    /** Both hands on the GW2 bass, playing along with the notes */
+    public static final ArmPose PLAYING_GW2_BASS = ArmPose.create("playing_gw2_bass", true,
+        Gw2BassPlaying::poseArms
     );
 
     /** The free arm of a player singing with Sky's Aurora voice, raised out to the side */
