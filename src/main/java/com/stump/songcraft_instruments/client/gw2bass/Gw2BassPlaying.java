@@ -40,7 +40,7 @@ import java.util.UUID;
  * and the plucking hand pulls through the strings with every note, alternating fingers.
  * The string the note's on rings out after, the lowest notes on the lowest string and the highest on the highest.
  * While playing, players settle into a groove, nodding their head and rocking to a beat that locks onto the
- * rhythm of their notes, swaying every other beat, leaning back a little with their head cocked towards the neck.
+ * rhythm of their notes, swaying to each side over 2 beats, leaning back a little with their head cocked towards the neck.
  * Everything settles back to standing still once they've stopped playing for a moment.
  * <p>
  * The arm poses were worked out from the bass's model and display settings, so that the hands land on the
@@ -125,7 +125,7 @@ public class Gw2BassPlaying {
     /** How far players look down at, turn towards and cock their head towards the neck while playing */
     private static final float HEAD_LOOK_DOWN = 0.1f, HEAD_TURN = 0.2f, HEAD_TILT = 0.1f;
 
-    /** How far players lean back while playing, rock forward on every beat, and sway to each side every other beat */
+    /** How far players lean back while playing, rock forward on every beat, and sway to each side over 2 beats */
     private static final float LEAN_BACK = 2f, GROOVE_ROCK = 1.6f, SWAY_ANGLE = 2f;
 
     /** How long the motion takes to fade in as players start playing, and to settle once they stop */
@@ -148,9 +148,8 @@ public class Gw2BassPlaying {
      */
     private static HumanoidModel<?> cockedModel;
 
-    /** The entity whose arms were last posed, and how far its holding arm was moved off the anchor */
+    /** The entity whose arms were last posed */
     private static LivingEntity posedEntity;
-    private static float holdOffsetX, holdOffsetY, holdOffsetZ;
 
     private static final class Playing {
         double lastNoteAt = Double.NEGATIVE_INFINITY;
@@ -292,9 +291,9 @@ public class Gw2BassPlaying {
         if (activity <= 0)
             return;
 
-        // Sway over every 2 beats, so it swings to one side on one beat and back on the next
+        // Sway over every 4 beats, swinging out to one side and back over 2 of them, then the other side over the next 2
         final float sway = activity * SWAY_ANGLE
-            * Mth.sin((float) (((playing.beats & 1) + playing.beatPhase) * Math.PI));
+            * Mth.sin((float) (((playing.beats & 3) + playing.beatPhase) * Math.PI / 2));
         final float leanBack = activity * LEAN_BACK - GROOVE_ROCK * playing.groove;
 
         final PoseStack poseStack = event.getPoseStack();
@@ -358,11 +357,7 @@ public class Gw2BassPlaying {
         pluckArm.yRot = pluckRest[1];
         pluckArm.zRot = pluckRest[2] + outwards * FINGER_SPREAD * fingerShift;
 
-        final float[] anchor = right ? RIGHT_ANCHOR : LEFT_ANCHOR;
         posedEntity = entity;
-        holdOffsetX = pluckArm.xRot - anchor[0];
-        holdOffsetY = pluckArm.yRot - anchor[1];
-        holdOffsetZ = pluckArm.zRot - anchor[2];
 
         // Vanilla sways both arms gently once they're posed, which would rock the bass into the fretting hand
         final float age = entity.tickCount + Minecraft.getInstance().getFrameTime();
@@ -406,12 +401,14 @@ public class Gw2BassPlaying {
         if ((right ? model.rightArmPose : model.leftArmPose) != ModArmPose.PLAYING_GW2_BASS)
             return;
 
-        // Undo the arm's own rotation and take on the anchor's instead, keeping anything added on after it was posed
+        // Undo the arm's own rotation and take on the anchor's instead.
+        // The arm's rotation is left out altogether, rather than offset from, since other mods may move it after
+        // it was posed: Not Enough Animations eases arms towards their pose, which would have the bass twitch with
+        // every pluck.
         final ModelPart part = right ? model.rightArm : model.leftArm;
+        final float[] anchor = right ? RIGHT_ANCHOR : LEFT_ANCHOR;
         poseStack.mulPose(new Quaternionf().rotationZYX(part.zRot, part.yRot, part.xRot).conjugate());
-        poseStack.mulPose(new Quaternionf().rotationZYX(
-            part.zRot - holdOffsetZ, part.yRot - holdOffsetY, part.xRot - holdOffsetX
-        ));
+        poseStack.mulPose(new Quaternionf().rotationZYX(anchor[2], anchor[1], anchor[0]));
     }
 
 
