@@ -18,7 +18,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.GameShuttingDownEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -38,6 +40,14 @@ public class ClientEvents {
     @SubscribeEvent
     public static void onClientTick(final ClientTickEvent event) {
         InstrumentScreen.getCurrentScreen(MINECRAFT).ifPresent(InstrumentScreen::handleAbruptClosing);
+    }
+
+
+    // Instrument screens draw the chat over themselves, so don't draw it under them too
+    @SubscribeEvent
+    public static void hideHudChat(final RenderGuiOverlayEvent.Pre event) {
+        if (event.getOverlay() == VanillaGuiOverlay.CHAT_PANEL.type() && InstrumentScreen.getCurrentScreen(MINECRAFT).isPresent())
+            event.setCanceled(true);
     }
 
 

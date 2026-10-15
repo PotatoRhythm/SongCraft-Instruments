@@ -5,6 +5,7 @@
 	"refmap": "mixins.songcraft_instruments.refmap.json",
 	"client": [
         "ScreenAccessor",
+        "ChatScreenAccessor",
         "ChannelSourceMixin",
         "LibraryMixin",
 		"SoundEngineMixin",

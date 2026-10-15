@@ -352,6 +352,7 @@
 
     "songcraft_instruments.keymaps.instrument_type_modifier": "Cycle Instrument Sound",
     "songcraft_instruments.keymaps.record": "Record",
+    "songcraft_instruments.keymaps.open_chat": "Open Chat",
 
     "itemGroup.songcraft_instruments.music_production_tab": "Music Production",
 

@@ -90,6 +90,16 @@ public class InstrumentKeyMappings {
             )
         ),
 
+        OPEN_CHAT = Lazy.of(
+            () -> new KeyMapping(
+                    CATEGORY+".open_chat",
+                    InstrumentKeyMappings.INSTRUMENT_KEY_CONFLICT_CONTEXT,
+                    InputConstants.Type.KEYSYM,
+                    GLFW.GLFW_KEY_ENTER,
+                    CATEGORY
+            )
+        ),
+
         DAMPEN = Lazy.of(
                 () -> new KeyMapping(
                 CATEGORY + ".dampen",
@@ -158,6 +168,7 @@ public class InstrumentKeyMappings {
         event.register(TRANSPOSE_DOWN_MODIFIER.get());
         event.register(INSTRUMENT_TYPE_MODIFIER.get());
         event.register(RECORD.get());
+        event.register(OPEN_CHAT.get());
 
         event.register(OCTAVE_DOWN.get());
         event.register(OCTAVE_UP.get());

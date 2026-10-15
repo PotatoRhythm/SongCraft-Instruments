@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenP
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.config.enumType.SoundType;
 import com.stump.songcraft_instruments.client.gui.instrument.DisclaimerScreen;
+import com.stump.songcraft_instruments.client.gui.instrument.InstrumentChatScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.NoteLabelSupplier;
 import com.stump.songcraft_instruments.client.gui.options.partial.AbstractInstrumentOptionsScreen;
@@ -22,6 +23,7 @@ import com.stump.songcraft_instruments.networking.packet.instrument.c2s.C2SDampe
 import com.stump.songcraft_instruments.networking.packet.instrument.c2s.CloseInstrumentPacket;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.mojang.blaze3d.platform.InputConstants.Key;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.InputConstants.Type;
 import com.mojang.logging.LogUtils;
 import com.stump.songcraft_instruments.sound.NoteSoundInstances;
@@ -34,6 +36,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -476,12 +479,28 @@ public abstract class InstrumentScreen extends Screen {
      */
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        if (!instrumentRenders()) {
+        if (!instrumentRenders())
             visibilityButton.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-            return;
-        }
+        else
+            renderInstrument(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 
-        renderInstrument(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+        renderChat(pGuiGraphics);
+    }
+
+    /**
+     * Renders the chat over the instrument, so messages can be read while playing.
+     * The HUD's own chat (under the instrument) is hidden meanwhile, see {@link com.stump.songcraft_instruments.event.ClientEvents#hideHudChat}.
+     */
+    protected void renderChat(final GuiGraphics gui) {
+        // Mouse is passed as MAX_VALUE when the chat is layered on top of us, so take it from the window instead
+        final Window window = minecraft.getWindow();
+        final int mouseX = Mth.floor(minecraft.mouseHandler.xpos() * window.getGuiScaledWidth() / window.getScreenWidth()),
+            mouseY = Mth.floor(minecraft.mouseHandler.ypos() * window.getGuiScaledHeight() / window.getScreenHeight());
+
+        gui.pose().pushPose();
+        gui.pose().translate(0, 0, 200);
+        minecraft.gui.getChat().render(gui, minecraft.gui.getGuiTicks(), mouseX, mouseY);
+        gui.pose().popPose();
     }
     public void renderInstrument(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
@@ -532,6 +551,12 @@ public abstract class InstrumentScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (InstrumentKeyMappings.OPEN_CHAT.get().matches(keyCode, scanCode)) {
+            // Deferred to the next frame, so the character this key types doesn't land in the chat box
+            minecraft.tell(this::openChat);
+            return true;
+        }
+
         if (InstrumentKeyMappings.VOLUME_UP.get().matches(keyCode, scanCode)) {
             changeVolume(0.05f);
             return true;
@@ -695,6 +720,26 @@ public abstract class InstrumentScreen extends Screen {
     }
 
 
+    /**
+     * Opens the chat on top of this instrument, keeping the instrument open.
+     * The chat returns here once a message is sent or it is escaped.
+     */
+    public void openChat() {
+        // The screen might have changed since this was queued
+        if (minecraft.screen != this)
+            return;
+
+        // Key releases will go to the chat from now on, so let go of everything held
+        notesIterable().forEach(NoteButton::release);
+        setFocused(null);
+        if (isTransposed())
+            resetTransposition();
+        dampenNotes();
+
+        minecraft.pushGuiLayer(new InstrumentChatScreen(this));
+    }
+
+
     private boolean closed = false;
 
     /**
@@ -756,6 +801,9 @@ public abstract class InstrumentScreen extends Screen {
 
         if (minecraft.screen instanceof AbstractInstrumentOptionsScreen instrumentOptionsScreen)
             return instrumentOptionsScreen.instrumentScreen;
+
+        if (minecraft.screen instanceof InstrumentChatScreen chatScreen)
+            return Optional.of(chatScreen.instrumentScreen);
 
         return Optional.empty();
     }
