@@ -65,6 +65,7 @@ This mod is a heavily modified continuation of the Genshin Instruments and Even 
 - `max_notes` (default `1000000`) — The most notes one record can hold, including imports. -1 for no limit
 - `import_operators_only` (default `false`) — Only operators can import records
 - `import_daily_limit_kb` (default `10240`) — How much new record data each player can import per 24 hours. Operators are exempt. -1 for no limit
+- `looper_per_player` (default `10`) — The most loopers one player can have placed. Operators are exempt. -1 for no limit
 
 ## Build / Run
 - Use Gradle wrapper: `./gradlew build`

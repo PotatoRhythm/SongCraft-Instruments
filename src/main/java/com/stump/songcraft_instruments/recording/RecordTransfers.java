@@ -10,6 +10,7 @@ import com.stump.songcraft_instruments.networking.packet.record.S2CRecordFilePar
 import com.stump.songcraft_instruments.networking.packet.record.S2CRecordImportRequestPacket;
 import com.stump.songcraft_instruments.recording.RecordingCodec.InvalidRecordingException;
 import com.stump.songcraft_instruments.recording.RecordingCodec.TooManyNotesException;
+import com.stump.songcraft_instruments.server.NoteRateLimit;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -197,6 +198,15 @@ public final class RecordTransfers {
             return;
         } catch (InvalidRecordingException e) {
             fail(player, message("import.invalid"));
+            return;
+        }
+
+        if (recording.performers().size() > Recording.MAX_PARTS) {
+            fail(player, Component.translatable("songcraft_instruments.record.too_many_parts", Recording.MAX_PARTS));
+            return;
+        }
+        if (NoteRateLimit.isExceededBy(recording)) {
+            fail(player, message("import.too_dense", NoteRateLimit.MAX_NOTES_PER_TICK, NoteRateLimit.MAX_NOTES_PER_SECOND));
             return;
         }
 

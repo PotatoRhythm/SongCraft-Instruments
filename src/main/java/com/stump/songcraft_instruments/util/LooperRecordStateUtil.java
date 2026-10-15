@@ -7,8 +7,11 @@ import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.LooperUnplayablePacket;
 import com.stump.songcraft_instruments.networking.packet.SyncModTagPacket;
 import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenProvider;
+import com.stump.songcraft_instruments.recording.Recording;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -95,6 +98,15 @@ public class LooperRecordStateUtil {
             return;
 
         lbe.connections().disconnectAbsentPlayers();
+
+        if (lbe.session().wouldExceedMaxParts()) {
+            player.displayClientMessage(
+                Component.translatable("songcraft_instruments.record.too_many_parts", Recording.MAX_PARTS)
+                    .withStyle(ChatFormatting.RED),
+                true
+            );
+            return;
+        }
 
         if (!lbe.session().startGroupSession())
             notifyLooperUnplayable(player);

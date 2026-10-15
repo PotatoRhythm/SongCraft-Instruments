@@ -74,6 +74,14 @@ public class C2SHeldNoteSoundPacket extends C2SNotePacket<HeldNoteSound> {
         return HeldNoteSound.readFromNetwork(buf);
     }
 
+    /**
+     * Releases always go through, so that no note is left sounding
+     */
+    @Override
+    protected boolean isNewNote() {
+        return phase == HeldSoundPhase.ATTACK;
+    }
+
     protected void sendPlayNotePackets(final ServerPlayer player) {
         HeldNoteSoundPacketUtil.sendPlayerPlayNotePackets(player, sound, meta, phase);
     }

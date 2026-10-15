@@ -2,6 +2,7 @@ package com.stump.songcraft_instruments.block;
 
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
 import com.stump.songcraft_instruments.block.blockentity.ModBlockEntities;
+import com.stump.songcraft_instruments.block.blockentity.looper.LooperOwners;
 import com.stump.songcraft_instruments.block.util.LooperInteractionRunnable;
 import com.stump.songcraft_instruments.criteria.ModCriteria;
 import com.stump.songcraft_instruments.item.record.WritableRecordItem;
@@ -10,6 +11,7 @@ import com.stump.songcraft_instruments.item.InstrumentItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -68,11 +70,18 @@ public class LooperBlock extends Block implements EntityBlock {
     }
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+        final Player player = pContext.getPlayer();
+        if (player != null && !pContext.getLevel().isClientSide && LooperOwners.refusePlacement(player))
+            return null;
+
         return defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
     }
 
     @Override
     public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
+        if (!pLevel.isClientSide && pPlacer instanceof Player player)
+            LooperOwners.get(pLevel.getServer()).addBlock(GlobalPos.of(pLevel.dimension(), pPos), player.getUUID());
+
         final boolean hasFootage = pLevel
             .getBlockEntity(pPos, ModBlockEntities.LOOPER.get())
             .orElseThrow()
@@ -321,6 +330,14 @@ public class LooperBlock extends Block implements EntityBlock {
             return;
 
         lbe.popRecord();
+    }
+
+    @Override
+    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
+        if (!pLevel.isClientSide && !pState.is(pNewState.getBlock()))
+            LooperOwners.get(pLevel.getServer()).removeBlock(GlobalPos.of(pLevel.dimension(), pPos));
+
+        super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
     }
 
 

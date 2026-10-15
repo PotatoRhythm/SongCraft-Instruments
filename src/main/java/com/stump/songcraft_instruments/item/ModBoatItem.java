@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.item;
 
+import com.stump.songcraft_instruments.block.blockentity.looper.LooperOwners;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -65,9 +66,15 @@ public class ModBoatItem extends Item {
             return InteractionResultHolder.fail(stack);
 
         if (!level.isClientSide) {
+            final boolean isLooper = LooperOwners.isLooperVehicle(boat);
+            if (isLooper && LooperOwners.refusePlacement(player))
+                return InteractionResultHolder.fail(stack);
+
             if (stack.hasCustomHoverName())
                 boat.setCustomName(stack.getHoverName());
             level.addFreshEntity(boat);
+            if (isLooper)
+                LooperOwners.get(level.getServer()).addVehicle(boat.getUUID(), player.getUUID());
             level.gameEvent(player, GameEvent.ENTITY_PLACE, location);
             if (!player.getAbilities().instabuild)
                 stack.shrink(1);

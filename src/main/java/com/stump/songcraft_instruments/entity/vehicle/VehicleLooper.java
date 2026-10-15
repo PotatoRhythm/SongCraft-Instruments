@@ -2,6 +2,7 @@ package com.stump.songcraft_instruments.entity.vehicle;
 
 import com.stump.songcraft_instruments.block.LooperBlock;
 import com.stump.songcraft_instruments.block.ModBlocks;
+import com.stump.songcraft_instruments.block.blockentity.looper.LooperOwners;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperPlayback;
 import com.stump.songcraft_instruments.block.blockentity.looper.LooperVolumeControls;
 import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
@@ -305,6 +306,9 @@ public class VehicleLooper implements Container, LooperPlayback.Host {
             Containers.dropItemStack(vehicle.level(), vehicle.getX(), vehicle.getY(), vehicle.getZ(), recordIn);
             recordIn = ItemStack.EMPTY;
         }
+
+        if (destroyed && vehicle.level().getServer() != null)
+            LooperOwners.get(vehicle.level().getServer()).removeVehicle(vehicle.getUUID());
     }
 
     //#endregion

@@ -159,6 +159,18 @@ public class RecordingSession {
     }
 
     /**
+     * Each participant adds a part on top of those of the record that would be recorded over, if any
+     * @return Whether recording now could make a record with more than {@link Recording#MAX_PARTS} parts
+     */
+    public boolean wouldExceedMaxParts() {
+        final LooperBlockEntity backingLooper = looper.getBackingLooper();
+        final Recording backing = (backingLooper != null) ? backingLooper.getRecording() : null;
+        final int backingParts = (backing != null) ? backing.performers().size() : 0;
+
+        return backingParts + looper.connections().getPlayerIds().size() > Recording.MAX_PARTS;
+    }
+
+    /**
      * Starts the countdown for a group recording, locking the connected players in as its participants.
      * @return Whether the session started
      */

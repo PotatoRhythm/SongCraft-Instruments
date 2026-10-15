@@ -20,6 +20,7 @@ public class ModServerConfigs {
 
     public static final BooleanValue RECORD_IMPORT_OPERATORS_ONLY;
     public static final IntValue RECORD_MAX_NOTES, RECORD_IMPORT_DAILY_LIMIT_KB;
+    public static final IntValue LOOPER_MAX_PER_PLAYER;
 
     static {
         final ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
@@ -36,6 +37,14 @@ public class ModServerConfigs {
         RECORD_IMPORT_DAILY_LIMIT_KB = configBuilder
             .comment("How much new recording data (in KB) a player may import in 24 hours. Records take about 2-3 bytes per note. Files already in the world don't count. Operators are exempt. 0 blocks all imports for non-operators, -1 for no limit")
             .defineInRange("import_daily_limit_kb", 10240, -1, 1048576);
+
+        configBuilder.pop();
+
+        configBuilder.push("loopers");
+
+        LOOPER_MAX_PER_PLAYER = configBuilder
+            .comment("The most loopers one player may have placed at once, counting looper blocks, boats and minecarts together. Loopers placed before this limit existed don't count. Operators are exempt. -1 for no limit")
+            .defineInRange("looper_per_player", 10, -1, Integer.MAX_VALUE);
 
         configBuilder.pop();
 

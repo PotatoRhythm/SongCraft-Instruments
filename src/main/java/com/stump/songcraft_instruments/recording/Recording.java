@@ -38,6 +38,12 @@ public final class Recording {
     public static final int PHASE_ATTACK = 0, PHASE_RELEASE = 1;
 
     /**
+     * The most performers a recording may have, so that records can't be layered until they lag.
+     * Each player recording on a record adds one, both in group recordings and when recording over a synced looper's record.
+     */
+    public static final int MAX_PARTS = 20;
+
+    /**
      * A player recorded on this recording. Their notes are played back as separate initiators,
      * so that dampening and held notes of one do not affect the others.
      * @param colors The particle colors of the performer when they recorded, for the record's tooltip. Empty if unknown.

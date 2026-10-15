@@ -496,11 +496,13 @@
 
     "songcraft_instruments.looper.pair_conflict": "This record already has burned footage!",
     "songcraft_instruments.looper.no_record": "No record inserted",
+    "songcraft_instruments.looper.limit_reached": "Limit reached (server-config)",
     "songcraft_instruments.looper.volume": "Looper volume: %s%%",
     "songcraft_instruments.looper.connections_locked": "This looper is recording. Wait for it to finish before connecting",
 
     "songcraft_instruments.record.no_footage": "This record has no footage! Use an instrument to start recording",
     "songcraft_instruments.record.not_writable": "Record already burned",
+    "songcraft_instruments.record.too_many_parts": "Too many parts: records can have up to %s",
     "songcraft_instruments.record.missing": "This record's recording isn't in this world. Import it with /screcord import",
 
 
@@ -539,6 +541,7 @@
     "commands.songcraft_instruments.screcord.import.read_failed": "Could not read %s: %s",
     "commands.songcraft_instruments.screcord.import.invalid": "That file is not a valid record",
     "commands.songcraft_instruments.screcord.import.too_many_notes": "That record has %s notes, but this server allows up to %s",
+    "commands.songcraft_instruments.screcord.import.too_dense": "That record plays too many notes at once. Each part can play up to %s notes at a time and %s per second",
     "commands.songcraft_instruments.screcord.import.daily_limit": "This record (%s KB) would put you over this server's daily import limit (%s of %s KB used)",
     "commands.songcraft_instruments.screcord.import.timed_out": "The import timed out",
     "commands.songcraft_instruments.screcord.import.no_empty_record": "Record imported, but you are no longer holding an Empty Record to burn it onto",

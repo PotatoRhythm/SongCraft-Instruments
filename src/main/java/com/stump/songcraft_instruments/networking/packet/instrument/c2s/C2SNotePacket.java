@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.networking.packet.instrument.c2s;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.NoteButton;
 import com.stump.songcraft_instruments.networking.IModPacket;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
+import com.stump.songcraft_instruments.server.NoteRateLimit;
 import com.stump.songcraft_instruments.util.ParticleColorUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -58,7 +59,18 @@ public abstract class C2SNotePacket<T> implements IModPacket {
     @Override
     public void handle(final Context context) {
         final ServerPlayer player = context.getSender();
+        // Notes past the limit are neither played to others nor recorded
+        if (isNewNote() && !NoteRateLimit.tryPlay(player))
+            return;
+
         sendPlayNotePackets(player);
     }
     protected abstract void sendPlayNotePackets(final ServerPlayer player);
+
+    /**
+     * @return Whether this packet starts a note, counting towards the {@link NoteRateLimit}
+     */
+    protected boolean isNewNote() {
+        return true;
+    }
 }

@@ -1,8 +1,10 @@
 package com.stump.songcraft_instruments.item;
 
+import com.stump.songcraft_instruments.block.blockentity.looper.LooperOwners;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -46,10 +48,17 @@ public class ModMinecartItem extends Item {
 
             final AbstractMinecart minecart = factory.create(level,
                 pos.getX() + 0.5D, pos.getY() + 0.0625D + ascendingOffset, pos.getZ() + 0.5D);
+            final Player player = context.getPlayer();
+            final boolean isLooper = LooperOwners.isLooperVehicle(minecart);
+            if (isLooper && player != null && LooperOwners.refusePlacement(player))
+                return InteractionResult.FAIL;
+
             if (stack.hasCustomHoverName())
                 minecart.setCustomName(stack.getHoverName());
 
             level.addFreshEntity(minecart);
+            if (isLooper && player != null)
+                LooperOwners.get(level.getServer()).addVehicle(minecart.getUUID(), player.getUUID());
             level.gameEvent(GameEvent.ENTITY_PLACE, pos, GameEvent.Context.of(context.getPlayer(), level.getBlockState(pos.below())));
         }
 
