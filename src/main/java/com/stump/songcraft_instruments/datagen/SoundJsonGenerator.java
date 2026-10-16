@@ -220,6 +220,11 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         add("glorious_drum_ka", definition().with(trimmedSound("songcraft_instruments:glorious_drum/ka", glorious_drum_V)));
         add("glorious_drum_ka_stereo", definition().with(trimmedSound("songcraft_instruments:glorious_drum/ka.stereo", glorious_drum_V)));
 
+        // The Lo-fi pedal's tape deck. The hiss's level is set in game, by the pedal's Age knob
+        add("pedal_tape_hiss", definition().with(sound("songcraft_instruments:lofi_pedal/tape_hiss").attenuationDistance(32)));
+        add("pedal_tape_start", definition().with(sound("songcraft_instruments:lofi_pedal/tape_start").volume(0.6f)));
+        add("pedal_tape_stop", definition().with(sound("songcraft_instruments:lofi_pedal/tape_stop").volume(0.6f)));
+
 
         float drumset_gw2_V = 0.758f;
         addSoundVariants("drumset_bass", "songcraft_instruments:drumset_gw2/0", drumset_gw2_V, true);

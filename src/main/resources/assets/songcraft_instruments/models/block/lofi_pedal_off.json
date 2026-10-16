@@ -1,0 +1,6 @@
+{
+    "parent": "songcraft_instruments:block/lofi_pedal",
+    "textures": {
+        "led": "minecraft:block/gray_concrete"
+    }
+}

@@ -4,10 +4,11 @@ import com.stump.songcraft_instruments.block.PedalBlock;
 import com.stump.songcraft_instruments.menu.PedalMenu;
 import com.stump.songcraft_instruments.pedal.PedalEffect;
 import com.stump.songcraft_instruments.pedal.PedalEffectType;
-import com.stump.songcraft_instruments.pedal.PedalInput;
 import com.stump.songcraft_instruments.pedal.PedalLinks;
+import com.stump.songcraft_instruments.pedal.PedalMonitorSync;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -20,29 +21,40 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
- * An effects pedal: its effect's knobs, whether it is bypassed, and what it is plugged into.
- * <p>Pedals chain into each other and end at a speaker block: instrument → pedal → pedal → speaker.
- * The speaker caches the resulting {@link com.stump.songcraft_instruments.pedal.PedalChain} and sends it along with
- * the notes it relays, so a pedal only has to tell its speaker whenever it changes (see {@link PedalLinks}).</p>
+ * An effects pedal: its effect's knobs, whether it is bypassed, and the pedals it is cabled to.
+ * <p>Instruments plug into a pedal, and play through it and every pedal after it:
+ * instrument → pedal → pedal. Several pedals may feed into the same one, so a band can share
+ * a pedal at the end of their chains (see {@link PedalLinks}).</p>
  */
-public class PedalBlockEntity extends BlockEntity implements PedalInput, MenuProvider {
-    private static final String KNOBS_TAG = "knobs", INPUT_TAG = "input", OUTPUT_TAG = "output";
+public class PedalBlockEntity extends BlockEntity implements MenuProvider {
+    private static final String ID_TAG = "pedal_id", KNOBS_TAG = "knobs", INPUTS_TAG = "inputs", OUTPUT_TAG = "output";
 
     /**
      * The menu's data: one slot per knob, then the bypass state
      */
     public static final int DATA_BYPASSED = PedalEffectType.MAX_KNOBS, DATA_COUNT = DATA_BYPASSED + 1;
 
+    /**
+     * Instruments name the pedal they plug into by this as well as its position,
+     * so a new pedal placed where an old one was isn't plugged into by mistake
+     */
+    private UUID pedalId = UUID.randomUUID();
+    /**
+     * Whether the saved data had no ID (a pedal from before IDs), so the one it was given is saved
+     */
+    private boolean idUnsaved = false;
     private PedalEffect effect;
     /**
-     * The pedal plugged into this one, or null
+     * The pedals plugged into this one
      */
-    @Nullable
-    private BlockPos input;
+    private final Set<BlockPos> inputs = new HashSet<>();
     /**
-     * What this pedal is plugged into: the next pedal or a speaker block, or null
+     * The pedal this one is plugged into, or null
      */
     @Nullable
     private BlockPos output;
@@ -74,6 +86,9 @@ public class PedalBlockEntity extends BlockEntity implements PedalInput, MenuPro
         return (state.getBlock() instanceof PedalBlock pedal) ? pedal.effectType : PedalEffectType.FUZZ;
     }
 
+    public UUID getPedalId() {
+        return pedalId;
+    }
     public PedalEffect getEffect() {
         return effect;
     }
@@ -109,20 +124,32 @@ public class PedalBlockEntity extends BlockEntity implements PedalInput, MenuPro
     private void onEffectChanged() {
         setChanged();
         if (level != null)
-            PedalLinks.notifySpeaker(level, getBlockPos());
+            PedalMonitorSync.onPedalsChanged(level);
+    }
+
+    /**
+     * Server only. Makes this a new pedal: unplugged, and with a new ID, even if its item carried a copied pedal's data
+     */
+    public void resetAsNew() {
+        pedalId = UUID.randomUUID();
+        inputs.clear();
+        output = null;
+        setChanged();
     }
 
 
     //#region Links
 
-    @Override
-    public @Nullable BlockPos getPedalInput() {
-        return input;
+    public Set<BlockPos> getInputs() {
+        return Set.copyOf(inputs);
     }
-    @Override
-    public void setPedalInput(@Nullable final BlockPos pedalPos) {
-        input = pedalPos;
-        setChanged();
+    public void addInput(final BlockPos pedalPos) {
+        if (inputs.add(pedalPos.immutable()))
+            setChanged();
+    }
+    public void removeInput(final BlockPos pedalPos) {
+        if (inputs.remove(pedalPos))
+            setChanged();
     }
 
     @Nullable
@@ -130,12 +157,22 @@ public class PedalBlockEntity extends BlockEntity implements PedalInput, MenuPro
         return output;
     }
     public void setOutput(@Nullable final BlockPos target) {
-        output = target;
+        output = (target == null) ? null : target.immutable();
         setChanged();
     }
 
     //#endregion
 
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        // Otherwise it would get a new ID every time it loads, and instruments plugged into it would come unplugged
+        if (idUnsaved && (level != null) && !level.isClientSide) {
+            idUnsaved = false;
+            setChanged();
+        }
+    }
 
     @Override
     public Component getDisplayName() {
@@ -150,18 +187,31 @@ public class PedalBlockEntity extends BlockEntity implements PedalInput, MenuPro
     @Override
     protected void saveAdditional(final CompoundTag pTag) {
         super.saveAdditional(pTag);
+        pTag.putUUID(ID_TAG, pedalId);
         pTag.putInt(KNOBS_TAG, effect.knobs());
-        if (input != null)
-            pTag.put(INPUT_TAG, NbtUtils.writeBlockPos(input));
+
+        if (!inputs.isEmpty()) {
+            final ListTag inputList = new ListTag();
+            for (final BlockPos input : inputs)
+                inputList.add(NbtUtils.writeBlockPos(input));
+            pTag.put(INPUTS_TAG, inputList);
+        }
         if (output != null)
             pTag.put(OUTPUT_TAG, NbtUtils.writeBlockPos(output));
     }
     @Override
     public void load(final CompoundTag pTag) {
         super.load(pTag);
+        idUnsaved = !pTag.hasUUID(ID_TAG);
+        if (!idUnsaved)
+            pedalId = pTag.getUUID(ID_TAG);
         if (pTag.contains(KNOBS_TAG, Tag.TAG_INT))
             effect = new PedalEffect(typeOf(getBlockState()), pTag.getInt(KNOBS_TAG));
-        input = pTag.contains(INPUT_TAG, Tag.TAG_COMPOUND) ? NbtUtils.readBlockPos(pTag.getCompound(INPUT_TAG)) : null;
+
+        inputs.clear();
+        final ListTag inputList = pTag.getList(INPUTS_TAG, Tag.TAG_COMPOUND);
+        for (int i = 0; i < inputList.size(); i++)
+            inputs.add(NbtUtils.readBlockPos(inputList.getCompound(i)));
         output = pTag.contains(OUTPUT_TAG, Tag.TAG_COMPOUND) ? NbtUtils.readBlockPos(pTag.getCompound(OUTPUT_TAG)) : null;
     }
 }

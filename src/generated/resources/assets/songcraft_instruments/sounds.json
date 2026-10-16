@@ -36419,6 +36419,30 @@
       }
     ]
   },
+  "pedal_tape_hiss": {
+    "sounds": [
+      {
+        "attenuation_distance": 32,
+        "name": "songcraft_instruments:lofi_pedal/tape_hiss"
+      }
+    ]
+  },
+  "pedal_tape_start": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:lofi_pedal/tape_start",
+        "volume": 0.6
+      }
+    ]
+  },
+  "pedal_tape_stop": {
+    "sounds": [
+      {
+        "name": "songcraft_instruments:lofi_pedal/tape_stop",
+        "volume": 0.6
+      }
+    ]
+  },
   "pipa_regular_note_0": {
     "sounds": [
       {

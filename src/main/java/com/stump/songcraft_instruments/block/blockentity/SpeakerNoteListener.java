@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Listens to instrument played events and immediately relays them
- * through every speaker paired to the playing instrument.
+ * through every speaker paired to the playing instrument, through the instrument's pedals.
  */
 @EventBusSubscriber(bus = Bus.FORGE, modid = SCInstrumentMod.MODID)
 public class SpeakerNoteListener {
@@ -25,13 +25,15 @@ public class SpeakerNoteListener {
         if (!event.isByPlayer() || event.level().isClientSide)
             return;
         final InitiatorID source = InitiatorID.fromEntity(event.entityInfo().get().entity);
-        getMatchingSpeakers(event).forEach((speakerBE) -> speakerBE.playNote(event.sound(), event.soundMeta(), source));
+        getMatchingSpeakers(event).forEach((speakerBE) ->
+            speakerBE.playNote(event.sound(), event.soundMeta(), source, event.pedalChain())
+        );
     }
 
     @SubscribeEvent
     public static void onHeldNoteSoundPlayed(final HeldNoteSoundPlayedEvent event) {
         getMatchingSpeakers(event).forEach((speakerBE) ->
-            speakerBE.playHeldNote(event.sound(), event.soundMeta(), event.phase, event.initiatorID)
+            speakerBE.playHeldNote(event.sound(), event.soundMeta(), event.phase, event.initiatorID, event.pedalChain())
         );
     }
 

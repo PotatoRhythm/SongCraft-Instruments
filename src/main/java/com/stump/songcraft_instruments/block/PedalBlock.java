@@ -32,8 +32,9 @@ import net.minecraftforge.network.NetworkHooks;
 import javax.annotation.Nullable;
 
 /**
- * An effects pedal, chained between instruments and a speaker with the speaker cable (see {@link PedalLinks}).
- * Right-click to turn its knobs, shift + right-click with an empty hand to stomp it on or off.
+ * An effects pedal. Instruments plug into it, and pedals chain into each other, with the speaker cable
+ * (see {@link PedalLinks}); held instruments plug in by right-clicking it.
+ * Right-click with an empty hand to turn its knobs, shift + right-click with an empty hand to stomp it on or off.
  */
 public class PedalBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -104,10 +105,8 @@ public class PedalBlock extends Block implements EntityBlock {
                             @Nullable final LivingEntity pPlacer, final ItemStack pStack) {
         super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
         // A new pedal never starts plugged in, even if the item carried a copied pedal's data
-        if (!pLevel.isClientSide && pLevel.getBlockEntity(pPos) instanceof PedalBlockEntity pedal) {
-            pedal.setPedalInput(null);
-            pedal.setOutput(null);
-        }
+        if (!pLevel.isClientSide && pLevel.getBlockEntity(pPos) instanceof PedalBlockEntity pedal)
+            pedal.resetAsNew();
     }
 
     @SuppressWarnings("deprecation")

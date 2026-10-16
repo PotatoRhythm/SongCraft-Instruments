@@ -1,5 +1,8 @@
 package com.stump.songcraft_instruments.recording;
 
+import com.stump.songcraft_instruments.pedal.PedalChain;
+
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -27,11 +30,13 @@ public final class Recording {
         INSTRUMENT_ID = 6,
         SOUND_TYPE = 7,
         SOUND_INDEX = 8,
+        // Index into the pedal chain palette: the effects pedals the note was played through
+        PEDALS = 9,
         // Held notes only: 0 for the attack, 1 for the release
-        HELD_PHASE = 9
+        HELD_PHASE = 10
     ;
     public static final int
-        DAMPEN_LENGTH = 3, REGULAR_LENGTH = 9, HELD_LENGTH = 10;
+        DAMPEN_LENGTH = 3, REGULAR_LENGTH = 10, HELD_LENGTH = 11;
 
     // Note types, matching the ordinals of WritableNoteType
     public static final int TYPE_REGULAR = 0, TYPE_HELD = 1, TYPE_DAMPEN = 2;
@@ -55,6 +60,20 @@ public final class Recording {
      */
     private final int length;
     private final List<String> instrumentIds, soundTypes;
+    /**
+     * The pedal chains notes were played through, by {@link PedalChain#key()} (empty for none), each followed by
+     * {@link #TAPE_SEPARATOR} and the ID of the Lo-fi pedal (the tape) it went through, if any. See {@link #pedalKey}.
+     */
+    private final List<String> pedalChains;
+    /**
+     * {@link #pedalChains}, parsed. Chains with effects this version doesn't know are played without pedals.
+     */
+    private final PedalChain[] parsedPedalChains;
+    /**
+     * The tape each of {@link #pedalChains} went through, or empty if none (or it isn't known)
+     */
+    private final String[] tapes;
+    public static final String TAPE_SEPARATOR = "@";
     private final List<Performer> performers;
     private final int[][] notes;
     /**
@@ -66,10 +85,22 @@ public final class Recording {
      * @param notes Notes sorted by timestamp, with palette and performer indices in range
      */
     Recording(final int length, final List<String> instrumentIds, final List<String> soundTypes,
-              final List<Performer> performers, final int[][] notes) {
+              final List<String> pedalChains, final List<Performer> performers, final int[][] notes) {
         this.length = length;
         this.instrumentIds = List.copyOf(instrumentIds);
         this.soundTypes = List.copyOf(soundTypes);
+        this.pedalChains = List.copyOf(pedalChains);
+        this.parsedPedalChains = new PedalChain[pedalChains.size()];
+        this.tapes = new String[pedalChains.size()];
+        for (int i = 0; i < parsedPedalChains.length; i++) {
+            final String key = pedalChains.get(i);
+            final int separator = key.indexOf(TAPE_SEPARATOR);
+            final String chainKey = (separator < 0) ? key : key.substring(0, separator);
+            tapes[i] = (separator < 0) ? "" : key.substring(separator + 1);
+
+            final PedalChain chain = chainKey.isEmpty() ? null : PedalChain.fromKey(chainKey);
+            parsedPedalChains[i] = (chain == null) ? PedalChain.NONE : chain;
+        }
         this.performers = List.copyOf(performers);
         this.notes = notes;
 
@@ -99,12 +130,36 @@ public final class Recording {
     public List<String> soundTypes() {
         return soundTypes;
     }
+    public List<String> pedalChains() {
+        return pedalChains;
+    }
 
     public String instrumentId(final int[] note) {
         return instrumentIds.get(note[INSTRUMENT_ID]);
     }
     public String soundType(final int[] note) {
         return soundTypes.get(note[SOUND_TYPE]);
+    }
+    /**
+     * @return The effects pedals the note was played through
+     */
+    public PedalChain pedalChain(final int[] note) {
+        return parsedPedalChains[note[PEDALS]];
+    }
+    /**
+     * @return The Lo-fi pedal (the tape) the note was played through, so playback can roll each tape as it was;
+     * empty if none, or it isn't known
+     */
+    public String tape(final int[] note) {
+        return tapes[note[PEDALS]];
+    }
+
+    /**
+     * @param tape The ID of the Lo-fi pedal the chain went through, or null
+     * @return The entry of {@link #pedalChains} for the chain and tape
+     */
+    public static String pedalKey(final PedalChain chain, @Nullable final UUID tape) {
+        return (tape == null) ? chain.key() : chain.key() + TAPE_SEPARATOR + tape;
     }
 
     /**
@@ -132,7 +187,7 @@ public final class Recording {
             return false;
 
         if (length != other.length || !instrumentIds.equals(other.instrumentIds) || !soundTypes.equals(other.soundTypes)
-                || performers.size() != other.performers.size() || !Arrays.deepEquals(notes, other.notes))
+                || !pedalChains.equals(other.pedalChains) || performers.size() != other.performers.size() || !Arrays.deepEquals(notes, other.notes))
             return false;
 
         for (int i = 0; i < performers.size(); i++) {

@@ -5,13 +5,16 @@ import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.event.HeldNoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
+import com.stump.songcraft_instruments.pedal.InstrumentPedals;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Listens to instrument played events
@@ -29,7 +32,9 @@ public class LooperNoteListener {
                     event.soundMeta(),
                     looperBE.getTicks(),
                     rgb,
-                    getPlayer(event).getUUID()
+                    getPlayer(event).getUUID(),
+                    event.pedalChain(),
+                    tapeOf(event)
             );
         });
     }
@@ -44,9 +49,19 @@ public class LooperNoteListener {
                     event.soundMeta(),
                     looperBE.getTicks(),
                     rgb,
-                    getPlayer(event).getUUID()
+                    getPlayer(event).getUUID(),
+                    event.pedalChain(),
+                    tapeOf(event)
             );
         });
+    }
+
+    /**
+     * @return The Lo-fi pedal (the tape) the note went through, or null
+     */
+    @Nullable
+    private static UUID tapeOf(final InstrumentPlayedEvent<?> event) {
+        return (event.pedalChain().tapeEffect() == null) ? null : InstrumentPedals.tapeOfOpenInstrument(getPlayer(event));
     }
 
     private static Player getPlayer(final InstrumentPlayedEvent<?> event) {

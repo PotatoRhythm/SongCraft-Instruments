@@ -65,6 +65,15 @@ public class ModBlocks {
         )),
         OCTAVE_PEDAL = BLOCKS.register("octave_pedal", () -> new PedalBlock(PedalEffectType.OCTAVE,
             BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        EQ_PEDAL = BLOCKS.register("eq_pedal", () -> new PedalBlock(PedalEffectType.EQ,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        REVERB_PEDAL = BLOCKS.register("reverb_pedal", () -> new PedalBlock(PedalEffectType.REVERB,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        LOFI_PEDAL = BLOCKS.register("lofi_pedal", () -> new PedalBlock(PedalEffectType.LOFI,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
         ))
         ;
 }

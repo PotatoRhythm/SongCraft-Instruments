@@ -1,7 +1,9 @@
 package com.stump.songcraft_instruments.recording;
 
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.recording.Recording.Performer;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +14,8 @@ import java.util.function.Supplier;
  * The notes of a recording in progress, kept by the looper recording them until it is finalized with {@link #build}.
  */
 public final class RecordingBuilder {
-    private final List<String> instrumentIds = new ArrayList<>(), soundTypes = new ArrayList<>();
+    private final List<String> instrumentIds = new ArrayList<>(), soundTypes = new ArrayList<>(),
+        pedalChains = new ArrayList<>();
     private final List<Performer> performers = new ArrayList<>();
     private final List<int[]> notes = new ArrayList<>();
 
@@ -24,6 +27,7 @@ public final class RecordingBuilder {
     public RecordingBuilder(final Recording draft) {
         instrumentIds.addAll(draft.instrumentIds());
         soundTypes.addAll(draft.soundTypes());
+        pedalChains.addAll(draft.pedalChains());
         performers.addAll(draft.performers());
         for (int i = 0; i < draft.noteCount(); i++)
             notes.add(draft.note(i).clone());
@@ -40,6 +44,7 @@ public final class RecordingBuilder {
     public void clear() {
         instrumentIds.clear();
         soundTypes.clear();
+        pedalChains.clear();
         performers.clear();
         notes.clear();
     }
@@ -64,27 +69,36 @@ public final class RecordingBuilder {
         notes.add(new int[] {timestamp, Recording.TYPE_DAMPEN, performer});
     }
 
+    /**
+     * @param pedalChain The effects pedals the note was played through
+     * @param tape The Lo-fi pedal (the tape) it went through, or null
+     */
     public void addNote(final int timestamp, final int performer,
                         final int pitch, final int volume, final int particleColor,
-                        final String instrumentId, final String soundType, final int soundIndex) {
+                        final String instrumentId, final String soundType, final int soundIndex,
+                        final PedalChain pedalChain, @Nullable final UUID tape) {
         notes.add(new int[] {
             timestamp, Recording.TYPE_REGULAR, performer,
             pitch, volume, particleColor,
-            paletteIndex(instrumentIds, instrumentId), paletteIndex(soundTypes, soundType), soundIndex
+            paletteIndex(instrumentIds, instrumentId), paletteIndex(soundTypes, soundType), soundIndex,
+            paletteIndex(pedalChains, Recording.pedalKey(pedalChain, tape))
         });
     }
 
     /**
+     * @param pedalChain The effects pedals the note was played through
+     * @param tape The Lo-fi pedal (the tape) it went through, or null
      * @param phase {@link Recording#PHASE_ATTACK} or {@link Recording#PHASE_RELEASE}
      */
     public void addHeldNote(final int timestamp, final int performer,
                             final int pitch, final int volume, final int particleColor,
                             final String instrumentId, final String soundType, final int soundIndex,
-                            final int phase) {
+                            final PedalChain pedalChain, @Nullable final UUID tape, final int phase) {
         notes.add(new int[] {
             timestamp, Recording.TYPE_HELD, performer,
             pitch, volume, particleColor,
             paletteIndex(instrumentIds, instrumentId), paletteIndex(soundTypes, soundType), soundIndex,
+            paletteIndex(pedalChains, Recording.pedalKey(pedalChain, tape)),
             phase
         });
     }
@@ -121,9 +135,10 @@ public final class RecordingBuilder {
 
         // Added first, so that base notes play before new ones of the same tick
         for (int i = 0; i < base.noteCount(); i++)
-            merged.notes.add(merged.remap(base.note(i), basePerformers, base.instrumentIds(), base.soundTypes()));
+            merged.notes.add(merged.remap(base.note(i), basePerformers,
+                base.instrumentIds(), base.soundTypes(), base.pedalChains()));
         for (final int[] note : notes)
-            merged.notes.add(merged.remap(note, newPerformers, instrumentIds, soundTypes));
+            merged.notes.add(merged.remap(note, newPerformers, instrumentIds, soundTypes, pedalChains));
 
         return merged.build(length);
     }
@@ -132,13 +147,15 @@ public final class RecordingBuilder {
      * @return A copy of a note from another recording, with its performer and palette indices pointing into this one
      */
     private int[] remap(final int[] note, final int[] performerMap,
-                        final List<String> fromInstrumentIds, final List<String> fromSoundTypes) {
+                        final List<String> fromInstrumentIds, final List<String> fromSoundTypes,
+                        final List<String> fromPedalChains) {
         final int[] copy = note.clone();
         copy[Recording.PERFORMER] = performerMap[note[Recording.PERFORMER]];
 
         if (note[Recording.TYPE] != Recording.TYPE_DAMPEN) {
             copy[Recording.INSTRUMENT_ID] = paletteIndex(instrumentIds, fromInstrumentIds.get(note[Recording.INSTRUMENT_ID]));
             copy[Recording.SOUND_TYPE] = paletteIndex(soundTypes, fromSoundTypes.get(note[Recording.SOUND_TYPE]));
+            copy[Recording.PEDALS] = paletteIndex(pedalChains, fromPedalChains.get(note[Recording.PEDALS]));
         }
         return copy;
     }
@@ -153,6 +170,6 @@ public final class RecordingBuilder {
         // Stable, so notes of the same tick keep the order they were played in
         sorted.sort(Comparator.comparingInt((note) -> note[Recording.TIMESTAMP]));
 
-        return new Recording(length, instrumentIds, soundTypes, performers, sorted.toArray(int[][]::new));
+        return new Recording(length, instrumentIds, soundTypes, pedalChains, performers, sorted.toArray(int[][]::new));
     }
 }

@@ -1,18 +1,16 @@
 package com.stump.songcraft_instruments.pedal;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The effects a speaker's notes go through, in signal order: from the pedal the instrument plugs into,
- * to the pedal plugged into the speaker. Bypassed pedals are left out.
- * <p>Sent along with every note a speaker relays (a few bytes per pedal), and to players whose instrument
- * plays through the speaker, so they hear their own notes with it too.</p>
+ * The effects an instrument's notes go through, in signal order: from the pedal the instrument plugs into,
+ * through each pedal after it. Bypassed pedals are left out.
+ * <p>Sent along with every note of the instrument, wherever it's heard (a few bytes per pedal), to its own player
+ * so they hear their own notes with it too, and saved with each recorded note by its key.</p>
  */
 public record PedalChain(List<PedalEffect> effects) {
     /**
@@ -22,7 +20,6 @@ public record PedalChain(List<PedalEffect> effects) {
     public static final PedalChain NONE = new PedalChain(List.of());
 
     private static final String KEY_SEPARATOR = "_";
-    private static final String TYPE_TAG = "type", KNOBS_TAG = "knobs";
 
     public PedalChain {
         effects = List.copyOf(effects);
@@ -52,13 +49,14 @@ public record PedalChain(List<PedalEffect> effects) {
     }
 
     /**
-     * @return This chain without its live effects (see {@link PedalEffectType.Kind#LIVE}): the part rendered
-     * into sounds. Live effects apply on top of it, as if they came last in the chain.
+     * @return The part of this chain rendered into sounds: without its purely live effects
+     * (see {@link PedalEffectType.Kind#LIVE}). Live effects apply on top of it, as if they came last in the chain.
      */
     public PedalChain rendered() {
-        if (!hasLive())
-            return this;
-        return new PedalChain(effects.stream().filter((effect) -> !effect.type().live).toList());
+        for (final PedalEffect effect : effects)
+            if (!effect.type().rendered)
+                return new PedalChain(effects.stream().filter((rendered) -> rendered.type().rendered).toList());
+        return this;
     }
     /**
      * @return Whether any of the effects is applied to notes while they play, see {@link PedalEffectType.Kind#LIVE}
@@ -71,29 +69,48 @@ public record PedalChain(List<PedalEffect> effects) {
     }
 
     /**
-     * @param seconds The time on a free-running clock
+     * @param seconds The time on a smooth, free-running clock, for effects that only need to be steady
+     * @param tapeSeconds The time on the world's game clock, the same for every player, for effects whose randomness
+     *                    every player should hear alike (a tape's dropouts); see {@link LofiParams}
      * @return The volume the chain's live effects give a note at that time, from 0 to 1
      */
-    public double liveGainAt(final double seconds) {
+    public double liveGainAt(final double seconds, final double tapeSeconds) {
         double gain = 1;
         for (final PedalEffect effect : effects) {
             if (effect.type() == PedalEffectType.TREMOLO)
                 gain *= TremoloParams.of(effect).gainAt(seconds);
+            else if (effect.type() == PedalEffectType.LOFI)
+                gain *= LofiParams.of(effect).gainAt(tapeSeconds);
         }
         return gain;
     }
 
     /**
-     * @param seconds The time on a free-running clock
+     * @param seconds See {@link #liveGainAt}
+     * @param tapeSeconds See {@link #liveGainAt}
      * @return The pitch multiplier the chain's live effects give a note at that time
      */
-    public double livePitchAt(final double seconds) {
+    public double livePitchAt(final double seconds, final double tapeSeconds) {
         double pitch = 1;
         for (final PedalEffect effect : effects) {
             if (effect.type() == PedalEffectType.VIBRATO)
                 pitch *= VibratoParams.of(effect).pitchAt(seconds);
+            else if (effect.type() == PedalEffectType.LOFI)
+                pitch *= LofiParams.of(effect).pitchAt(tapeSeconds);
         }
         return pitch;
+    }
+
+    /**
+     * @return The chain's Lo-fi effect (the first, if it has several), whose tape hiss rolls while its instrument
+     * plays; or null if it has none
+     */
+    @Nullable
+    public PedalEffect tapeEffect() {
+        for (final PedalEffect effect : effects)
+            if (effect.type() == PedalEffectType.LOFI)
+                return effect;
+        return null;
     }
     /**
      * @return Whether the chain has an effect of the given type
@@ -106,13 +123,15 @@ public record PedalChain(List<PedalEffect> effects) {
     }
 
     /**
-     * @return How long the chain's effects ring on after a note ends (its echoes), in seconds
+     * @return How long the chain's effects ring on after a note ends (echoes and reverb), in seconds
      */
     public double tailSeconds() {
         double tail = 0;
         for (final PedalEffect effect : effects) {
             if (effect.type() == PedalEffectType.DELAY)
                 tail += DelayParams.of(effect).tailSeconds();
+            else if (effect.type() == PedalEffectType.REVERB)
+                tail += ReverbParams.of(effect).tailSeconds();
         }
         return Math.min(tail, DelayParams.MAX_TAIL_SECONDS);
     }
@@ -165,29 +184,5 @@ public record PedalChain(List<PedalEffect> effects) {
                 effects.add(new PedalEffect(type, knobs));
         }
         return new PedalChain(effects);
-    }
-
-    public ListTag save() {
-        final ListTag list = new ListTag();
-        for (final PedalEffect effect : effects) {
-            final CompoundTag tag = new CompoundTag();
-            tag.putString(TYPE_TAG, effect.type().id);
-            tag.putInt(KNOBS_TAG, effect.knobs());
-            list.add(tag);
-        }
-        return list;
-    }
-    public static PedalChain load(final ListTag list) {
-        final List<PedalEffect> effects = new ArrayList<>();
-        for (int i = 0; i < list.size() && effects.size() < MAX_LENGTH; i++) {
-            final CompoundTag tag = list.getCompound(i);
-            final PedalEffectType type = PedalEffectType.byId(tag.getString(TYPE_TAG));
-            if (type != null)
-                effects.add(new PedalEffect(type, tag.getInt(KNOBS_TAG)));
-        }
-        return effects.isEmpty() ? NONE : new PedalChain(effects);
-    }
-    public static PedalChain load(final CompoundTag parent, final String key) {
-        return load(parent.getList(key, Tag.TAG_COMPOUND));
     }
 }

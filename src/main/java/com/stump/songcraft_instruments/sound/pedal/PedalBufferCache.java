@@ -13,13 +13,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
 /**
  * The rendered copies of sounds played through pedals (see {@link PedalSounds}), in place of vanilla's sound buffer
@@ -37,6 +41,10 @@ public final class PedalBufferCache {
      * A copy played this recently may be about to start playing, so is never let go
      */
     private static final long MIN_IDLE_NANOS = 5_000_000_000L;
+    /**
+     * A prewarm stops once it has rendered this share of the budget, so it never pushes everything else out
+     */
+    private static final double PREWARM_BUDGET_SHARE = 0.5;
 
     private static final class Entry {
         final CompletableFuture<SoundBuffer> buffer;
@@ -66,6 +74,10 @@ public final class PedalBufferCache {
      * Bumped whenever the cache is cleared, so renders that finish afterwards aren't counted
      */
     private static int generation;
+    /**
+     * Bumped whenever a prewarm starts (or the cache is cleared), so the one before it stops
+     */
+    private static int prewarmRun;
 
     /**
      * The sound files vanilla's sound buffers are loaded from, including the mod's converted twins
@@ -112,12 +124,50 @@ public final class PedalBufferCache {
     }
 
     /**
-     * Renders a copy ahead of time, so it is ready the first time it is played
-     * @param sound The rendered copy, see {@link PedalSounds#withPedals}
+     * Renders copies ahead of time, so they are ready the first time they are played. Replaces any prewarm
+     * still going.
+     * <p>Renders one copy at a time, so it doesn't crowd out notes being played (or the rest of the game's
+     * background work), and stops after {@link #PREWARM_BUDGET_SHARE} of the budget. Copies it didn't get to
+     * render the first time they're played, as usual.</p>
+     * @param sounds The rendered copies, see {@link PedalSounds#withPedals}
      */
-    public static void prewarm(final Sound sound) {
-        if (PedalSounds.isFxFile(sound.getPath()))
-            get(sound.getPath());
+    public static void prewarm(final List<Sound> sounds) {
+        final Deque<ResourceLocation> files = new ArrayDeque<>();
+        for (final Sound sound : sounds)
+            if (PedalSounds.isFxFile(sound.getPath()))
+                files.add(sound.getPath());
+
+        final int run;
+        synchronized (LOCK) {
+            run = ++prewarmRun;
+        }
+        prewarmNext(files, run, 0);
+    }
+    private static void prewarmNext(final Deque<ResourceLocation> files, final int run, final long renderedBytes) {
+        if (resources == null || renderedBytes >= budgetBytes() * PREWARM_BUDGET_SHARE)
+            return;
+
+        ResourceLocation file;
+        synchronized (LOCK) {
+            if (run != prewarmRun)
+                return;
+            // Skips copies already rendered (or rendering), without counting it as them being played
+            do {
+                file = files.poll();
+            } while (file != null && ENTRIES.containsKey(file));
+        }
+        if (file == null)
+            return;
+
+        get(file).whenComplete((buffer, error) -> {
+            long bytes = 0;
+            synchronized (LOCK) {
+                final Entry entry = (buffer != null) ? BY_BUFFER.get(buffer) : null;
+                if (entry != null)
+                    bytes = entry.bytes;
+            }
+            prewarmNext(files, run, renderedBytes + bytes);
+        });
     }
 
     private static SoundBuffer render(final ResourceProvider resources, final ResourceLocation file, final Entry entry) {
@@ -178,8 +228,29 @@ public final class PedalBufferCache {
     /**
      * Lets go of the least recently played copies nothing is playing, until the cache is within its budget
      */
+    /**
+     * Called on the main thread every sound engine tick. Lets go of copies past the budget on the sound thread,
+     * as copies that are rendered but never played (like prewarms) don't go through {@link #onAttach}, and copies
+     * still too recently played to let go there only become idle later.
+     */
+    public static void tick(final Executor soundExecutor) {
+        synchronized (LOCK) {
+            if (totalBytes <= budgetBytes())
+                return;
+        }
+        soundExecutor.execute(() -> {
+            synchronized (LOCK) {
+                evictOverBudget();
+            }
+        });
+    }
+
+    private static long budgetBytes() {
+        return ModClientConfigs.PEDAL_CACHE_MB.get() * 1024L * 1024L;
+    }
+
     private static void evictOverBudget() {
-        final long budget = ModClientConfigs.PEDAL_CACHE_MB.get() * 1024L * 1024L;
+        final long budget = budgetBytes();
         if (totalBytes <= budget)
             return;
 
@@ -196,7 +267,8 @@ public final class PedalBufferCache {
     }
 
     private static void discard(final Entry entry) {
-        final SoundBuffer buffer = entry.buffer.getNow(null);
+        // A render that failed has no buffer, and getNow would throw its exception
+        final SoundBuffer buffer = entry.buffer.isCompletedExceptionally() ? null : entry.buffer.getNow(null);
         if (buffer != null) {
             BY_BUFFER.remove(buffer);
             buffer.discardAlBuffer();
@@ -217,6 +289,7 @@ public final class PedalBufferCache {
             BY_SOURCE.clear();
             totalBytes = 0;
             generation++;
+            prewarmRun++;
         }
     }
 }

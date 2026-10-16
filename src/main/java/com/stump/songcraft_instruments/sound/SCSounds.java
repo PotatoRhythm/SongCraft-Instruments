@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.HashMap;
 
@@ -890,6 +891,19 @@ public class SCSounds {
      */
     private static HeldNoteSoundRegistrar hnsr(ResourceLocation instrumentId) {
         return new HeldNoteSoundRegistrar(SCSounds.SOUNDS, instrumentId);
+    }
+
+    /**
+     * The Lo-fi pedal's tape deck: the hiss that rolls while its instrument plays, and its play and stop keys.
+     * See {@code TapeDecks}.
+     */
+    public static final RegistryObject<SoundEvent>
+        TAPE_HISS = registerSimple("pedal_tape_hiss"),
+        TAPE_START = registerSimple("pedal_tape_start"),
+        TAPE_STOP = registerSimple("pedal_tape_stop");
+
+    private static RegistryObject<SoundEvent> registerSimple(final String name) {
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(loc(name)));
     }
 
     private static final HashMap<NoteBlockInstrument, NoteSound[]> NOTE_BLOCK_SOUNDS = registerNoteBlockSounds();

@@ -9,6 +9,8 @@ import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CLoope
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldNoteSoundPacketUtil;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.NoteSoundPacketUtil;
+import com.stump.songcraft_instruments.pedal.PedalChain;
+import com.stump.songcraft_instruments.pedal.TapeDecks;
 import com.stump.songcraft_instruments.recording.Recording;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
@@ -70,7 +72,8 @@ public class LooperPlayback {
      * for pausing and resuming the looper.
      */
     private final HashSet<CachedHeldNote> cachedHeldNotes = new HashSet<>();
-    private record CachedHeldNote(HeldNoteSound sound, NoteSoundMetadata meta, int particleRgb, InitiatorID initiator) {}
+    private record CachedHeldNote(HeldNoteSound sound, NoteSoundMetadata meta, int particleRgb, InitiatorID initiator,
+                                  PedalChain pedalChain) {}
 
     /**
      * @param initiatorID The initiator the first performer's notes are played back with
@@ -81,9 +84,17 @@ public class LooperPlayback {
     }
 
 
+    /**
+     * @return What tells this looper's tape deck apart from others', see {@link TapeDecks}
+     */
+    private String tapeDeckId() {
+        return looperInitiatorID.type() + ":" + looperInitiatorID.identifier();
+    }
+
     public void stopAndClearHeldSounds() {
         notifyHeldNotesPhase(HeldSoundPhase.RELEASE);
         cachedHeldNotes.clear();
+        TapeDecks.onLooperStopped(tapeDeckId());
     }
 
     public void notifyHeldNotesPhase(final HeldSoundPhase phase) {
@@ -94,9 +105,12 @@ public class LooperPlayback {
                 looper.getHostLevel(),
                 note.sound(), note.meta(),
                 phase,
-                note.initiator()
+                note.initiator(),
+                note.pedalChain()
             );
-            speakers.forEach((speaker) -> speaker.playHeldNote(note.sound(), note.meta(), phase, note.initiator()));
+            speakers.forEach((speaker) ->
+                speaker.playHeldNote(note.sound(), note.meta(), phase, note.initiator(), note.pedalChain())
+            );
         });
     }
 
@@ -164,14 +178,19 @@ public class LooperPlayback {
             return;
 
         final InitiatorID initiator = getPerformerInitiatorID(note[Recording.PERFORMER]);
+        // Played back through the pedals it was recorded with
+        final PedalChain pedalChain = recording.pedalChain(note);
 
         NoteSoundPacketUtil.sendPlayNotePackets(
                 looper.getHostLevel(),
                 sound,
                 meta,
-                initiator
+                initiator,
+                pedalChain
         );
-        getPairedSpeakers().forEach((speaker) -> speaker.playNote(sound, meta, initiator));
+        getPairedSpeakers().forEach((speaker) -> speaker.playNote(sound, meta, initiator, pedalChain));
+        TapeDecks.onLooperNote(tapeDeckId(), recording.tape(note), looper.getHostLevel(), looper.getSoundPos(),
+            getPairedSpeakers(), pedalChain, meta.volume(), null, null);
 
         triggerEmitNoteParticle(note[Recording.PARTICLE_COLOR]);
     }
@@ -188,17 +207,22 @@ public class LooperPlayback {
         final HeldSoundPhase phase = (note[Recording.HELD_PHASE] == Recording.PHASE_RELEASE)
             ? HeldSoundPhase.RELEASE : HeldSoundPhase.ATTACK;
         final InitiatorID initiator = getPerformerInitiatorID(note[Recording.PERFORMER]);
+        // Played back through the pedals it was recorded with
+        final PedalChain pedalChain = recording.pedalChain(note);
 
         HeldNoteSoundPacketUtil.sendPlayNotePackets(
             looper.getHostLevel(), sound,
-            meta, phase, initiator
+            meta, phase, initiator, pedalChain
         );
-        getPairedSpeakers().forEach((speaker) -> speaker.playHeldNote(sound, meta, phase, initiator));
+        getPairedSpeakers().forEach((speaker) -> speaker.playHeldNote(sound, meta, phase, initiator, pedalChain));
+        // A held note keeps the looper's tape rolling until it's released
+        TapeDecks.onLooperNote(tapeDeckId(), recording.tape(note), looper.getHostLevel(), looper.getSoundPos(),
+            getPairedSpeakers(), pedalChain, meta.volume(), phase, List.of(sound, meta.pitch(), initiator));
 
         if (phase == HeldSoundPhase.ATTACK) {
             final int rgb = note[Recording.PARTICLE_COLOR];
 
-            cachedHeldNotes.add(new CachedHeldNote(sound, meta, rgb, initiator));
+            cachedHeldNotes.add(new CachedHeldNote(sound, meta, rgb, initiator, pedalChain));
             triggerEmitNoteParticle(rgb);
 
         } else if (phase == HeldSoundPhase.RELEASE) {

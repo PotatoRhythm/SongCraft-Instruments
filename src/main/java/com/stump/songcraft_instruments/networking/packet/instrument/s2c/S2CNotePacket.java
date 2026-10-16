@@ -22,7 +22,7 @@ public abstract class S2CNotePacket<T> implements IModPacket {
     public final T sound;
     public final NoteSoundMetadata meta;
     /**
-     * The effects pedals the note goes through, for notes relayed by a speaker. Usually {@link PedalChain#NONE}.
+     * The effects pedals the note goes through: those of the instrument that played it. Usually {@link PedalChain#NONE}.
      */
     public final PedalChain pedalChain;
 

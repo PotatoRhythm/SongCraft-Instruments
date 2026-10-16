@@ -1,10 +1,13 @@
 package com.stump.songcraft_instruments.item;
 
+import com.stump.songcraft_instruments.block.PedalBlock;
 import com.stump.songcraft_instruments.block.SpeakerBlock;
+import com.stump.songcraft_instruments.block.blockentity.PedalBlockEntity;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentScreen;
 import com.stump.songcraft_instruments.item.clientExtensions.InstrumentItemClientExt;
 import com.stump.songcraft_instruments.networking.OpenInstrumentPacketSender;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.InstrumentPacketUtil;
+import com.stump.songcraft_instruments.pedal.InstrumentPedals;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -15,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,15 +67,29 @@ public class InstrumentItem extends Item {
 
     /**
      * right-clicking a speaker pairs this instrument to it, and shift + right-clicking unpairs it.
-     * handled here rather than in the speaker's own interaction, as this runs first and regardless of sneaking.
+     * right-clicking an effects pedal plugs this instrument into it, and shift + right-clicking unplugs it.
+     * handled here rather than in the block's own interaction, as this runs first and regardless of sneaking.
      */
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
         final Player player = context.getPlayer();
-        if ((player == null) || !(context.getLevel().getBlockState(context.getClickedPos()).getBlock() instanceof SpeakerBlock))
+        if (player == null)
             return InteractionResult.PASS;
 
-        return SpeakerBlock.onHeldInstrumentUse(context.getLevel(), context.getClickedPos(), player, stack);
+        final Level level = context.getLevel();
+        final Block block = level.getBlockState(context.getClickedPos()).getBlock();
+        if (block instanceof SpeakerBlock)
+            return SpeakerBlock.onHeldInstrumentUse(level, context.getClickedPos(), player, stack);
+
+        if (block instanceof PedalBlock) {
+            if (level.isClientSide)
+                return InteractionResult.SUCCESS;
+            if (level.getBlockEntity(context.getClickedPos()) instanceof PedalBlockEntity pedal)
+                InstrumentPedals.useHeldInstrument(player, stack, pedal);
+            return InteractionResult.SUCCESS;
+        }
+
+        return InteractionResult.PASS;
     }
 
     @Override

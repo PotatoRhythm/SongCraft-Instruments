@@ -16,6 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(value = SoundPhysics.class, remap = false)
 public abstract class SoundPhysicsProcessSoundLegacyMixin {
+    // Missing from the Sound Physics version compiled against, which is why this mixin is only applied when it exists
+    @SuppressWarnings("target")
     @Inject(method = SoundPhysicsMixinPlugin.PROCESS_SOUND_LEGACY, at = @At("HEAD"), cancellable = true)
     private static void songcraft_instruments$processAtWorldOrigin(int source, double x, double y, double z,
                                                                    SoundSource category, String sound,

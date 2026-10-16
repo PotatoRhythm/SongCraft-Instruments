@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " P ",
+        "RCR",
+        "III"
+    ],
+    "key": {
+        "P": { "item": "minecraft:stone_pressure_plate" },
+        "R": { "item": "minecraft:redstone" },
+        "C": { "item": "minecraft:dried_kelp" },
+        "I": { "item": "minecraft:iron_ingot" }
+    },
+    "result": { "item": "songcraft_instruments:lofi_pedal", "count": 1 }
+}

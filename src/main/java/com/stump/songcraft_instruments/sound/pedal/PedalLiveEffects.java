@@ -55,8 +55,8 @@ public final class PedalLiveEffects {
         Live(final SoundInstance instance, final PedalChain chain) {
             this.instance = instance;
             this.chain = chain;
-            this.changesVolume = chain.has(PedalEffectType.TREMOLO);
-            this.changesPitch = chain.has(PedalEffectType.VIBRATO);
+            this.changesVolume = chain.has(PedalEffectType.TREMOLO) || chain.has(PedalEffectType.LOFI);
+            this.changesPitch = chain.has(PedalEffectType.VIBRATO) || chain.has(PedalEffectType.LOFI);
         }
     }
 
@@ -85,7 +85,7 @@ public final class PedalLiveEffects {
      * before its channel starts playing.
      */
     public static void onSoundPlay(final SoundInstance sound, final ChannelAccess.ChannelHandle handle) {
-        if (!(sound instanceof PedalSoundInstance pedalSound) || !pedalSound.getPedalChain().hasLive())
+        if (!(sound instanceof PedalSoundInstance pedalSound) || !pedalSound.getPedalChain().hasLive() || (handle == null))
             return;
 
         final Live live = new Live(sound, pedalSound.getPedalChain());
@@ -106,7 +106,7 @@ public final class PedalLiveEffects {
             return volume;
 
         live.baseVolume = volume;
-        return volume * (float) live.chain.liveGainAt(now());
+        return volume * (float) live.chain.liveGainAt(now(), TapeClock.seconds());
     }
     /**
      * Called on the main thread when vanilla works out a playing sound's pitch (every tick)
@@ -118,7 +118,7 @@ public final class PedalLiveEffects {
             return pitch;
 
         live.basePitch = pitch;
-        return pitch * (float) live.chain.livePitchAt(now());
+        return pitch * (float) live.chain.livePitchAt(now(), TapeClock.seconds());
     }
 
     /**
@@ -158,7 +158,7 @@ public final class PedalLiveEffects {
         UPDATE_QUEUED.set(false);
 
         try {
-            final double now = now();
+            final double now = now(), tapeNow = TapeClock.seconds();
             for (final Live live : BY_SOURCE.values()) {
                 final Channel channel = live.channel;
                 if (channel == null)
@@ -167,9 +167,9 @@ public final class PedalLiveEffects {
                 // Until vanilla gives it a volume and pitch, it plays at the ones it started with
                 final float volume = live.baseVolume, pitch = live.basePitch;
                 if (live.changesVolume && volume >= 0)
-                    channel.setVolume(volume * (float) live.chain.liveGainAt(now));
+                    channel.setVolume(volume * (float) live.chain.liveGainAt(now, tapeNow));
                 if (live.changesPitch && pitch >= 0)
-                    channel.setPitch(pitch * (float) live.chain.livePitchAt(now));
+                    channel.setPitch(pitch * (float) live.chain.livePitchAt(now, tapeNow));
             }
         } catch (RuntimeException e) {
             LOGGER.error("Failed to update the live pedal effects of instrument sounds", e);

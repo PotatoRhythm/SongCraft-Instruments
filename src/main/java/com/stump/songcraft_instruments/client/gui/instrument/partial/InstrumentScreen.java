@@ -14,6 +14,7 @@ import com.stump.songcraft_instruments.client.gui.widget.IconToggleButton;
 import com.stump.songcraft_instruments.client.gui.widget.SliderButton;
 import com.stump.songcraft_instruments.client.keyMaps.InstrumentKeyMappings;
 import com.stump.songcraft_instruments.client.midi.InstrumentMidiReceiver;
+import com.stump.songcraft_instruments.client.pedal.PedalMonitor;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.item.ModItemTags;
@@ -21,6 +22,7 @@ import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
 import com.stump.songcraft_instruments.networking.packet.instrument.c2s.C2SDampenNotesPacket;
 import com.stump.songcraft_instruments.networking.packet.instrument.c2s.CloseInstrumentPacket;
+import com.stump.songcraft_instruments.pedal.PedalEffect;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.platform.Window;
@@ -32,6 +34,7 @@ import com.stump.songcraft_instruments.sound.held.HeldNoteSounds;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import com.stump.songcraft_instruments.util.CommonUtil;
 import com.stump.songcraft_instruments.util.SpeakerUtil;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -56,7 +59,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -504,7 +509,8 @@ public abstract class InstrumentScreen extends Screen {
     }
     public void renderInstrument(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-        renderSpeakerCounter(pGuiGraphics);
+        final boolean speakersShown = renderSpeakerCounter(pGuiGraphics);
+        renderPedalChain(pGuiGraphics, speakersShown, pMouseX, pMouseY);
     }
 
     private static final ResourceLocation SPEAKER_ICON = new ResourceLocation(SCInstrumentMod.MODID, SPRITE_LOC + "speaker.png");
@@ -513,11 +519,12 @@ public abstract class InstrumentScreen extends Screen {
     /**
      * renders the connected speaker counter ("🔈 1") in the top-right corner,
      * lined up with the visibility button. hidden when no speakers are connected.
+     * @return whether it was shown
      */
-    protected void renderSpeakerCounter(final GuiGraphics gui) {
+    protected boolean renderSpeakerCounter(final GuiGraphics gui) {
         final int count = getSpeakerCount();
         if (count <= 0)
-            return;
+            return false;
 
         final String text = " " + count;
         final int iconX = width - VISIBILITY_BUTTON_MARGIN - font.width(text) - 1 - SPEAKER_ICON_SIZE;
@@ -526,6 +533,70 @@ public abstract class InstrumentScreen extends Screen {
 
         gui.blit(SPEAKER_ICON, iconX, iconY, 0, 0, SPEAKER_ICON_SIZE, SPEAKER_ICON_SIZE, SPEAKER_ICON_SIZE, SPEAKER_ICON_SIZE);
         gui.drawString(font, text, iconX + SPEAKER_ICON_SIZE + 1, iconY + 1, 0xFFFFFF);
+        return true;
+    }
+
+    private static final String PEDAL_SEPARATOR = " → ";
+    private static final int PEDAL_HOVER_COLOR = 0xFFFF55;
+
+    /**
+     * renders the effects pedals the open instrument plays through ("Pedals: Fuzz → Delay") in the top-right corner,
+     * in signal order: in the speaker counter's row, or under it when that's shown.
+     * only pedals that are on are listed; hidden when there are none. hovering a pedal shows its knobs.
+     */
+    protected void renderPedalChain(final GuiGraphics gui, final boolean belowSpeakers, final int mouseX, final int mouseY) {
+        final List<PedalEffect> effects = PedalMonitor.chain().effects();
+        if (effects.isEmpty())
+            return;
+
+        final Component label = Component.translatable("gui.songcraft_instruments.pedal.chain");
+        final List<Component> names = new ArrayList<>(effects.size());
+        int lineWidth = font.width(label);
+        for (int i = 0; i < effects.size(); i++) {
+            names.add(Component.translatable("gui.songcraft_instruments.pedal.effect." + effects.get(i).type().id));
+            lineWidth += font.width((i == 0) ? " " : PEDAL_SEPARATOR) + font.width(names.get(i));
+        }
+
+        // the speaker counter's text row, or the next one down
+        final int y = VISIBILITY_BUTTON_MARGIN + (18 - SPEAKER_ICON_SIZE) / 2 + 1
+            + (belowSpeakers ? font.lineHeight + 3 : 0);
+
+        int x = width - VISIBILITY_BUTTON_MARGIN - lineWidth;
+        gui.drawString(font, label, x, y, 0xFFFFFF);
+        x += font.width(label);
+
+        int hovered = -1;
+        for (int i = 0; i < effects.size(); i++) {
+            final String gap = (i == 0) ? " " : PEDAL_SEPARATOR;
+            gui.drawString(font, gap, x, y, 0xFFFFFF);
+            x += font.width(gap);
+
+            final int nameWidth = font.width(names.get(i));
+            final boolean isHovered = (mouseX >= x) && (mouseX < x + nameWidth)
+                && (mouseY >= y - 1) && (mouseY < y + font.lineHeight);
+            gui.drawString(font, names.get(i), x, y, isHovered ? PEDAL_HOVER_COLOR : 0xFFFFFF);
+            x += nameWidth;
+
+            if (isHovered)
+                hovered = i;
+        }
+
+        if (hovered != -1)
+            gui.renderComponentTooltip(font, pedalTooltip(effects.get(hovered), names.get(hovered)), mouseX, mouseY);
+    }
+    /**
+     * @return the pedal's name, then each of its knobs and their value, shown as on the pedal itself
+     */
+    private static List<Component> pedalTooltip(final PedalEffect effect, final Component name) {
+        final List<Component> lines = new ArrayList<>();
+        lines.add(name);
+        for (int i = 0; i < effect.type().knobCount(); i++) {
+            lines.add(Component.translatable("gui.songcraft_instruments.pedal.knob_value",
+                Component.translatable("gui.songcraft_instruments.pedal.knob." + effect.type().knob(i).name()),
+                effect.type().knob(i).format(effect.knob(i))
+            ).withStyle(ChatFormatting.GRAY));
+        }
+        return lines;
     }
     /**
      * @return how many speakers the instrument the player has open is connected to

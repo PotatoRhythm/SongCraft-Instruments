@@ -10,7 +10,8 @@
         "LibraryMixin",
 		"SoundEngineMixin",
 		"SoundManagerPreparationsMixin",
-		"SoundBufferLibraryMixin"
+		"SoundBufferLibraryMixin",
+		"WeighedSoundEventsAccessor"
 	],
 	"minVersion": "0.8"
 }

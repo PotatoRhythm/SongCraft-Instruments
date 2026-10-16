@@ -1,0 +1,11 @@
+{
+    "__comment": "Placeholder vanilla textures until the pedal has its own",
+    "parent": "songcraft_instruments:block/pedal_template",
+    "textures": {
+        "body": "minecraft:block/blue_concrete",
+        "bottom": "minecraft:block/black_concrete",
+        "switch": "minecraft:block/iron_block",
+        "knob": "minecraft:block/black_concrete",
+        "led": "minecraft:block/redstone_block"
+    }
+}

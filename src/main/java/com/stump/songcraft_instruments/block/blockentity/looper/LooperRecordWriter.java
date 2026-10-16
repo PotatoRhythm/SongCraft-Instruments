@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.capability.recording.RecordingCapabilityP
 import com.stump.songcraft_instruments.config.ModServerConfigs;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.recording.Recording;
 import com.stump.songcraft_instruments.recording.RecordingBuilder;
 import com.stump.songcraft_instruments.recording.RecordingCodec;
@@ -13,6 +14,7 @@ import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 /**
@@ -29,24 +31,30 @@ public class LooperRecordWriter {
 
     /**
      * Writes a new note to the writable record.
+     * @param pedalChain The effects pedals the note was played through, played back with it
+     * @param tape The Lo-fi pedal (the tape) it went through, or null; its hiss rolls as it did
      */
-    public void writeNote(NoteSound sound, NoteSoundMetadata soundMeta, int timestamp, int particleRgb, UUID performer) {
+    public void writeNote(NoteSound sound, NoteSoundMetadata soundMeta, int timestamp, int particleRgb, UUID performer,
+                          PedalChain pedalChain, @Nullable UUID tape) {
         final RecordingBuilder draft = looper.getDraft();
         if (draft == null)
             return;
 
         draft.addNote(timestamp, getPerformerIndex(draft, performer),
             soundMeta.pitch(), soundMeta.volume(), particleRgb,
-            soundMeta.instrumentId().toString(), sound.baseSoundLocation.toString(), sound.index
+            soundMeta.instrumentId().toString(), sound.baseSoundLocation.toString(), sound.index,
+            pedalChain, tape
         );
         looper.setChanged();
     }
     /**
      * Writes a new note to the writable record.
+     * @param pedalChain The effects pedals the note was played through, played back with it
+     * @param tape The Lo-fi pedal (the tape) it went through, or null; its hiss rolls as it did
      */
     public void writeHeldNote(HeldNoteSound sound, HeldSoundPhase phase,
                               NoteSoundMetadata soundMeta, int timestamp,
-                              int particleRgb, UUID performer) {
+                              int particleRgb, UUID performer, PedalChain pedalChain, @Nullable UUID tape) {
         final RecordingBuilder draft = looper.getDraft();
         if (draft == null)
             return;
@@ -54,6 +62,7 @@ public class LooperRecordWriter {
         draft.addHeldNote(timestamp, getPerformerIndex(draft, performer),
             soundMeta.pitch(), soundMeta.volume(), particleRgb,
             soundMeta.instrumentId().toString(), sound.baseSoundLocation().toString(), sound.index(),
+            pedalChain, tape,
             (phase == HeldSoundPhase.RELEASE) ? Recording.PHASE_RELEASE : Recording.PHASE_ATTACK
         );
         looper.setChanged();

@@ -132,7 +132,7 @@ public record HeldNoteSound (
         }
         /**
          * A method for packets to use for playing this note on the client's end.
-         * @param pedalChain The pedals a speaker relays this note through, if any
+         * @param pedalChain The pedals of the instrument that played this note, if any
          */
         @OnlyIn(Dist.CLIENT)
         public void playFromServer(Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId,
@@ -141,13 +141,9 @@ public record HeldNoteSound (
             final Level level = localPlayer.level();
 
             final InitiatorID _initiatorID = InitiatorID.getEither(initiatorId, oInitiatorId);
-            PedalChain chain = pedalChain;
 
             if (initiatorId.isPresent()) {
                 final Entity initiator = level.getEntity(initiatorId.get());
-                // Our own note, heard from the server: through the pedals we monitor, as our local copy would be
-                if (chain.isEmpty() && localPlayer.equals(initiator))
-                    chain = PedalMonitor.chain();
 
                 MinecraftForge.EVENT_BUS.post(
                     new HeldNoteSoundPlayedEvent(initiator, this, meta, phase, _initiatorID)
@@ -167,7 +163,7 @@ public record HeldNoteSound (
 
 
             switch (phase) {
-                case ATTACK -> attackFromServer(_initiatorID, meta, chain);
+                case ATTACK -> attackFromServer(_initiatorID, meta, pedalChain);
                 case RELEASE -> releaseFromServer(_initiatorID, meta);
             }
         }

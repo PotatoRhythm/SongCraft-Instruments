@@ -23,21 +23,34 @@ public class PedalScreen extends AbstractContainerScreen<PedalMenu> {
     private static final int TEXT_COLOR = 0x404040;
     private static final int ROW_Y = 22, ROW_HEIGHT = 18;
     private static final int LABEL_X = 10, BUTTON_SIZE = 14;
-    private static final int DOWN_X = 80, VALUE_WIDTH = 24, UP_X = DOWN_X + BUTTON_SIZE + VALUE_WIDTH;
+    private static final int DOWN_X = 80, MIN_VALUE_WIDTH = 24, VALUE_PADDING = 6, RIGHT_MARGIN = 8;
     private static final int TOGGLE_WIDTH = 100, TOGGLE_HEIGHT = 20;
 
     private Button toggleButton;
+    /**
+     * Wide enough for the longest value any of the pedal's knobs can show (like "+10.5 dB")
+     */
+    private int valueWidth = MIN_VALUE_WIDTH;
 
     public PedalScreen(final PedalMenu menu, final Inventory inventory, final Component title) {
         super(menu, inventory, title);
-        imageWidth = 140;
     }
 
     @Override
     protected void init() {
-        final int knobs = menu.getEffectType().knobCount();
+        final PedalEffectType type = menu.getEffectType();
+        final int knobs = type.knobCount();
+
+        valueWidth = MIN_VALUE_WIDTH;
+        for (int i = 0; i < knobs; i++)
+            for (int value = 0; value < PedalEffectType.KNOB_STEPS; value++)
+                valueWidth = Math.max(valueWidth, font.width(type.knob(i).format(value)) + VALUE_PADDING);
+
+        imageWidth = DOWN_X + BUTTON_SIZE + valueWidth + BUTTON_SIZE + RIGHT_MARGIN;
         imageHeight = ROW_Y + knobs * ROW_HEIGHT + TOGGLE_HEIGHT + 12;
         super.init();
+
+        final int upX = DOWN_X + BUTTON_SIZE + valueWidth;
 
         for (int i = 0; i < knobs; i++) {
             final int knob = i;
@@ -47,7 +60,7 @@ public class PedalScreen extends AbstractContainerScreen<PedalMenu> {
                 .build()
             );
             addRenderableWidget(Button.builder(Component.literal("+"), (button) -> pressButton(PedalMenu.knobButton(knob, true)))
-                .bounds(leftPos + UP_X, y, BUTTON_SIZE, BUTTON_SIZE)
+                .bounds(leftPos + upX, y, BUTTON_SIZE, BUTTON_SIZE)
                 .build()
             );
         }
@@ -99,9 +112,8 @@ public class PedalScreen extends AbstractContainerScreen<PedalMenu> {
             gui.drawString(font, Component.translatable("gui.songcraft_instruments.pedal.knob." + type.knob(i).name()),
                 LABEL_X, textY, TEXT_COLOR, false);
 
-            // Shown from 0 to 10 like a real knob, though it turns in finer steps
-            final String value = String.format("%.1f", menu.getKnob(i) * 10f / (PedalEffectType.KNOB_STEPS - 1));
-            gui.drawString(font, value, DOWN_X + BUTTON_SIZE + (VALUE_WIDTH - font.width(value)) / 2, textY,
+            final String value = type.knob(i).format(menu.getKnob(i));
+            gui.drawString(font, value, DOWN_X + BUTTON_SIZE + (valueWidth - font.width(value)) / 2, textY,
                 TEXT_COLOR, false);
         }
     }

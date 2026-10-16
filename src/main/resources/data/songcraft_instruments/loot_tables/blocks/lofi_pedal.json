@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "name": "songcraft_instruments:lofi_pedal",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "songcraft_instruments:lofi_pedal"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "songcraft_instruments:blocks/lofi_pedal"
+}

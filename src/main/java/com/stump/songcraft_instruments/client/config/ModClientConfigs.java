@@ -126,10 +126,7 @@ public class ModClientConfigs {
         PEDAL_CACHE_MB = configBuilder.comment(
             "How much memory (in MB) instrument sounds played through effects pedals may keep.",
             "Each sound is processed once per pedal setting and kept for reuse; the least recently played are let go past this."
-        ).defineInRange("pedal_cache_mb", 64, 8, 1024);
-        // Your own notes are heard through the pedals of the nearest speaker your instrument plays through
-        // (see PedalMonitor). If players ask for it, a "lock to this speaker" option could go here,
-        // to always hear a chosen speaker's pedals instead of the nearest's.
+        ).defineInRange("pedal_cache_mb", 256, 8, 1024);
 
         ACCEPTED_DISCLAIMER = configBuilder.define("accepted_disclaimer", false);
 

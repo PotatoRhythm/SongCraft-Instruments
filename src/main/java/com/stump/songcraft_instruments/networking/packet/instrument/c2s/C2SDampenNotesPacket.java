@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.block.util.LooperSessionState;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.IModPacket;
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CDampenNotesPacket;
+import com.stump.songcraft_instruments.pedal.TapeDecks;
 import com.stump.songcraft_instruments.util.SpeakerUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,6 +46,7 @@ public class C2SDampenNotesPacket implements IModPacket {
 
         // Dampening doesn't send individual releases, so release the player's held notes on their speakers too
         SpeakerUtil.releaseHeldNotes(player);
+        TapeDecks.onDampen(player);
 
         SCPacketHandler.sendToTrackingEntityAndSelf(
                 new S2CDampenNotesPacket(player.getId()),

@@ -323,7 +323,7 @@ public abstract class NoteButton extends AbstractButton {
                 Minecraft.getInstance().player.position().distanceToSqr(pos.getCenter()),
                 instrumentScreen.getInstrumentId(),
                 Optional.ofNullable(getIdentifier()),
-                // Speakers don't relay our notes back to us, so we hear their pedals on our own copy
+                // Our own copy, through the pedals our instrument is plugged into
                 PedalMonitor.chain()
         );
     }

@@ -4,7 +4,9 @@ import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.NoteSoundInstance;
 import com.stump.songcraft_instruments.sound.UnderwaterMuffling;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSoundInstance;
+import com.stump.songcraft_instruments.sound.pedal.PedalBufferCache;
 import com.stump.songcraft_instruments.sound.pedal.PedalLiveEffects;
+import com.stump.songcraft_instruments.sound.pedal.TapeHissSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
@@ -39,9 +41,10 @@ public class SoundEngineMixin {
             CallbackInfoReturnable<Float> cir
     ) {
         // The Mono crossfade too, or it would be clamped (to 0.5-2) while its Stereo sound isn't,
-        // playing notes over an octave from their sample at a different pitch than their Stereo sound
+        // playing notes over an octave from their sample at a different pitch than their Stereo sound.
+        // And a Lo-fi tape's hiss, whose motor winds down below 0.5 as the tape stops
         if (sound instanceof NoteSoundInstance || sound instanceof HeldNoteSoundInstance
-                || sound instanceof CrossfadeMonoSoundInstance) {
+                || sound instanceof CrossfadeMonoSoundInstance || sound instanceof TapeHissSoundInstance) {
             // Through their pedals' live effects (like a vibrato)
             cir.setReturnValue(PedalLiveEffects.onPitch(sound, sound.getPitch()));
         }
@@ -71,6 +74,7 @@ public class SoundEngineMixin {
     private void songcraft_instruments$updateMuffling(CallbackInfo ci) {
         UnderwaterMuffling.tick(instanceToChannel, executor);
         PedalLiveEffects.tick(executor);
+        PedalBufferCache.tick(executor);
     }
 
     /**

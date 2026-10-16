@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.event;
 import com.stump.songcraft_instruments.block.partial.InstrumentBlockEntity;
 import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenProvider;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +23,10 @@ public abstract class InstrumentPlayedEvent<T> extends Event {
     private final T sound;
     private final NoteSoundMetadata soundMeta;
     private final Level level;
+    /**
+     * The effects pedals the note is played through
+     */
+    private final PedalChain pedalChain;
 
     /**
      * Information about the entity initiator.
@@ -40,9 +45,16 @@ public abstract class InstrumentPlayedEvent<T> extends Event {
      * Constructor for creating a non-entity event
      */
     public InstrumentPlayedEvent(Level level, T sound, NoteSoundMetadata soundMeta) {
+        this(level, sound, soundMeta, PedalChain.NONE);
+    }
+    /**
+     * Constructor for creating a non-entity event, played through the given pedals
+     */
+    public InstrumentPlayedEvent(Level level, T sound, NoteSoundMetadata soundMeta, PedalChain pedalChain) {
         this.level = level;
         this.sound = sound;
         this.soundMeta = soundMeta;
+        this.pedalChain = pedalChain;
 
         this.entityInfo = Optional.empty();
     }
@@ -51,9 +63,16 @@ public abstract class InstrumentPlayedEvent<T> extends Event {
      * Constructor for creating a by-entity event
      */
     public InstrumentPlayedEvent(Entity entity, T sound, NoteSoundMetadata soundMeta) {
+        this(entity, sound, soundMeta, PedalChain.NONE);
+    }
+    /**
+     * Constructor for creating a by-entity event, played through the given pedals
+     */
+    public InstrumentPlayedEvent(Entity entity, T sound, NoteSoundMetadata soundMeta, PedalChain pedalChain) {
         this.level = entity.level();
         this.sound = sound;
         this.soundMeta = soundMeta;
+        this.pedalChain = pedalChain;
 
         this.entityInfo = Optional.of(new EntityInfo(entity));
     }
@@ -67,6 +86,12 @@ public abstract class InstrumentPlayedEvent<T> extends Event {
     }
     public Level level() {
         return level;
+    }
+    /**
+     * @return The effects pedals the note is played through. Only known on the server; none on the client.
+     */
+    public PedalChain pedalChain() {
+        return pedalChain;
     }
     public Optional<EntityInfo> entityInfo() {
         return entityInfo;

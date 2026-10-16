@@ -1,7 +1,6 @@
 package com.stump.songcraft_instruments.sound;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
-import com.stump.songcraft_instruments.client.pedal.PedalMonitor;
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
@@ -174,7 +173,7 @@ public class NoteSound {
      * Will also stop the client's background music per preference.
      * @param initiatorId The ID of the player who initiated the sound. Empty for when it wasn't a player.
      * @param meta Additional metadata of the Note Sound being played
-     * @param pedalChain The pedals a speaker relays this note through, if any
+     * @param pedalChain The pedals of the instrument that played this note, if any
      */
     @OnlyIn(Dist.CLIENT)
     public void playFromServer(Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId,
@@ -226,11 +225,6 @@ public class NoteSound {
 
         final float mcPitch = getPitchByNoteOffset(clampPitch(meta.pitch()));
 
-        // Our own note, heard from the server: through the pedals we monitor, as our local copy would be
-        final PedalChain chain = (pedalChain.isEmpty() && oInitiatorId.isEmpty() && player.equals(initiator))
-                ? PedalMonitor.chain()
-                : pedalChain;
-
         // Relays of the note (by a looper's or player's speakers) share all but the position.
         // A player's own copy names them by entity ID, while relays name them by initiator ID
         final InitiatorID source = oInitiatorId.orElseGet(() ->
@@ -239,7 +233,7 @@ public class NoteSound {
                 new RelayKey(this, meta.pitch(), meta.volume(), meta.instrumentId(), source),
                 playDistSqr,
                 source,
-                (dropped) -> playLocally(mcPitch, meta, playDistSqr, initiatorId, oInitiatorId, chain)
+                (dropped) -> playLocally(mcPitch, meta, playDistSqr, initiatorId, oInitiatorId, pedalChain)
         );
     }
     private record RelayKey(NoteSound sound, int pitch, int volume, ResourceLocation instrumentId,

@@ -16,16 +16,16 @@ import javax.annotation.Nullable;
  * {@code songcraft_instruments:pedal_fx/<chain key>/<variant>/<original namespace>/<original path>}. Vanilla loads it
  * like any other sound file, which {@link PedalBufferCache} catches and renders instead. Everything else about the
  * sound (its volume, attenuation, and the sound event it was played as) stays as it was.</p>
- * <p>The variant is {@code x} for most chains. Chains with effects that play out over time (see
- * {@link PedalChain#isTimeBased}) are rendered for the exact pitch the sound plays at, {@code p<pitch in thousandths>},
- * so their timing comes out right once OpenAL resamples the sound to that pitch. {@code t<pitch>} is a held note's
- * echo tail (see {@link PedalDsp}).</p>
+ * <p>The variant is the exact pitch the sound plays at, {@code p<pitch in thousandths>}: every chain is rendered for it,
+ * so its filters and timing come out as set once OpenAL resamples the sound to that pitch, rather than moving with the
+ * note. Most notes play at their sound file's own pitch ({@code p1000}) unless transposed, so they share one copy.
+ * {@code t<pitch>} is a held note's echo tail (see {@link PedalDsp}).</p>
  */
 @OnlyIn(Dist.CLIENT)
 public final class PedalSounds {
     private static final String FX_DIR = "pedal_fx/";
     private static final String SOUNDS_PREFIX = "sounds/", OGG_SUFFIX = ".ogg";
-    private static final String ANY_PITCH = "x", AT_PITCH = "p", ECHO_TAIL = "t";
+    private static final String AT_PITCH = "p", ECHO_TAIL = "t";
 
     private PedalSounds() {}
 
@@ -48,10 +48,7 @@ public final class PedalSounds {
             || sound.shouldStream() || sound.getType() != Sound.Type.FILE)
             return sound;
 
-        final String pitchKey = String.valueOf(Math.max(1, Math.round(pitch * 1000)));
-        final String variant = echoTail ? ECHO_TAIL + pitchKey
-            : chain.isTimeBased() ? AT_PITCH + pitchKey
-            : ANY_PITCH;
+        final String variant = (echoTail ? ECHO_TAIL : AT_PITCH) + Math.max(1, Math.round(pitch * 1000));
 
         final ResourceLocation original = sound.getLocation();
         return new Sound(
@@ -64,7 +61,7 @@ public final class PedalSounds {
 
     /**
      * A rendered copy of a sound file
-     * @param pitch The pitch it will be played at, or 1 if it doesn't matter
+     * @param pitch The pitch it will be played at
      * @param echoTail See {@link #withPedals(Sound, PedalChain, float, boolean)}
      * @param original The original sound file's location (sounds/...ogg)
      */
@@ -91,9 +88,6 @@ public final class PedalSounds {
             return null;
 
         final String variant = parts[1];
-        if (variant.equals(ANY_PITCH))
-            return new FxFile(chain, 1, false, original);
-
         final boolean echoTail = variant.startsWith(ECHO_TAIL);
         if (!echoTail && !variant.startsWith(AT_PITCH))
             return null;

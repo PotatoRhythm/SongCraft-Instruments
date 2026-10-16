@@ -1,6 +1,7 @@
 package com.stump.songcraft_instruments.event;
 
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -18,5 +19,8 @@ public class NoteSoundPlayedEvent extends InstrumentPlayedEvent<NoteSound> {
 
     public NoteSoundPlayedEvent(Entity initiator, NoteSound sound, NoteSoundMetadata soundMeta) {
         super(initiator, sound, soundMeta);
+    }
+    public NoteSoundPlayedEvent(Entity initiator, NoteSound sound, NoteSoundMetadata soundMeta, PedalChain pedalChain) {
+        super(initiator, sound, soundMeta, pedalChain);
     }
 }

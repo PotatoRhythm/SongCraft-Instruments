@@ -1,41 +1,41 @@
 package com.stump.songcraft_instruments.pedal;
 
 import com.stump.songcraft_instruments.SCInstrumentMod;
-import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
 import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenProvider;
 import com.stump.songcraft_instruments.event.InstrumentOpenStateChangedEvent;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.S2CPedalMonitorPacket;
-import com.stump.songcraft_instruments.util.SpeakerUtil;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Lets players hear their own notes through the pedals of the speakers their instrument plays through.
- * <p>Speakers don't relay notes back to whoever played them (they already hear their own copy, without delay),
- * so the pedal chains of the open instrument's speakers are sent to its player instead, who applies them
- * to their own copy (see {@code PedalMonitor} on the client).</p>
- * <p>Sent when an instrument is opened, and again when something those chains depend on changes:
- * a speaker's chain, or which speakers are paired. Only sent when it actually differs from what the player has.
- * Server only.</p>
+ * Lets players hear their own notes through the pedals their instrument is plugged into.
+ * <p>A player hears their own copy of their notes without waiting on the server, so the chain of the instrument they
+ * have open is sent to them, to play that copy through (see {@code PedalMonitor} on the client). Everyone else gets
+ * the chain along with each note.</p>
+ * <p>Sent when an instrument is opened, and again whenever pedals change. Pedals only apply while they're loaded,
+ * so the chain is also checked every {@link #CHECK_INTERVAL} ticks, in case its pedals loaded or unloaded.
+ * Only sent when it actually differs from what the player has. Server only.</p>
  */
 @EventBusSubscriber(bus = Bus.FORGE, modid = SCInstrumentMod.MODID)
 public final class PedalMonitorSync {
+    private static final int CHECK_INTERVAL = 20;
+
     /**
-     * What each player was last sent, so unchanged lists aren't sent again
+     * What each player was last sent, so an unchanged chain isn't sent again
      */
-    private static final Map<UUID, List<S2CPedalMonitorPacket.Entry>> SENT = new ConcurrentHashMap<>();
+    private static final Map<UUID, PedalChain> SENT = new ConcurrentHashMap<>();
+    private static int ticksToCheck = CHECK_INTERVAL;
 
     private PedalMonitorSync() {}
 
@@ -55,24 +55,24 @@ public final class PedalMonitorSync {
             sync(player);
     }
 
-    /**
-     * Called when a speaker's pedal chain changed
-     */
-    public static void onSpeakerChainChanged(final Level level) {
-        syncPlayersWithOpenInstruments(level);
-    }
-    /**
-     * Called when an instrument was paired to or unpaired from a speaker
-     */
-    public static void onPairingsChanged(final Level level) {
-        syncPlayersWithOpenInstruments(level);
+    @SubscribeEvent
+    public static void onServerTick(final TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || --ticksToCheck > 0)
+            return;
+
+        ticksToCheck = CHECK_INTERVAL;
+        for (final ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+            if (InstrumentOpenProvider.isOpen(player))
+                sync(player);
+        }
     }
 
     /**
-     * Pairings and chains change rarely (and chains at most a few times a second per speaker),
-     * and few players have an instrument open at once, so simply check them all
+     * Called when a pedal's settings or cables changed, or an instrument was plugged in or unplugged.
+     * Changes come in at most as fast as players click, and few players have an instrument open at once,
+     * so simply check them all.
      */
-    private static void syncPlayersWithOpenInstruments(final Level level) {
+    public static void onPedalsChanged(final Level level) {
         if (level.isClientSide)
             return;
 
@@ -83,17 +83,13 @@ public final class PedalMonitorSync {
     }
 
     private static void sync(final ServerPlayer player) {
-        final List<S2CPedalMonitorPacket.Entry> entries = new ArrayList<>();
-        for (final Speaker speaker : SpeakerUtil.getFromOpenInstrument(player)) {
-            if (!speaker.getPedalChain().isEmpty())
-                entries.add(new S2CPedalMonitorPacket.Entry(speaker.getSoundPos(), speaker.getPedalChain()));
-        }
+        final PedalChain chain = InstrumentPedals.chainOfOpenInstrument(player);
 
-        final List<S2CPedalMonitorPacket.Entry> previous = SENT.put(player.getUUID(), entries);
+        final PedalChain previous = SENT.put(player.getUUID(), chain);
         // A player who never had any pedals needn't be told they have none
-        if (entries.equals(previous) || (previous == null && entries.isEmpty()))
+        if (chain.equals(previous) || (previous == null && chain.isEmpty()))
             return;
 
-        SCPacketHandler.sendToClient(new S2CPedalMonitorPacket(entries), player);
+        SCPacketHandler.sendToClient(new S2CPedalMonitorPacket(chain), player);
     }
 }

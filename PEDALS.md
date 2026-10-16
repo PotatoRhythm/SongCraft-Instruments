@@ -7,25 +7,38 @@ Kept up to date as pedals are added. A short player-facing list will be compiled
 
 These apply to every pedal, so the per-pedal sections don't repeat them.
 
-- **Effects are rendered ahead of time, not live.** Each sound file is processed once per pedal setting, on the
-  client, and cached (`pedal_cache_mb`, default 64 MB). The server only stores the knobs and sends a few bytes
-  with each relayed note.
+- **Instruments plug into pedals, not speakers.** A held instrument plugs in by right-clicking a pedal with it
+  (shift + right-click unplugs it), a block instrument with the speaker cable (the instrument and the pedal, in
+  either order). Pedals chain into each other with the cable, and an instrument plays through the pedal it's
+  plugged into and every pedal after it.
+- **The effect follows the instrument everywhere.** Its notes sound through its pedals where it's played, through
+  each of its speakers, and to its own player. Speakers just relay the instrument's sound.
+- **Pedals can be shared.** Several pedals (and instruments) can plug into the same pedal, so a band can each have
+  their own pedals, all ending at one shared pedal. Turning a shared pedal's knobs changes it for everyone.
+- **Pedals only apply while loaded.** An instrument plays dry while its pedal's chunk isn't loaded, or from another
+  dimension. A chain stops at the first pedal that isn't loaded. A pedal that was broken (or replaced by another
+  at the same spot) unplugs its instruments once its spot is loaded.
+- **Recordings remember the pedals.** Each recorded note keeps the chain it was played through, and plays back
+  with it on any looper, even after the pedals are changed or gone.
+- **Effects are rendered ahead of time, not live.** Each sound file is processed once per pedal setting and pitch
+  it's played at, on the client, and cached (`pedal_cache_mb`, default 256 MB). The server only stores the knobs and sends a few bytes
+  with each note.
 - **Knobs change the next note, not the one already sounding.** A note keeps the sound it started with. That
   includes held notes, which only pick up a change once they're played again.
 - **Knobs turn in 16 steps**, shown as 0 to 10. Each step is a new rendered variant of every sound played through it.
-- **Tone shifts with pitch.** A sound is rendered at its file's own pitch, and OpenAL resamples it for other notes
-  (up to 2 octaves either way). Any frequency inside the effect moves with the note: a filter at 2 kHz sits at
-  4 kHz an octave up, and at 1 kHz an octave down. High notes come out brighter and low notes darker than the
-  knob suggests, by up to 4x in frequency.
-- **Time-based effects (the Delay) are the exception.** Resampling would also stretch their timing, so chains
-  with one are rendered separately for every pitch a note plays at, with timing and filters corrected for it.
-  That's one rendered variant per note rather than per sound file, so these chains use more cache memory and
-  render more often.
-- **Held notes only get time-based effects on release.** Their attack and hold go through the rest of the chain,
+- **Every pedal sounds the same at every pitch.** Notes are pitched by OpenAL resampling a sound file (playing it
+  faster or slower), which would move everything an effect did along with it: a 2 kHz filter would sit at 4 kHz an
+  octave up. So a chain is rendered for the exact pitch a note plays at, with its filters, timing and sample rates
+  worked out for that pitch, and they come out as set once it's resampled.
+- **Transposing costs memory, not playing at the default pitch.** Most instruments have a sound file per note, so
+  at the default transpose notes play at their file's own pitch and share one rendered copy. Each other transpose
+  (or octave swap, or MIDI note past the instrument's range) renders its own copies, as much again as the default.
+- **Held notes only get time-based effects (the Delay and Reverb) on release.** Their attack and hold go through the rest of the chain,
   since echoes of a looping sound would pile up while it's held.
 - **Live effects (Tremolo, Vibrato) aren't rendered at all.** They change a note's volume or pitch while it plays, so they reach
   held notes the whole time they're held, and turning their knobs never renders anything. They always act as if
-  they were last in the chain, wherever the pedal actually sits.
+  they were last in the chain, wherever the pedal actually sits. The Lo-fi pedal is partly live: its wobble and
+  dropouts are, while its tape tone is rendered like any other pedal.
 - **The level is set from the sound file's own loudness.** The volume trims in `sounds.json`, the instrument's
   volume slider and distance are all applied afterwards. Pedals don't change how loud instruments are relative
   to each other, but anything that depends on the file's level (such as the fuzz's gate) treats quiet and loud
@@ -36,16 +49,16 @@ These apply to every pedal, so the per-pedal sections don't repeat them.
   turn down: fully up is as loud as the original. This compares measured levels, not perceived loudness: an
   effect that adds bright harmonics (like fuzz) can still sound a little louder at the same level, since ears
   are most sensitive to the upper mids.
-- **Chains go in order, up to 4 pedals.** A soft limiter at the end of every chain rounds off peaks above 85%,
+- **Chains go in order, up to 4 pedals.** No path through the pedals can be longer, counting from any pedal an
+  instrument could plug into. A soft limiter at the end of every chain rounds off peaks above 85%,
   so stacked effects don't clip harshly.
 - **First note after a change.** A sound is rendered the first time it is played through a new setting, which
   delays that note by a few milliseconds. The performer's own instrument is rendered ahead of time; listeners
   render as they hear it.
-- **The performer hears the nearest speaker's pedals** on their own notes, switching once another is 3+ blocks
-  closer. Nothing in the UI shows which speaker that is yet.
-- **Someone standing by the performer hears the performer's notes without pedals.** Only the nearest copy of a
-  note is played, and next to the performer that's the performer's own unprocessed copy, not a speaker's.
-- **Only speaker blocks take pedals**, not speakers on boats or minecarts.
+- **The instrument screen shows the chain** in its top-right corner (e.g. "Pedals: Fuzz → Delay"), under the speaker
+  counter. It lists only the pedals that are on and loaded, so it's exactly what the notes go through, and updates as
+  pedals are stomped or plugged in. Hovering a pedal's name shows its knobs, from 0 to 10 as on the pedal. It
+  doesn't show which pedal block is which.
 - **Sound Physics Remastered** (when installed) adds its room reverb after the pedals, as a room would.
 
 ## Fuzz Pedal
@@ -136,9 +149,10 @@ tape delay.
 - **More voices.** Each note sounds for up to 4 seconds longer, so fast playing has more notes sounding at once.
   On busy servers this can reach Minecraft's limit on simultaneous sounds sooner, and Sound Physics twin sources
   run out sooner (the crossfades fall back to gliding).
-- **Memory.** One rendered variant per note, each up to 4 seconds longer. An instrument fully played through a
-  delay can take a large share of the default 64 MB cache, so other variants get let go more often. Raise
-  `pedal_cache_mb` if notes start to take a moment to sound again.
+- **Memory.** Each rendered note is up to 4 seconds longer. An instrument fully played through a
+  delay takes up to about 70 MB (the long bass samples), a good share of the default 256 MB cache. With several
+  players' delays heard at once, other variants get let go more often. Raise `pedal_cache_mb` if notes start to
+  take a moment to sound again.
 - **Held-note echo tails are an approximation.** They echo a slice of the held sound, not exactly what was
   playing when the note was let go, and at the volume the note had then. Very short presses (released during
   the attack) use the same slice.
@@ -166,9 +180,9 @@ reduction (samples rounded to fewer levels), then blended with the original by M
 - **Held notes work all the way through.** It isn't time-based, so attacks, holds and releases are all crushed.
 
 **How it behaves:**
-- **Downsampling shifts with pitch,** like the Fuzz's tone: it's applied at the sound file's own pitch, so notes
-  played above a sample sound less downsampled and notes below more. The aliasing stays tied to the note, so
-  each note keeps a consistent character.
+- **Downsampling is the same at every pitch:** the sample rate is set as heard, so a transposed note is crushed to
+  the same rate as any other. Its aliasing doesn't follow the note, so different notes alias into different
+  inharmonic tones, like a real bitcrusher.
 - **In chains:** Fuzz then Bitcrusher crushes an already squared-off signal, which is dense and aggressive.
   Bitcrusher then Fuzz fuzzes the crushed sound, which smears the steps. Bitcrusher then Delay gives crushed
   echoes that soften as they repeat. Delay then Bitcrusher crushes the echoes too, so at high crush the quieter
@@ -287,11 +301,9 @@ length:
 - **Octave fuzz.** Octave then Fuzz gives the classic screaming octave-fuzz tone.
 
 **How it behaves:**
-- **Rendered once per sound file,** like the Fuzz: no per-pitch variants, no extra cache memory, and held notes
-  get it from attack to release.
+- **No echoes, so no extra length:** held notes get it from attack to release.
 - **Stays in tune at every pitch.** The octaves are worked out from each sound itself, so they stay octaves
-  when the note is pitched. Its filters shift with pitch, though, like the Fuzz's tone: the sub sounds brighter
-  on high notes.
+  when the note is pitched, and its filters sit where they're set whatever the note.
 - **Stereo-safe.** Cycles are counted on both channels mixed together, so the octave below stays in phase
   between left and right.
 - **Within the loudness cap.** All three knobs up gets louder than the note, so the cap turns it back down.
@@ -311,6 +323,131 @@ length:
 - **Bitcrusher before it** gives the cycle counting stepped, noisy edges, so the sub tends to sputter.
 - **Decays sputter at the very end.** As a note fades into its noise floor, the counting can go erratic for a
   moment before it stops.
+
+## EQ Pedal
+
+**Signal path:** three filters in a row, like an amp's tone stack: a low shelf for the bass, a wide peak for the
+mids, and a high shelf for the treble. A band left in the middle isn't run at all.
+
+| Knob | Range | Effect |
+|---|---|---|
+| Bass | -10.5 to +12 dB below 100 Hz (flat in the middle) | Down: thinner and tighter. Up: fuller and boomier |
+| Mid | -10.5 to +12 dB around 800 Hz, a wide band (Q 0.8) | Down: scooped and hollow. Up: honky, pushed forward |
+| Treble | -10.5 to +12 dB above 3.2 kHz | Down: darker and softer. Up: brighter and airier |
+
+Knobs show their boost or cut in dB rather than 0 to 10, in 1.5 dB steps.
+
+**How it changes the tone:**
+- **Shaping, not distortion.** It only changes how loud each part of the sound is, so it adds no grit or harmonics.
+- **Scoops and pushes.** Mid down with bass and treble up gives the classic scooped metal tone; mid up helps a
+  part cut through a busy mix.
+- **Taming effects.** After a Fuzz or Bitcrusher, treble down softens harsh fizz and aliasing; before a Fuzz,
+  bass down keeps low notes from turning to mud.
+
+**How it behaves:**
+- **Same at every pitch,** like every pedal: the bands stay at 100 Hz, 800 Hz and 3.2 kHz as heard.
+- **Rendered once per sound file and pitch,** with no extra length, so held notes get it from attack to release.
+
+**Issues and shortcomings:**
+- **Boosts make the rest quieter.** Pedals never make a note louder, so after a boost the whole sound is turned
+  down until it's as loud as before. Boosting the bass makes it stand out more, not louder: the mids and treble
+  come out quieter instead.
+- **Fixed frequencies.** The bands can't be moved, so it can't reach a narrow problem frequency the way a
+  parametric EQ can. Three knobs keep it quick to dial in.
+- **Gentle shelves.** The bass and treble shelves are halfway at their corner frequency (100 Hz, 3.2 kHz) and only
+  reach the full boost or cut about an octave past it.
+- **Instruments with little bass or treble** (piccolo, bells, bass guitar's treble) barely respond to those knobs:
+  there's nothing there to boost.
+
+## Reverb Pedal
+
+**Signal path:** the note, plus the sound of it ringing on in a room. Built like the classic Freeverb: eight
+feedback loops of different lengths in parallel, each darkened by the Tone on every pass, then four diffusers in a
+row that smear their echoes into a smooth wash. The right channel's loops are slightly longer than the left's, so
+stereo sounds come out wide.
+
+| Knob | Range | Effect |
+|---|---|---|
+| Decay | 0.3 to 4 s to die away by 60 dB (exponential) | Low: a small room, short and tight. High: a big hall or cathedral |
+| Tone | 1.5 to 12 kHz damping | Low: warm and soft, like a carpeted room. High: bright and shimmery, like a stone hall or plate |
+| Mix | 0% to 100% | How loud the reverb is: at full, it carries as much energy as the note itself |
+
+**How it changes the tone:**
+- **Space.** Notes sound like they're played in a room, from a small booth to a cathedral. Sustained instruments
+  (pads, strings, flutes, voices) get the classic lush wash; plucked ones get a ringing halo.
+- **Darker as it fades.** High frequencies die away faster than the lows, as in a real room, and more so with the
+  Tone down. The Decay is the time for the low and middle frequencies.
+- **Short decays thicken.** Below about half a second it mostly adds body and width rather than an audible tail.
+
+**How it behaves:**
+- **Same at every pitch,** like every pedal: the decay and tone come out as set whatever the note.
+- **Held notes get it on release,** like the Delay: instruments with a release sound play it through the reverb,
+  and those without ring on from a short slice of the held sound. While held, they play dry.
+- **Dampening fades instead of cutting,** over up to 2 seconds, like the Delay, so the reverb dies away rather than
+  stopping dead.
+- **Fast to render**: about 20 ms for a 2 second stereo note with the longest decay, so a first note after a knob
+  change is only slightly late.
+- **With the Delay:** Delay then Reverb gives echoes that each bloom into the room, the classic ambient wash.
+  Reverb then Delay repeats the whole reverberant sound, which gets muddy quickly.
+
+**Issues and shortcomings:**
+- **Held notes are dry while held.** The biggest compromise: sustained instruments, where reverb matters most,
+  only get it once let go. A live reverb that reaches held notes (through OpenAL, like Sound Physics Remastered's)
+  could be added later as another mode.
+- **Notes ring on.** Up to 4 seconds past each note, so fast passages blur together, more notes sound at once
+  (towards Minecraft's limit on simultaneous sounds), and each rendered note takes more cache memory, like the Delay.
+- **The loudness cap can turn notes down.** The reverb adds to the note while it's sounding, so at a high Mix the
+  whole note is turned down slightly to stay within the cap.
+- **Stacks with Sound Physics Remastered,** whose own room reverb is added on top when installed. A big pedal reverb
+  in a stone cave can be a lot; turn the Mix down there.
+- **Metallic on clicks and drums.** Like any simple algorithmic reverb, very sharp sounds (drums, the kalimba's
+  attack) can bring out a slight metallic flutter in the tail, most at short decays with the Tone up.
+
+## Lo-fi Pedal
+
+**Signal path:** a worn cassette tape, in four parts:
+- **Tape tone** (rendered): two-pole low and high cuts for the tape's narrow bandwidth, then soft saturation that
+  rounds off the peaks. The more worn the tape, the narrower and warmer.
+- **Wow and flutter** (live): the pitch drifts slowly and unevenly, with a faster, finer shimmer on top.
+- **Dropouts** (live): brief, random dips where the tape loses contact with the head, smoothed so they never click.
+- **Tape hiss** (its own sound): rolls on its own while the instrument plays, rather than with each note.
+
+| Knob | Range | Effect |
+|---|---|---|
+| Age | Fresh to 30 years old | Low: clean, with a faint hiss. High: muffled (highs from 16 kHz down to 3.5 kHz), saturated, and hissy (-54 to -34 dB of hiss) |
+| Wobble | None to ±30 cents of wow, plus ±8 of flutter | Low: steady. Middle: a gentle, nostalgic drift. High: a seasick, warped tape |
+| Dropouts | None to about one a second | Low: none. Middle: an occasional dip. High: frequent, deep dropouts (6 to 30 dB) |
+
+**The tape deck:**
+- **It rolls while you play.** The first note presses the play key: a clunk, and the motor spinning the hiss up to
+  speed. It keeps rolling between notes, and while notes are held. About 5 seconds after the last note, the stop
+  key clunks and the motor winds the hiss down in pitch, like a tape stopping. Closing the instrument stops it at once.
+- **The hiss plays where the instrument is heard:** from the player (or the instrument block), and from each of its
+  speakers. Players coming within range of a rolling deck hear its hiss fade in, without the clunk.
+- **The hiss follows the instrument's volume,** and dips with the tape's dropouts.
+- **Loopers have tape decks too.** A looper playing back notes recorded through a Lo-fi pedal rolls its own deck
+  while it plays them, with its own hiss, at the looper and its speakers.
+- **Everyone hears the same tape.** The wobble and dropouts follow the world's game time, through a repeatable random
+  function, so every player hears the same drift and the same dropouts at the same moment, give or take a tick
+  (50 ms). Every note through it, on every player's game, wobbles and drops out together, like one tape.
+
+**How it changes the tone:**
+- **Nostalgic and warm.** A little Age and Wobble gives the classic lo-fi hip hop sound; more gives a worn, warped
+  VHS or answering-machine sound.
+- **Held notes and chords wobble together**, since the whole tape drifts at once.
+
+**Issues and shortcomings:**
+- **Out of tune with other instruments** at high Wobble, by design: a warped tape drifts against the band.
+- **The hiss is synthesized,** as are the key clunks. They can be swapped for recordings by replacing the files in
+  `sounds/lofi_pedal` (the masters are in `InstrumentSoundFiles/Lofi_Pedal`).
+- **The motor sounds only reach the hiss.** A tape stopping also slows the music down, but by then the notes have
+  usually finished; notes still ringing when it stops don't wind down with it.
+- **Dropouts only dip the volume.** A real dropout also dulls the highs for a moment; that could be added later
+  through the live filters the underwater muffling already uses.
+- **Turning Dropouts while a deck rolls** changes the notes' dropouts at once, but the hiss keeps its old setting until
+  the deck next starts.
+- **A deck's places update with its notes,** so a looper on a moving boat or minecart leaves its hiss behind until
+  its next note.
 
 ## Player-facing list
 

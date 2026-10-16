@@ -341,6 +341,15 @@ public class ModItems {
         OCTAVE_PEDAL = registerBlockItem(ModBlocks.OCTAVE_PEDAL, "octave_pedal",
             SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
         ),
+        EQ_PEDAL = registerBlockItem(ModBlocks.EQ_PEDAL, "eq_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
+        REVERB_PEDAL = registerBlockItem(ModBlocks.REVERB_PEDAL, "reverb_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
+        LOFI_PEDAL = registerBlockItem(ModBlocks.LOFI_PEDAL, "lofi_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
 
         LOOPER_ADAPTER = register("looper_adapter",
             () -> new LooperAdapterItem(new Properties().stacksTo(1)),
