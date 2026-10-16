@@ -5,7 +5,8 @@
 	"refmap": "mixins.songcraft_instruments.refmap.json",
 	"client": [
         "ParrotLooperDanceInjector",
-        "ItemInHandLayerMixin"
+        "ItemInHandLayerMixin",
+        "HumanoidModelMixin"
     ],
 	"minVersion": "0.8"
 }

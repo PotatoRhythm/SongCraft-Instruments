@@ -88,6 +88,11 @@ public abstract class ModArmPose {
         (model, entity, arm) -> MicrophoneSway.raiseArm(model, arm)
     );
 
+    /** Both arms of a player singing as the Meatball Man, flailing about over their head */
+    public static final ArmPose MEATBALL_MAN_FLAIL = ArmPose.create("meatball_man_flail", false,
+        MicrophoneSway::flailArm
+    );
+
     public static final ArmPose PLAYING_MICROPHONE = ArmPose.create("playing_microphone", false,
             (model, entity, arm) -> {
                 if (arm == HumanoidArm.RIGHT) {
