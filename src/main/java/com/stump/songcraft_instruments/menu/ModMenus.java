@@ -4,6 +4,7 @@ import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.entity.vehicle.LooperVehicleMenu;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -17,5 +18,10 @@ public class ModMenus {
 
     public static final RegistryObject<MenuType<LooperVehicleMenu>> LOOPER_VEHICLE = MENUS.register("looper_vehicle", () ->
         new MenuType<>(LooperVehicleMenu::new, FeatureFlags.DEFAULT_FLAGS)
+    );
+
+    // Opened with the pedal's position, see PedalMenu
+    public static final RegistryObject<MenuType<PedalMenu>> PEDAL = MENUS.register("pedal", () ->
+        IForgeMenuType.create(PedalMenu::new)
     );
 }

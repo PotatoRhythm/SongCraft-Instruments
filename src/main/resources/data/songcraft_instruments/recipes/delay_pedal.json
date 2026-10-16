@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " P ",
+        "RAR",
+        "III"
+    ],
+    "key": {
+        "P": { "item": "minecraft:stone_pressure_plate" },
+        "R": { "item": "minecraft:redstone" },
+        "A": { "item": "minecraft:amethyst_shard" },
+        "I": { "item": "minecraft:iron_ingot" }
+    },
+    "result": { "item": "songcraft_instruments:delay_pedal", "count": 1 }
+}

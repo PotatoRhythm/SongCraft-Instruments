@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.client;
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.block.blockentity.ModBlockEntities;
 import com.stump.songcraft_instruments.client.gui.LooperVehicleScreen;
+import com.stump.songcraft_instruments.client.gui.PedalScreen;
 import com.stump.songcraft_instruments.entity.ModEntities;
 import com.stump.songcraft_instruments.menu.ModMenus;
 import com.stump.songcraft_instruments.render.CarriedBlockBoatRenderer;
@@ -36,7 +37,10 @@ public class ClientSetup {
         BlockEntityRenderers.register(ModBlockEntities.KOTO.get(), KotoRenderer::new);
         BlockEntityRenderers.register(ModBlockEntities.LOOPER.get(), LooperRenderer::new);
 
-        event.enqueueWork(() -> MenuScreens.register(ModMenus.LOOPER_VEHICLE.get(), LooperVehicleScreen::new));
+        event.enqueueWork(() -> {
+            MenuScreens.register(ModMenus.LOOPER_VEHICLE.get(), LooperVehicleScreen::new);
+            MenuScreens.register(ModMenus.PEDAL.get(), PedalScreen::new);
+        });
     }
 
     @SubscribeEvent

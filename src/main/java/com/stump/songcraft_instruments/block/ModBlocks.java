@@ -1,6 +1,7 @@
 package com.stump.songcraft_instruments.block;
 
 import com.stump.songcraft_instruments.SCInstrumentMod;
+import com.stump.songcraft_instruments.pedal.PedalEffectType;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -45,6 +46,16 @@ public class ModBlocks {
 
         LOOPER = BLOCKS.register("looper", () -> new LooperBlock(BlockBehaviour.Properties.copy(Blocks.NOTE_BLOCK))),
 
-        SPEAKER = BLOCKS.register("speaker", () -> new SpeakerBlock(BlockBehaviour.Properties.copy(Blocks.NOTE_BLOCK)))
+        SPEAKER = BLOCKS.register("speaker", () -> new SpeakerBlock(BlockBehaviour.Properties.copy(Blocks.NOTE_BLOCK))),
+
+        FUZZ_PEDAL = BLOCKS.register("fuzz_pedal", () -> new PedalBlock(PedalEffectType.FUZZ,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        DELAY_PEDAL = BLOCKS.register("delay_pedal", () -> new PedalBlock(PedalEffectType.DELAY,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        BITCRUSHER_PEDAL = BLOCKS.register("bitcrusher_pedal", () -> new PedalBlock(PedalEffectType.BITCRUSH,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        ))
         ;
 }

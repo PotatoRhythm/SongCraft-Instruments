@@ -32,6 +32,7 @@ public class ModClientConfigs {
     public static final IntValue MIDI_DEVICE_INDEX, OCTAVE_SHIFT, MIDI_CHANNEL;
     public static final IntValue TRANSPOSE;
     public static final IntValue OCTAVE_SWAP_MIN, OCTAVE_SWAP_MAX;
+    public static final IntValue PEDAL_CACHE_MB;
     public static final DoubleValue VOLUME, MIDI_IN_SENSITIVITY;
     public static final DoubleValue SOUND_PHYSICS_MIN_CLARITY;
 
@@ -121,6 +122,14 @@ public class ModClientConfigs {
             "Notes are muffled by Sound Physics as usual, but never past this point, so they never vanish completely.",
             "0 lets Sound Physics silence notes entirely; 1 disables muffling of instrument notes."
         ).defineInRange("sound_physics_min_clarity", 0.1, 0, 1);
+
+        PEDAL_CACHE_MB = configBuilder.comment(
+            "How much memory (in MB) instrument sounds played through effects pedals may keep.",
+            "Each sound is processed once per pedal setting and kept for reuse; the least recently played are let go past this."
+        ).defineInRange("pedal_cache_mb", 64, 8, 1024);
+        // Your own notes are heard through the pedals of the nearest speaker your instrument plays through
+        // (see PedalMonitor). If players ask for it, a "lock to this speaker" option could go here,
+        // to always hear a chosen speaker's pedals instead of the nearest's.
 
         ACCEPTED_DISCLAIMER = configBuilder.define("accepted_disclaimer", false);
 

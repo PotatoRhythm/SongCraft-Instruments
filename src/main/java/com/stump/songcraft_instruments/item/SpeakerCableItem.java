@@ -2,13 +2,17 @@ package com.stump.songcraft_instruments.item;
 
 import com.stump.songcraft_instruments.SCInstrumentMod;
 import com.stump.songcraft_instruments.block.LooperBlock;
+import com.stump.songcraft_instruments.block.PedalBlock;
 import com.stump.songcraft_instruments.block.SpeakerBlock;
 import com.stump.songcraft_instruments.block.blockentity.LooperBlockEntity;
+import com.stump.songcraft_instruments.block.blockentity.PedalBlockEntity;
 import com.stump.songcraft_instruments.block.blockentity.SpeakerBlockEntity;
 import com.stump.songcraft_instruments.block.blockentity.speaker.Speaker;
 import com.stump.songcraft_instruments.block.blockentity.speaker.SpeakerAddress;
 import com.stump.songcraft_instruments.block.partial.AbstractInstrumentBlock;
 import com.stump.songcraft_instruments.block.partial.InstrumentBlockEntity;
+import com.stump.songcraft_instruments.pedal.PedalChain;
+import com.stump.songcraft_instruments.pedal.PedalLinks;
 import com.stump.songcraft_instruments.util.CommonUtil;
 import com.stump.songcraft_instruments.util.SpeakerUtil;
 import net.minecraft.ChatFormatting;
@@ -38,12 +42,17 @@ import java.util.List;
  * or only the speaker selected with this cable beforehand.
  * held instruments don't need a cable: they pair by right-clicking a speaker directly (see SpeakerBlock).
  * speakers carried by boats and minecarts work the same way, see {@link #useOnSpeaker}.
+ *
+ * also chains effects pedals into speaker blocks: right-click a pedal, then the next pedal or a speaker block,
+ * to plug it in (see {@link PedalLinks}). shift + right-click a pedal to unplug both of its cables.
  */
 public class SpeakerCableItem extends Item {
     private static final String CABLE_TAG = "speakerCable",
         SOURCE_POS_TAG = "source",
         // The selected speaker's address
-        SPEAKER_TAG = "speaker";
+        SPEAKER_TAG = "speaker",
+        // The selected pedal's position
+        PEDAL_TAG = "pedal";
 
     public SpeakerCableItem(Properties pProperties) {
         super(pProperties);
@@ -66,7 +75,8 @@ public class SpeakerCableItem extends Item {
 
         final boolean isCableTarget = block instanceof AbstractInstrumentBlock
             || block instanceof LooperBlock
-            || block instanceof SpeakerBlock;
+            || block instanceof SpeakerBlock
+            || block instanceof PedalBlock;
         if (!isCableTarget)
             return InteractionResult.PASS;
         if (level.isClientSide)
@@ -83,9 +93,16 @@ public class SpeakerCableItem extends Item {
         } else if (block instanceof LooperBlock) {
             sourcePos = clickedPos;
             selectMessage = "item.songcraft_instruments.speaker_cable.looper.select";
+        } else if (block instanceof PedalBlock) {
+            return handlePedal(clickedPos, cableTag, player) ? InteractionResult.SUCCESS : InteractionResult.CONSUME_PARTIAL;
         } else if (block instanceof SpeakerBlock) {
             if (!(level.getBlockEntity(clickedPos) instanceof SpeakerBlockEntity sbe))
                 return InteractionResult.CONSUME_PARTIAL;
+            // A selected pedal plugs into the speaker block
+            if (!player.isShiftKeyDown() && cableTag.contains(PEDAL_TAG, Tag.TAG_COMPOUND)) {
+                connectPedal(NbtUtils.readBlockPos(cableTag.getCompound(PEDAL_TAG)), clickedPos, cableTag, player);
+                return InteractionResult.SUCCESS;
+            }
             return useOnSpeaker(pContext.getItemInHand(), player, sbe.speaker());
         } else {
             return InteractionResult.FAIL;
@@ -124,6 +141,14 @@ public class SpeakerCableItem extends Item {
         return true;
     }
     private static boolean handleSpeaker(Speaker speaker, CompoundTag cableTag, Player player) {
+        // Speaker blocks take pedals before getting here, see onItemUseFirst
+        if (cableTag.contains(PEDAL_TAG, Tag.TAG_COMPOUND)) {
+            clearCable(cableTag);
+            player.displayClientMessage(
+                Component.translatable("songcraft_instruments.pedal.vehicle").withStyle(ChatFormatting.RED)
+            , true);
+            return false;
+        }
         if (cableTag.contains(SOURCE_POS_TAG, Tag.TAG_COMPOUND))
             return pairSpeakerToSource(cableTag, speaker, NbtUtils.readBlockPos(cableTag.getCompound(SOURCE_POS_TAG)), player);
 
@@ -216,6 +241,81 @@ public class SpeakerCableItem extends Item {
         return true;
     }
 
+    //#region Pedals
+
+    /**
+     * right-click (or shift + right-click) on a pedal. server only.
+     * a pedal selected beforehand plugs into this one; a selected speaker block has this pedal plugged into it.
+     */
+    private static boolean handlePedal(BlockPos pedalPos, CompoundTag cableTag, Player player) {
+        final Level level = player.level();
+        final PedalBlockEntity pedal = PedalLinks.pedalAt(level, pedalPos);
+        if (pedal == null)
+            return false;
+
+        if (player.isShiftKeyDown()) {
+            clearCable(cableTag);
+            final boolean wasConnected = PedalLinks.isConnected(level, pedal);
+            PedalLinks.disconnect(level, pedal);
+            player.displayClientMessage(wasConnected
+                ? Component.translatable("songcraft_instruments.pedal.disconnected").withStyle(ChatFormatting.GREEN)
+                : Component.translatable("songcraft_instruments.pedal.not_connected").withStyle(ChatFormatting.YELLOW)
+            , true);
+            return true;
+        }
+
+        if (cableTag.contains(PEDAL_TAG, Tag.TAG_COMPOUND)) {
+            final BlockPos selected = NbtUtils.readBlockPos(cableTag.getCompound(PEDAL_TAG));
+            if (!selected.equals(pedalPos) && (PedalLinks.pedalAt(level, selected) != null)) {
+                connectPedal(selected, pedalPos, cableTag, player);
+                return true;
+            }
+        }
+        // A speaker selected first: plug this pedal into it, if it is a speaker block
+        final SpeakerAddress speakerAddress = SpeakerAddress.read(cableTag.getCompound(SPEAKER_TAG));
+        if (speakerAddress instanceof SpeakerAddress.AtBlock atBlock) {
+            connectPedal(pedalPos, atBlock.pos(), cableTag, player);
+            return true;
+        }
+        if (speakerAddress != null) {
+            clearCable(cableTag);
+            player.displayClientMessage(
+                Component.translatable("songcraft_instruments.pedal.vehicle").withStyle(ChatFormatting.RED)
+            , true);
+            return false;
+        }
+
+        clearCable(cableTag);
+        cableTag.put(PEDAL_TAG, NbtUtils.writeBlockPos(pedalPos));
+        player.displayClientMessage(
+            Component.translatable("item.songcraft_instruments.speaker_cable.pedal.select").withStyle(ChatFormatting.GREEN)
+        , true);
+        return true;
+    }
+
+    /**
+     * plugs the pedal at {@code pedalPos} into the pedal or speaker block at {@code targetPos}
+     */
+    private static void connectPedal(BlockPos pedalPos, BlockPos targetPos, CompoundTag cableTag, Player player) {
+        clearCable(cableTag);
+
+        final Component message = switch (PedalLinks.connect(player.level(), pedalPos, targetPos)) {
+            case CONNECTED -> Component.translatable("songcraft_instruments.pedal.connected")
+                .withStyle(ChatFormatting.GREEN);
+            case ALREADY_CONNECTED -> Component.translatable("songcraft_instruments.pedal.already_connected")
+                .withStyle(ChatFormatting.YELLOW);
+            case LOOP -> Component.translatable("songcraft_instruments.pedal.loop")
+                .withStyle(ChatFormatting.RED);
+            case TOO_LONG -> Component.translatable("songcraft_instruments.pedal.too_long", PedalChain.MAX_LENGTH)
+                .withStyle(ChatFormatting.RED);
+            case SAME_BLOCK, NOT_A_TARGET -> Component.translatable("songcraft_instruments.pedal.not_a_target")
+                .withStyle(ChatFormatting.RED);
+        };
+        player.displayClientMessage(message, true);
+    }
+
+    //#endregion
+
     private static void clearCable(CompoundTag cableTag) {
         for (final String key : List.copyOf(cableTag.getAllKeys()))
             cableTag.remove(key);
@@ -247,6 +347,10 @@ public class SpeakerCableItem extends Item {
         );
         tooltipComponents.add(
             Component.translatable("item.songcraft_instruments.speaker_cable.held.description")
+                .withStyle(ChatFormatting.GRAY)
+        );
+        tooltipComponents.add(
+            Component.translatable("item.songcraft_instruments.speaker_cable.pedal.description")
                 .withStyle(ChatFormatting.GRAY)
         );
 

@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.block;
 import com.stump.songcraft_instruments.block.blockentity.ModBlockEntities;
 import com.stump.songcraft_instruments.block.blockentity.SpeakerBlockEntity;
 import com.stump.songcraft_instruments.item.InstrumentItem;
+import com.stump.songcraft_instruments.pedal.PedalMonitorSync;
 import com.stump.songcraft_instruments.util.SpeakerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -75,6 +76,19 @@ public class SpeakerBlock extends Block implements EntityBlock {
         super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
         if (!pLevel.isClientSide && pLevel.getBlockEntity(pPos) instanceof SpeakerBlockEntity sbe)
             sbe.speaker().resetPairings();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
+        final boolean hadPedals = !pLevel.isClientSide && !pState.is(pNewState.getBlock())
+            && (pLevel.getBlockEntity(pPos) instanceof SpeakerBlockEntity sbe) && !sbe.speaker().getPedalChain().isEmpty();
+
+        super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
+
+        // Once it's gone, so players playing through it stop hearing its pedals on their own notes
+        if (hadPedals)
+            PedalMonitorSync.onSpeakerChainChanged(pLevel);
     }
 
     @Override

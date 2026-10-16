@@ -1,7 +1,11 @@
 package com.stump.songcraft_instruments.sound;
 
+import com.stump.songcraft_instruments.pedal.PedalChain;
+import com.stump.songcraft_instruments.sound.pedal.PedalSounds;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -19,11 +23,25 @@ import javax.annotation.Nullable;
 @OnlyIn(Dist.CLIENT)
 public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance implements WorldOriginSoundInstance {
     private final AbstractTickableSoundInstance stereo;
+    /**
+     * The effects pedals the note is played through, same as its Stereo sound's
+     */
+    private final PedalChain pedalChain;
+    private final boolean echoTail;
 
     public CrossfadeMonoSoundInstance(SoundEvent mono, AbstractTickableSoundInstance stereo, float pitch) {
+        this(mono, stereo, pitch, PedalChain.NONE, false);
+    }
+    /**
+     * @param echoTail Whether to play only the echoes of the sound, same as its Stereo sound
+     */
+    public CrossfadeMonoSoundInstance(SoundEvent mono, AbstractTickableSoundInstance stereo, float pitch,
+                                      PedalChain pedalChain, boolean echoTail) {
         super(mono, NoteSound.INSTRUMENT_SOUND_SOURCE, SoundInstance.createUnseededRandom());
 
         this.stereo = stereo;
+        this.pedalChain = pedalChain;
+        this.echoTail = echoTail;
 
         this.pitch = pitch;
         this.volume = 0;
@@ -36,6 +54,14 @@ public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance im
         this.y = pos.y;
         this.z = pos.z;
         this.volume = volume;
+    }
+
+    @Override
+    public WeighedSoundEvents resolve(final SoundManager manager) {
+        final WeighedSoundEvents events = super.resolve(manager);
+        // The pitch it plays at, same as SoundEngineMixin gives it
+        sound = PedalSounds.withPedals(sound, pedalChain, getPitch(), echoTail);
+        return events;
     }
 
     @Override

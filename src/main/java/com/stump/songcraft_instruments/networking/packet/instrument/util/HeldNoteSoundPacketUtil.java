@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.networking.packet.instrument.util;
 import com.stump.songcraft_instruments.event.HeldNoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CHeldNoteSoundPacket;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import net.minecraft.core.BlockPos;
@@ -109,16 +110,18 @@ public class HeldNoteSoundPacketUtil {
      * except to whoever played it, who already hears their own copy where they are
      * @param initiatorID The speaker's initiator, the note is played with
      * @param source Who played the note (a player or looper)
+     * @param pedalChain The effects pedals plugged into the speaker
      */
     public static void sendRelayedNotePackets(Level level, HeldNoteSound sound, NoteSoundMetadata soundMeta,
-                                              HeldSoundPhase phase, InitiatorID initiatorID, InitiatorID source) {
+                                              HeldSoundPhase phase, InitiatorID initiatorID, InitiatorID source,
+                                              PedalChain pedalChain) {
         final List<? extends Player> listeners = listeners(level, soundMeta.pos(), phase).stream()
             .filter((player) -> !InitiatorID.fromEntity(player).equals(source))
             .toList();
 
         fireGenericEvent(level,
             InstrumentPacketUtil.sendPlayNotePackets(
-                level, sound, soundMeta, toReg(initiatorID, phase), listeners
+                level, sound, soundMeta, toReg(initiatorID, phase, pedalChain), listeners
             )
         );
     }
@@ -160,9 +163,13 @@ public class HeldNoteSoundPacketUtil {
     // Converting to the base instrument packet lambda
 
     private static S2CNotePacketDelegate<HeldNoteSound, S2CHeldNoteSoundPacket> toReg(InitiatorID oInitiatorID, HeldSoundPhase phase) {
+        return toReg(oInitiatorID, phase, PedalChain.NONE);
+    }
+    private static S2CNotePacketDelegate<HeldNoteSound, S2CHeldNoteSoundPacket> toReg(InitiatorID oInitiatorID, HeldSoundPhase phase,
+                                                                                      PedalChain pedalChain) {
         return (initiatorID, sound, meta) -> new S2CHeldNoteSoundPacket(
             initiatorID, Optional.of(oInitiatorID),
-            sound, meta, phase
+            sound, meta, phase, pedalChain
         );
     }
     private static S2CNotePacketDelegate<HeldNoteSound, S2CHeldNoteSoundPacket> toReg(HeldSoundPhase phase, Entity initiator) {

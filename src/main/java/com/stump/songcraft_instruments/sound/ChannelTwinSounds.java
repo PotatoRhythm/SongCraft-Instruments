@@ -72,19 +72,35 @@ public final class ChannelTwinSounds {
      * @param resources Provides the twin's backing file under the twin's own location
      */
     public static SoundBuffer loadTwin(final ResourceProvider resources, final ResourceLocation location) {
+        final Decoded decoded = decode(resources, location);
+        return new SoundBuffer(decoded.samples(), decoded.format());
+    }
+
+    /**
+     * A sound file's samples, as 16-bit little-endian PCM (interleaved if Stereo)
+     */
+    public record Decoded(ByteBuffer samples, AudioFormat format) {}
+
+    /**
+     * Decodes one of the mod's sound files, or converts it if it is a missing twin.
+     * @param location The sound file's location (sounds/...ogg)
+     */
+    public static Decoded decode(final ResourceProvider resources, final ResourceLocation location) {
         try (
             InputStream input = resources.open(location);
             OggAudioStream stream = new OggAudioStream(input)
         ) {
             final ByteBuffer samples = stream.readAll();
             final AudioFormat format = stream.getFormat();
-            final int channels = location.getPath().endsWith(STEREO_SUFFIX) ? 2 : 1;
+            if (!isTwin(location))
+                return new Decoded(samples, format);
 
+            final int channels = location.getPath().endsWith(STEREO_SUFFIX) ? 2 : 1;
             if (format.getChannels() == channels)
-                return new SoundBuffer(samples, format);
+                return new Decoded(samples, format);
 
             final ByteBuffer converted = (channels == 1) ? mixDown(samples) : duplicateChannel(samples);
-            return new SoundBuffer(converted, new AudioFormat(format.getSampleRate(), 16, channels, true, false));
+            return new Decoded(converted, new AudioFormat(format.getSampleRate(), 16, channels, true, false));
         } catch (IOException e) {
             throw new CompletionException(e);
         }

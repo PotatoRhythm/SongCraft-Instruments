@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.networking.packet.instrument.util;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CNoteSoundPacket;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import net.minecraft.core.BlockPos;
@@ -62,14 +63,15 @@ public class NoteSoundPacketUtil {
      * Sends a speaker's relay of a note to everyone in {@link InstrumentPacketUtil#PLAY_DISTANCE}
      * except whoever played it, who already hears their own copy where they are
      * @param source Who played the note (a player or looper)
+     * @param pedalChain The effects pedals plugged into the speaker
      */
     public static void sendRelayedNotePackets(Level level, NoteSound sound,
-            NoteSoundMetadata soundMeta, InitiatorID source) {
+            NoteSoundMetadata soundMeta, InitiatorID source, PedalChain pedalChain) {
         final List<Player> listeners = InstrumentPacketUtil.noteListeners(level, soundMeta.pos());
         listeners.removeIf((player) -> InitiatorID.fromEntity(player).equals(source));
 
         fireGenericEvent(level, InstrumentPacketUtil.sendPlayNotePackets(
-                    level, sound, soundMeta, toReg(source), listeners
+                    level, sound, soundMeta, toReg(source, pedalChain), listeners
                 )
         );
     }
@@ -122,7 +124,12 @@ public class NoteSoundPacketUtil {
     private static S2CNotePacketDelegate<NoteSound, S2CNoteSoundPacket> toReg(
             InitiatorID oInitiatorID) {
 
+        return toReg(oInitiatorID, PedalChain.NONE);
+    }
+    private static S2CNotePacketDelegate<NoteSound, S2CNoteSoundPacket> toReg(
+            InitiatorID oInitiatorID, PedalChain pedalChain) {
+
         return (initiatorID, sound, meta) ->
-                new S2CNoteSoundPacket(initiatorID, Optional.of(oInitiatorID), sound, meta);
+                new S2CNoteSoundPacket(initiatorID, Optional.of(oInitiatorID), sound, meta, pedalChain);
     }
 }

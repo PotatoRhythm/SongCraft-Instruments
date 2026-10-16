@@ -27,6 +27,13 @@ public class ModBlockEntities {
             SpeakerBlockEntity::new, ModBlocks.SPEAKER.get()
         ).build(null)
     );
+
+    public static final RegistryObject<BlockEntityType<PedalBlockEntity>> PEDAL = BLOCK_ENTITIES.register("pedal", () ->
+        BlockEntityType.Builder.of(
+            PedalBlockEntity::new, ModBlocks.FUZZ_PEDAL.get(), ModBlocks.DELAY_PEDAL.get(),
+            ModBlocks.BITCRUSHER_PEDAL.get()
+        ).build(null)
+    );
     
     // hmm
     public static final RegistryObject<BlockEntityType<ModInstrumentBlockEntity>> INSTRUMENT =

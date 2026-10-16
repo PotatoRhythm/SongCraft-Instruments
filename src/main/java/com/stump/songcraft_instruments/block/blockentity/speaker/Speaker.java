@@ -6,6 +6,10 @@ import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CLoope
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldNoteSoundPacketUtil;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.NoteSoundPacketUtil;
+import com.stump.songcraft_instruments.pedal.PedalChain;
+import com.stump.songcraft_instruments.pedal.PedalInput;
+import com.stump.songcraft_instruments.pedal.PedalLinks;
+import com.stump.songcraft_instruments.pedal.PedalMonitorSync;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
@@ -14,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
@@ -25,8 +30,9 @@ import java.util.UUID;
 /**
  * immediately rebroadcasts the notes of its paired instruments from its host's position.
  * the host is a speaker block, or a boat or minecart carrying one.
+ * a speaker block can also have effects pedals plugged into it, whose {@link PedalChain} it relays notes through.
  */
-public class Speaker {
+public class Speaker implements PedalInput {
     /**
      * where a speaker lives: a speaker block, or a boat or minecart carrying one
      */
@@ -58,7 +64,8 @@ public class Speaker {
 
     private static final double PARTICLE_SIZE = 0.2;
     private static final String SPEAKER_ID_TAG = "speaker_id", INSTRUMENTS_TAG = "instruments",
-        INSTRUMENT_ID_TAG = "id", INSTRUMENT_POS_TAG = "pos", LOOPER_ID_TAG = "looper_id";
+        INSTRUMENT_ID_TAG = "id", INSTRUMENT_POS_TAG = "pos", LOOPER_ID_TAG = "looper_id",
+        PEDAL_INPUT_TAG = "pedal_input", PEDAL_CHAIN_TAG = "pedal_chain";
     /**
      * how often (in ticks) paired block instruments are checked for still being paired
      */
@@ -68,6 +75,11 @@ public class Speaker {
      */
     private static final int HELD_PARTICLE_INTERVAL = 10;
     private int heldParticleTimer = 0;
+    /**
+     * the least time (in ticks) between working out the pedal chain again, so turning a pedal's knobs
+     * resends it to players at most a few times a second
+     */
+    private static final int PEDAL_UPDATE_INTERVAL = 5;
 
     private final Host host;
     private final InitiatorID speakerInitiatorID;
@@ -101,6 +113,19 @@ public class Speaker {
     private UUID pairedLooperId = null;
 
     /**
+     * the pedal plugged into this speaker (the last of its chain), or null. only speaker blocks take pedals.
+     */
+    @Nullable
+    private BlockPos pedalInput = null;
+    /**
+     * the effects of the pedals plugged into this speaker, kept so notes don't walk the chain,
+     * and so it still applies while some of its pedals aren't loaded
+     */
+    private PedalChain pedalChain = PedalChain.NONE;
+    private boolean pedalsChanged = false;
+    private long lastPedalUpdate = Long.MIN_VALUE / 2;
+
+    /**
      * @param initiatorID The initiator held notes relayed through this speaker are played with
      */
     public Speaker(final Host host, final InitiatorID initiatorID) {
@@ -118,7 +143,7 @@ public class Speaker {
     public void playNote(final NoteSound sound, final NoteSoundMetadata meta, final InitiatorID source) {
         final NoteSoundMetadata relocated = relocate(meta);
 
-        NoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound, relocated, source);
+        NoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound, relocated, source, pedalChain);
         emitNoteParticle(relocated.particleColor());
     }
 
@@ -131,14 +156,15 @@ public class Speaker {
         final HeldNoteKey key = new HeldNoteKey(sound, relocated.pitch(), source);
 
         if (phase == HeldSoundPhase.ATTACK) {
-            HeldNoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound, relocated, phase, speakerInitiatorID, source);
+            HeldNoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound, relocated, phase, speakerInitiatorID, source,
+                pedalChain);
             sustainedNotes.put(key, relocated);
             emitNoteParticle(relocated.particleColor());
         } else if (phase == HeldSoundPhase.RELEASE) {
             // Release with the metadata the note started with, so clients match it to the right sound
             final NoteSoundMetadata attackMeta = sustainedNotes.remove(key);
             HeldNoteSoundPacketUtil.sendRelayedNotePackets(host.getHostLevel(), sound,
-                (attackMeta != null) ? attackMeta : relocated, phase, speakerInitiatorID, source);
+                (attackMeta != null) ? attackMeta : relocated, phase, speakerInitiatorID, source, PedalChain.NONE);
         }
     }
 
@@ -153,7 +179,7 @@ public class Speaker {
 
             HeldNoteSoundPacketUtil.sendRelayedNotePackets(
                 host.getHostLevel(), entry.getKey().sound(), entry.getValue(), HeldSoundPhase.RELEASE, speakerInitiatorID,
-                source
+                source, PedalChain.NONE
             );
             return true;
         });
@@ -251,14 +277,22 @@ public class Speaker {
         speakerId = UUID.randomUUID();
         pairedInstruments.clear();
         pairedLooperId = null;
+        pedalInput = null;
+        pedalChain = PedalChain.NONE;
         onPairingsChanged();
     }
 
     public void tick(final Level level) {
         emitHeldParticles();
 
-        if (level.getGameTime() % VALIDATE_INTERVAL == 0)
+        if (level.getGameTime() % VALIDATE_INTERVAL == 0) {
             validateBlockInstruments(level);
+            // also catches pedals broken or replaced while this speaker wasn't loaded
+            pedalsChanged = true;
+        }
+
+        if (pedalsChanged && (level.getGameTime() - lastPedalUpdate >= PEDAL_UPDATE_INTERVAL))
+            updatePedalChain(level);
     }
     /**
      * drops block instruments that were broken or no longer list this speaker.
@@ -294,6 +328,11 @@ public class Speaker {
 
         if (pairedLooperId != null)
             pTag.putUUID(LOOPER_ID_TAG, pairedLooperId);
+
+        if (pedalInput != null)
+            pTag.put(PEDAL_INPUT_TAG, NbtUtils.writeBlockPos(pedalInput));
+        if (!pedalChain.isEmpty())
+            pTag.put(PEDAL_CHAIN_TAG, pedalChain.save());
     }
     public void load(final CompoundTag pTag) {
         if (pTag.hasUUID(SPEAKER_ID_TAG))
@@ -316,6 +355,61 @@ public class Speaker {
         pairedLooperId = pTag.hasUUID(LOOPER_ID_TAG) ? pTag.getUUID(LOOPER_ID_TAG) : null;
         if ((pairedLooperId != null) && !pairedInstruments.containsKey(pairedLooperId))
             pairedLooperId = null;
+
+        pedalInput = pTag.contains(PEDAL_INPUT_TAG, Tag.TAG_COMPOUND) ? NbtUtils.readBlockPos(pTag.getCompound(PEDAL_INPUT_TAG)) : null;
+        pedalChain = PedalChain.load(pTag, PEDAL_CHAIN_TAG);
+    }
+
+    //#endregion
+
+
+    //#region Pedals
+
+    @Override
+    public @Nullable BlockPos getPedalInput() {
+        return pedalInput;
+    }
+    @Override
+    public void setPedalInput(@Nullable final BlockPos pedalPos) {
+        pedalInput = pedalPos;
+        host.markHostChanged();
+        onPedalsChanged();
+    }
+
+    /**
+     * return the effects notes relayed by this speaker go through, in signal order
+     */
+    public PedalChain getPedalChain() {
+        return pedalChain;
+    }
+    /**
+     * return the position notes are relayed from
+     */
+    public BlockPos getSoundPos() {
+        return host.getSoundPos();
+    }
+
+    /**
+     * called when a pedal in this speaker's chain changes, or the chain itself does.
+     * the chain is worked out again on a later tick, see {@link #PEDAL_UPDATE_INTERVAL}
+     */
+    public void onPedalsChanged() {
+        pedalsChanged = true;
+    }
+
+    private void updatePedalChain(final Level level) {
+        pedalsChanged = false;
+        lastPedalUpdate = level.getGameTime();
+
+        // pedals only plug into speaker blocks, whose sound position is their own
+        final PedalChain resolved = PedalLinks.resolveChain(level, host.getSoundPos(), this);
+        // keep the chain we have while part of it isn't loaded
+        if (resolved == null || resolved.equals(pedalChain))
+            return;
+
+        pedalChain = resolved;
+        host.markHostChanged();
+        PedalMonitorSync.onSpeakerChainChanged(level);
     }
 
     //#endregion

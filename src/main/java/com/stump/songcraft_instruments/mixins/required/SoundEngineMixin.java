@@ -1,5 +1,6 @@
 package com.stump.songcraft_instruments.mixins.required;
 
+import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.NoteSoundInstance;
 import com.stump.songcraft_instruments.sound.UnderwaterMuffling;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSoundInstance;
@@ -36,7 +37,10 @@ public class SoundEngineMixin {
             SoundInstance sound,
             CallbackInfoReturnable<Float> cir
     ) {
-        if (sound instanceof NoteSoundInstance || sound instanceof HeldNoteSoundInstance) {
+        // The Mono crossfade too, or it would be clamped (to 0.5-2) while its Stereo sound isn't,
+        // playing notes over an octave from their sample at a different pitch than their Stereo sound
+        if (sound instanceof NoteSoundInstance || sound instanceof HeldNoteSoundInstance
+                || sound instanceof CrossfadeMonoSoundInstance) {
             cir.setReturnValue(sound.getPitch());
         }
     }

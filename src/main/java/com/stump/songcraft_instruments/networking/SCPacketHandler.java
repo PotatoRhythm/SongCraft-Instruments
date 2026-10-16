@@ -33,6 +33,7 @@ public class SCPacketHandler {
         // Sync stuff
         DoesLooperExistPacket.class, LooperUnplayablePacket.class, SyncModTagPacket.class,
         LooperPlayStatePacket.class, LooperConnectionsPacket.class, LooperRestartPacket.class,
+        S2CPedalMonitorPacket.class,
         // Record files
         S2CRecordFilePartPacket.class, C2SRecordFilePartPacket.class,
         S2CRecordImportRequestPacket.class, S2CRecordFilesListPacket.class
@@ -44,7 +45,8 @@ public class SCPacketHandler {
     }
 
 
-    private static final String PROTOCOL_VERSION = "1.1.0";
+    // Bumped for the pedal chain carried by note packets
+    private static final String PROTOCOL_VERSION = "1.2.0";
 
     private static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
         new ResourceLocation(SCInstrumentMod.MODID, "main"),

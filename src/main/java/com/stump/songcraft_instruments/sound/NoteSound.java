@@ -1,11 +1,13 @@
 package com.stump.songcraft_instruments.sound;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
+import com.stump.songcraft_instruments.client.pedal.PedalMonitor;
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.event.NoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.particle.ModParticles;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import com.stump.songcraft_instruments.sound.registrar.NoteSoundRegistrar;
 import com.stump.songcraft_instruments.util.LabelUtil;
@@ -165,6 +167,18 @@ public class NoteSound {
     @OnlyIn(Dist.CLIENT)
     public void playFromServer(Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId,
                                NoteSoundMetadata meta) {
+        playFromServer(initiatorId, oInitiatorId, meta, PedalChain.NONE);
+    }
+    /**
+     * A method for packets to use for playing this note on the client's end.
+     * Will also stop the client's background music per preference.
+     * @param initiatorId The ID of the player who initiated the sound. Empty for when it wasn't a player.
+     * @param meta Additional metadata of the Note Sound being played
+     * @param pedalChain The pedals a speaker relays this note through, if any
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playFromServer(Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId,
+                               NoteSoundMetadata meta, PedalChain pedalChain) {
         final Minecraft minecraft = Minecraft.getInstance();
         final Player player = minecraft.player;
 
@@ -212,6 +226,11 @@ public class NoteSound {
 
         final float mcPitch = getPitchByNoteOffset(clampPitch(meta.pitch()));
 
+        // Our own note, heard from the server: through the pedals we monitor, as our local copy would be
+        final PedalChain chain = (pedalChain.isEmpty() && oInitiatorId.isEmpty() && player.equals(initiator))
+                ? PedalMonitor.chain()
+                : pedalChain;
+
         // Relays of the note (by a looper's or player's speakers) share all but the position.
         // A player's own copy names them by entity ID, while relays name them by initiator ID
         final InitiatorID source = oInitiatorId.orElseGet(() ->
@@ -220,7 +239,7 @@ public class NoteSound {
                 new RelayKey(this, meta.pitch(), meta.volume(), meta.instrumentId(), source),
                 playDistSqr,
                 source,
-                (dropped) -> playLocally(mcPitch, meta, playDistSqr, initiatorId, oInitiatorId)
+                (dropped) -> playLocally(mcPitch, meta, playDistSqr, initiatorId, oInitiatorId, chain)
         );
     }
     private record RelayKey(NoteSound sound, int pitch, int volume, ResourceLocation instrumentId,
@@ -233,6 +252,24 @@ public class NoteSound {
     @OnlyIn(Dist.CLIENT)
     public void playLocally(float pitch, NoteSoundMetadata meta, double playDistSqr,
             Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId) {
+        playLocally(pitch, meta, playDistSqr, initiatorId, oInitiatorId, PedalChain.NONE);
+    }
+    /**
+     * Plays this sound locally through the given pedals. Treats the given {@code pitch} as a Minecraft pitch.
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playLocally(float pitch, NoteSoundMetadata meta, double playDistSqr,
+            Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId, PedalChain pedalChain) {
+        playLocally(pitch, meta, playDistSqr, initiatorId, oInitiatorId, pedalChain, false);
+    }
+    /**
+     * Plays this sound locally through the given pedals. Treats the given {@code pitch} as a Minecraft pitch.
+     * @param echoTail Whether to play only the echoes of the sound, for a held note's release
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playLocally(float pitch, NoteSoundMetadata meta, double playDistSqr,
+            Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId, PedalChain pedalChain,
+            boolean echoTail) {
         final Minecraft minecraft = Minecraft.getInstance();
         final SoundEvent sound = getByDistance(playDistSqr);
 
@@ -245,7 +282,9 @@ public class NoteSound {
                 meta,
                 playDistSqr,
                 initiatorId,
-                oInitiatorId
+                oInitiatorId,
+                pedalChain,
+                echoTail
         );
 
         minecraft.getSoundManager().play(instance);
@@ -256,6 +295,14 @@ public class NoteSound {
     @OnlyIn(Dist.CLIENT)
     public void playLocally(int notePitch, float volume, BlockPos pos, double playDistSqr,
             ResourceLocation instrumentId, Optional<NoteButtonIdentifier> noteIdentifier) {
+        playLocally(notePitch, volume, pos, playDistSqr, instrumentId, noteIdentifier, PedalChain.NONE);
+    }
+    /**
+     * Plays this note as the local player's own, through the given pedals
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playLocally(int notePitch, float volume, BlockPos pos, double playDistSqr,
+            ResourceLocation instrumentId, Optional<NoteButtonIdentifier> noteIdentifier, PedalChain pedalChain) {
         final float mcPitch = getPitchByNoteOffset(clampPitch(notePitch));
 
         final NoteSoundMetadata meta = new NoteSoundMetadata(
@@ -272,7 +319,8 @@ public class NoteSound {
                 meta,
                 playDistSqr,
                 Optional.of(Minecraft.getInstance().player.getId()),
-                Optional.empty()
+                Optional.empty(),
+                pedalChain
         );
     }
 
@@ -281,6 +329,21 @@ public class NoteSound {
      */
     @OnlyIn(Dist.CLIENT)
     public void playLocally(float pitch, float volume, BlockPos pos) {
+        playLocally(pitch, volume, pos, PedalChain.NONE);
+    }
+    /**
+     * Plays this sound locally through the given pedals. Treats the given {@code pitch} as a Minecraft pitch.
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playLocally(float pitch, float volume, BlockPos pos, PedalChain pedalChain) {
+        playLocally(pitch, volume, pos, pedalChain, false);
+    }
+    /**
+     * Plays this sound locally through the given pedals. Treats the given {@code pitch} as a Minecraft pitch.
+     * @param echoTail Whether to play only the echoes of the sound, for a held note's release
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playLocally(float pitch, float volume, BlockPos pos, PedalChain pedalChain, boolean echoTail) {
         final Minecraft minecraft = Minecraft.getInstance();
 
         final double playDistSqr =
@@ -300,7 +363,9 @@ public class NoteSound {
                 meta,
                 playDistSqr,
                 Optional.of(minecraft.player.getId()),
-                Optional.empty()
+                Optional.empty(),
+                pedalChain,
+                echoTail
         );
     }
 

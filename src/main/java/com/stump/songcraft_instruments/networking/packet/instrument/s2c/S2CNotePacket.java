@@ -2,6 +2,7 @@ package com.stump.songcraft_instruments.networking.packet.instrument.s2c;
 
 import com.stump.songcraft_instruments.networking.IModPacket;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkDirection;
@@ -20,6 +21,10 @@ public abstract class S2CNotePacket<T> implements IModPacket {
     public final Optional<InitiatorID> oInitiatorID;
     public final T sound;
     public final NoteSoundMetadata meta;
+    /**
+     * The effects pedals the note goes through, for notes relayed by a speaker. Usually {@link PedalChain#NONE}.
+     */
+    public final PedalChain pedalChain;
 
     /**
      * Constructs a packet with an entity initiator.
@@ -34,10 +39,19 @@ public abstract class S2CNotePacket<T> implements IModPacket {
      */
     public S2CNotePacket(Optional<Integer> initiatorID, Optional<InitiatorID> oInitiatorID,
             T sound, NoteSoundMetadata meta) {
+        this(initiatorID, oInitiatorID, sound, meta, PedalChain.NONE);
+    }
+    /**
+     * Constructs a packet with an optional entity initiator and
+     * an optional custom initiator, played through the given pedals.
+     */
+    public S2CNotePacket(Optional<Integer> initiatorID, Optional<InitiatorID> oInitiatorID,
+            T sound, NoteSoundMetadata meta, PedalChain pedalChain) {
         this.initiatorID = initiatorID;
         this.oInitiatorID = oInitiatorID;
         this.sound = sound;
         this.meta = meta;
+        this.pedalChain = pedalChain;
     }
 
     public S2CNotePacket(FriendlyByteBuf buf) {
@@ -45,6 +59,7 @@ public abstract class S2CNotePacket<T> implements IModPacket {
         oInitiatorID = buf.readOptional(InitiatorID::readFromNetwork);
         sound = readSound(buf);
         meta = NoteSoundMetadata.read(buf);
+        pedalChain = PedalChain.read(buf);
     }
 
     @Override
@@ -53,6 +68,7 @@ public abstract class S2CNotePacket<T> implements IModPacket {
         buf.writeOptional(oInitiatorID, (buffer, initiatorID) -> initiatorID.writeToNetwork(buffer));
         writeSound(buf);
         meta.write(buf);
+        pedalChain.write(buf);
     }
 
     protected abstract T readSound(FriendlyByteBuf buf);

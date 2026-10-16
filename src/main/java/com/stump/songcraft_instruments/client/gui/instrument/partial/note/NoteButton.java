@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.client.config.ModClientConfigs;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.InstrumentScreen;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.label.NoteLabelSupplier;
 import com.stump.songcraft_instruments.client.gui.instrument.partial.note.render.NoteButtonRenderer;
+import com.stump.songcraft_instruments.client.pedal.PedalMonitor;
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIdentifier;
@@ -321,7 +322,9 @@ public abstract class NoteButton extends AbstractButton {
                 pos,
                 Minecraft.getInstance().player.position().distanceToSqr(pos.getCenter()),
                 instrumentScreen.getInstrumentId(),
-                Optional.ofNullable(getIdentifier())
+                Optional.ofNullable(getIdentifier()),
+                // Speakers don't relay our notes back to us, so we hear their pedals on our own copy
+                PedalMonitor.chain()
         );
     }
 

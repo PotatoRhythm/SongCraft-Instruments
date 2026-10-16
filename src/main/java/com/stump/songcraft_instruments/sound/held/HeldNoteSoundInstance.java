@@ -2,15 +2,19 @@ package com.stump.songcraft_instruments.sound.held;
 
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.particle.ModParticles;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.DampenableSoundInstance;
 import com.stump.songcraft_instruments.sound.NearestCopyFilter;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.WorldOriginSoundInstance;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound.Phase;
+import com.stump.songcraft_instruments.sound.pedal.PedalSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -52,6 +56,11 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
 
     private boolean released;
     private boolean dampened;
+    /**
+     * The effects pedals this note (and its holds and release) are played through, see {@link PedalSounds}.
+     * Effects that play out over time (like a delay's echoes) only apply to its release.
+     */
+    private final PedalChain pedalChain;
 
     /**
      * A positioned Mono sound this Stereo sound crossfades into with distance.
@@ -74,7 +83,7 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
                                     int notePitch, int particleColor, float startVolume, float volume,
                                     @Nullable Entity initiator, @Nullable BlockPos soundOrigin,
                                     InitiatorID initiatorId, ResourceLocation instrumentId,
-                                    int timeAlive, boolean released) {
+                                    int timeAlive, boolean released, PedalChain pedalChain) {
         super(
             heldSoundContainer.getSound(phase).getByDistance(distFromSourceSqr(soundOrigin, initiator)),
             NoteSound.INSTRUMENT_SOUND_SOURCE,
@@ -98,6 +107,7 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
         this.pitch = NoteSound.getPitchByNoteOffset(notePitch);
 
         this.released = released;
+        this.pedalChain = pedalChain;
 
 
         final NoteSound sound = heldSoundContainer.getSound(phase);
@@ -107,7 +117,7 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
             relative = true;
             x = y = z = 0;
 
-            monoCrossfade = new CrossfadeMonoSoundInstance(sound.getMono(), this, pitch);
+            monoCrossfade = new CrossfadeMonoSoundInstance(sound.getMono(), this, pitch, pedalChain.withoutTimeBased(), false);
             crossfadePos = getSourcePos();
             updateCrossfade();
         } else if (distFromSourceSqr() < Mth.square(NoteSound.LOCAL_RANGE)) {
@@ -146,7 +156,22 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
             heldSoundContainer,
             phase, notePitch, particleColor, startVolume, volume,
             initiator, soundOrigin, initiatorId, instrumentId,
-            0, false
+            PedalChain.NONE
+        );
+    }
+    /**
+     * A held note sound instance for 3rd party trigger, played through the given pedals
+     */
+    public HeldNoteSoundInstance(HeldNoteSound heldSoundContainer, HeldNoteSound.Phase phase,
+                                 int notePitch, int particleColor, float startVolume, float volume,
+                                 @Nullable Entity initiator, @Nullable BlockPos soundOrigin,
+                                 InitiatorID initiatorId, ResourceLocation instrumentId,
+                                 PedalChain pedalChain) {
+        this(
+            heldSoundContainer,
+            phase, notePitch, particleColor, startVolume, volume,
+            initiator, soundOrigin, initiatorId, instrumentId,
+            0, false, pedalChain
         );
     }
 
@@ -198,12 +223,27 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
             if (heldSoundContainer.release() != null) {
                 final Vec3 pos = getSourcePos();
 
+                // The release gets every pedal, echoes included
                 heldSoundContainer.release().playLocally(
                     pitch, volume,
-                    new BlockPos((int) pos.x, (int) pos.y, (int) pos.z)
+                    new BlockPos((int) pos.x, (int) pos.y, (int) pos.z),
+                    pedalChain
                 );
             }
 
+        }
+
+        // Without a release sound, a delay's echoes come from a slice of the held sound instead.
+        // An attack that hasn't started its hold yet stands in for it; once it has, the hold plays them
+        final boolean releasesHold = (phase == Phase.HOLD) || (phase == Phase.ATTACK && !chainedHolding);
+        if (releasesHold && heldSoundContainer.release() == null && pedalChain.isTimeBased()) {
+            final Vec3 pos = getSourcePos();
+
+            heldSoundContainer.hold().playLocally(
+                pitch, volume,
+                new BlockPos((int) pos.x, (int) pos.y, (int) pos.z),
+                pedalChain, true
+            );
         }
     }
 
@@ -252,6 +292,15 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
 
         // A released Stereo sound stays where it was "blown", same as its crossfade
         return (crossfadePos != null) ? crossfadePos : getSourcePos();
+    }
+
+
+    @Override
+    public WeighedSoundEvents resolve(final SoundManager manager) {
+        final WeighedSoundEvents events = super.resolve(manager);
+        // Held notes only get effects that play out over time (like echoes) on their release
+        sound = PedalSounds.withPedals(sound, pedalChain.withoutTimeBased(), getPitch());
+        return events;
     }
 
 
@@ -348,7 +397,7 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
             heldSoundContainer, Phase.HOLD, notePitch, particleColor, startVolume, nextVolume,
             initiator.orElse(null), soundOrigin.orElse(null),
             initiatorId, instrumentId,
-            overallTimeAlive, released
+            overallTimeAlive, released, pedalChain
         );
         next.addMergedInitiators(mergedInitiators);
         next.queueAndAddInstance();

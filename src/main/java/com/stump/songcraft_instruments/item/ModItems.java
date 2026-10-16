@@ -323,6 +323,16 @@ public class ModItems {
             SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
         ),
 
+        FUZZ_PEDAL = registerBlockItem(ModBlocks.FUZZ_PEDAL, "fuzz_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
+        DELAY_PEDAL = registerBlockItem(ModBlocks.DELAY_PEDAL, "delay_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
+        BITCRUSHER_PEDAL = registerBlockItem(ModBlocks.BITCRUSHER_PEDAL, "bitcrusher_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
+
         LOOPER_ADAPTER = register("looper_adapter",
             () -> new LooperAdapterItem(new Properties().stacksTo(1)),
             CreativeModeTabs.REDSTONE_BLOCKS, SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey()

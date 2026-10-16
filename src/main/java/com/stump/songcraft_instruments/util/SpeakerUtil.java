@@ -9,6 +9,7 @@ import com.stump.songcraft_instruments.capability.instrumentOpen.InstrumentOpenP
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
 import com.stump.songcraft_instruments.networking.SCPacketHandler;
 import com.stump.songcraft_instruments.networking.packet.SyncModTagPacket;
+import com.stump.songcraft_instruments.pedal.PedalMonitorSync;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -97,6 +98,7 @@ public class SpeakerUtil {
         entries.add(newEntry);
         writeEntries(modTag, entries);
         speaker.addInstrument(instrumentId, instrumentPos, isLooper);
+        PedalMonitorSync.onPairingsChanged(level);
         return PairResult.PAIRED;
     }
 
@@ -120,6 +122,8 @@ public class SpeakerUtil {
 
         if (instrumentId != null)
             speaker.removeInstrument(instrumentId);
+        if (removed)
+            PedalMonitorSync.onPairingsChanged(level);
         return removed;
     }
 
@@ -148,6 +152,7 @@ public class SpeakerUtil {
 
         modTag.remove(SPEAKER_TAG);
         onBlockInstrumentChanged(level, instrument);
+        PedalMonitorSync.onPairingsChanged(level);
         return new UnpairAllResult(entries.size(), stillConnected);
     }
     /**
@@ -178,6 +183,7 @@ public class SpeakerUtil {
             speaker.removeInstrument(sourceId);
         });
 
+        PedalMonitorSync.onPairingsChanged(level);
         return sources.size();
     }
     private static void removeFromHeldInstruments(final Level level, final UUID instrumentId, final Speaker speaker) {

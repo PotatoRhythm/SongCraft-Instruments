@@ -2,6 +2,7 @@ package com.stump.songcraft_instruments.networking.packet.instrument.s2c;
 
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
 import net.minecraft.network.FriendlyByteBuf;
@@ -29,7 +30,17 @@ public class S2CHeldNoteSoundPacket extends S2CNotePacket<HeldNoteSound> {
     public S2CHeldNoteSoundPacket(Optional<Integer> initiatorID, Optional<InitiatorID> oInitiatorID,
                                   HeldNoteSound sound, NoteSoundMetadata meta,
                                   HeldSoundPhase phase) {
-        super(initiatorID, sound, meta);
+        this(initiatorID, oInitiatorID, sound, meta, phase, PedalChain.NONE);
+    }
+    /**
+     * Constructs a new {@link S2CHeldNoteSoundPacket} played through the given pedals.
+     * @param initiatorID The UUID of the player initiating the sound.
+     *                      May be empty for a non-player trigger.
+     */
+    public S2CHeldNoteSoundPacket(Optional<Integer> initiatorID, Optional<InitiatorID> oInitiatorID,
+                                  HeldNoteSound sound, NoteSoundMetadata meta,
+                                  HeldSoundPhase phase, PedalChain pedalChain) {
+        super(initiatorID, Optional.empty(), sound, meta, pedalChain);
         this.phase = phase;
         this.oInitiatorID = oInitiatorID;
     }
@@ -58,6 +69,6 @@ public class S2CHeldNoteSoundPacket extends S2CNotePacket<HeldNoteSound> {
 
     @Override
     public void handle(final Context context) {
-        sound.playFromServer(initiatorID, oInitiatorID, meta, phase);
+        sound.playFromServer(initiatorID, oInitiatorID, meta, phase, pedalChain);
     }
 }

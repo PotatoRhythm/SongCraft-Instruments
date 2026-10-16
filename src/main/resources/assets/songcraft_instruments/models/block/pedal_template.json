@@ -1,0 +1,79 @@
+{
+    "parent": "minecraft:block/block",
+    "textures": {
+        "particle": "#body"
+    },
+    "elements": [
+        {
+            "__comment": "Body",
+            "from": [3, 0, 1],
+            "to": [13, 4, 15],
+            "faces": {
+                "north": { "uv": [3, 12, 13, 16], "texture": "#body" },
+                "south": { "uv": [3, 12, 13, 16], "texture": "#body" },
+                "east": { "uv": [1, 12, 15, 16], "texture": "#body" },
+                "west": { "uv": [1, 12, 15, 16], "texture": "#body" },
+                "up": { "uv": [3, 1, 13, 15], "texture": "#body" },
+                "down": { "uv": [3, 1, 13, 15], "texture": "#bottom", "cullface": "down" }
+            }
+        },
+        {
+            "__comment": "Footswitch, towards the player",
+            "from": [7, 4, 3],
+            "to": [9, 5, 5],
+            "faces": {
+                "north": { "uv": [7, 11, 9, 12], "texture": "#switch" },
+                "south": { "uv": [7, 11, 9, 12], "texture": "#switch" },
+                "east": { "uv": [3, 11, 5, 12], "texture": "#switch" },
+                "west": { "uv": [3, 11, 5, 12], "texture": "#switch" },
+                "up": { "uv": [7, 3, 9, 5], "texture": "#switch" }
+            }
+        },
+        {
+            "__comment": "LED",
+            "from": [7.5, 4, 6.5],
+            "to": [8.5, 4.5, 7.5],
+            "faces": {
+                "north": { "uv": [7, 7, 8, 8], "texture": "#led" },
+                "south": { "uv": [7, 7, 8, 8], "texture": "#led" },
+                "east": { "uv": [7, 7, 8, 8], "texture": "#led" },
+                "west": { "uv": [7, 7, 8, 8], "texture": "#led" },
+                "up": { "uv": [7, 7, 8, 8], "texture": "#led" }
+            }
+        },
+        {
+            "__comment": "Knobs",
+            "from": [4.5, 4, 11],
+            "to": [6, 5, 12.5],
+            "faces": {
+                "north": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "south": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "east": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "west": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "up": { "uv": [0, 0, 2, 2], "texture": "#knob" }
+            }
+        },
+        {
+            "from": [7.25, 4, 11],
+            "to": [8.75, 5, 12.5],
+            "faces": {
+                "north": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "south": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "east": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "west": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "up": { "uv": [0, 0, 2, 2], "texture": "#knob" }
+            }
+        },
+        {
+            "from": [10, 4, 11],
+            "to": [11.5, 5, 12.5],
+            "faces": {
+                "north": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "south": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "east": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "west": { "uv": [0, 0, 2, 1], "texture": "#knob" },
+                "up": { "uv": [0, 0, 2, 2], "texture": "#knob" }
+            }
+        }
+    ]
+}

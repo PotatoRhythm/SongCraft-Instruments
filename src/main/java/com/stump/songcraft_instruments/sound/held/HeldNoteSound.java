@@ -1,9 +1,11 @@
 package com.stump.songcraft_instruments.sound.held;
 
 import com.stump.songcraft_instruments.client.config.ModClientConfigs;
+import com.stump.songcraft_instruments.client.pedal.PedalMonitor;
 import com.stump.songcraft_instruments.event.HeldNoteSoundPlayedEvent;
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSoundPhase;
+import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.InstrumentSoundSet;
 import com.stump.songcraft_instruments.sound.NearestCopyFilter;
 import com.stump.songcraft_instruments.sound.NoteSound;
@@ -64,11 +66,20 @@ public record HeldNoteSound (
     @OnlyIn(Dist.CLIENT)
     public void startPlaying(int notePitch, int particleColor, float volume, Entity initiator, BlockPos pos,
                              InitiatorID initiatorId, ResourceLocation instrumentId) {
+        startPlaying(notePitch, particleColor, volume, initiator, pos, initiatorId, instrumentId, PedalChain.NONE);
+    }
+    /**
+     * A held note sound instance for 3rd party trigger, played through the given pedals
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void startPlaying(int notePitch, int particleColor, float volume, Entity initiator, BlockPos pos,
+                             InitiatorID initiatorId, ResourceLocation instrumentId, PedalChain pedalChain) {
         new HeldNoteSoundInstance(
             this, Phase.ATTACK,
             notePitch, particleColor, volume, volume,
             initiator, pos,
-            initiatorId, instrumentId
+            initiatorId, instrumentId,
+            pedalChain
         ).queueAndAddInstance();
     }
     /**
@@ -95,11 +106,13 @@ public record HeldNoteSound (
         startPlaying(notePitch, particleColor, volume, null, pos, initiatorId, instrumentId);
     }
     /**
-     * A held note sound instance for local playing
+     * A held note sound instance for local playing, through the pedals the local player monitors
      */
     @OnlyIn(Dist.CLIENT)
     public void startPlaying(int notePitch, int particleColor, float volume, ResourceLocation instrumentId) {
-        startPlaying(notePitch, particleColor, volume, Minecraft.getInstance().player, instrumentId);
+        final Player player = Minecraft.getInstance().player;
+        startPlaying(notePitch, particleColor, volume, player, null, InitiatorID.fromEntity(player), instrumentId,
+            PedalMonitor.chain());
     }
 
 
@@ -115,13 +128,26 @@ public record HeldNoteSound (
         @OnlyIn(Dist.CLIENT)
         public void playFromServer(Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId,
                                    NoteSoundMetadata meta, HeldSoundPhase phase) {
+            playFromServer(initiatorId, oInitiatorId, meta, phase, PedalChain.NONE);
+        }
+        /**
+         * A method for packets to use for playing this note on the client's end.
+         * @param pedalChain The pedals a speaker relays this note through, if any
+         */
+        @OnlyIn(Dist.CLIENT)
+        public void playFromServer(Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId,
+                                   NoteSoundMetadata meta, HeldSoundPhase phase, PedalChain pedalChain) {
             final Player localPlayer = Minecraft.getInstance().player;
             final Level level = localPlayer.level();
 
             final InitiatorID _initiatorID = InitiatorID.getEither(initiatorId, oInitiatorId);
+            PedalChain chain = pedalChain;
 
             if (initiatorId.isPresent()) {
                 final Entity initiator = level.getEntity(initiatorId.get());
+                // Our own note, heard from the server: through the pedals we monitor, as our local copy would be
+                if (chain.isEmpty() && localPlayer.equals(initiator))
+                    chain = PedalMonitor.chain();
 
                 MinecraftForge.EVENT_BUS.post(
                     new HeldNoteSoundPlayedEvent(initiator, this, meta, phase, _initiatorID)
@@ -141,13 +167,13 @@ public record HeldNoteSound (
 
 
             switch (phase) {
-                case ATTACK -> attackFromServer(_initiatorID, meta);
+                case ATTACK -> attackFromServer(_initiatorID, meta, chain);
                 case RELEASE -> releaseFromServer(_initiatorID, meta);
             }
         }
 
     @OnlyIn(Dist.CLIENT)
-    private void attackFromServer(InitiatorID initiatorID, NoteSoundMetadata meta) {
+    private void attackFromServer(InitiatorID initiatorID, NoteSoundMetadata meta, PedalChain pedalChain) {
         // Play as an entity, or as other
         final @Nullable Entity initiator = initiatorID.type().equals("entity")
             ? Minecraft.getInstance().level.getEntity(Integer.parseInt(initiatorID.identifier()))
@@ -166,7 +192,8 @@ public record HeldNoteSound (
                     this, Phase.ATTACK,
                     meta.pitch(), meta.particleColor(), meta.volume() / 100f, meta.volume() / 100f,
                     initiator, pos,
-                    initiatorID, meta.instrumentId()
+                    initiatorID, meta.instrumentId(),
+                    pedalChain
                 );
                 // Releasing or dampening any of the dropped copies does so to the one played
                 instance.addMergedInitiators(dropped);
