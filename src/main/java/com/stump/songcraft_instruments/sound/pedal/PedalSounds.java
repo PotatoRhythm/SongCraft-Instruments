@@ -41,7 +41,9 @@ public final class PedalSounds {
      * @param echoTail Whether to play only the echoes of a short slice of the sound, for a held note's release
      *                 (its own sound fades out as usual). Only for chains with effects that play out over time.
      */
-    public static Sound withPedals(final Sound sound, final PedalChain chain, final float pitch, final boolean echoTail) {
+    public static Sound withPedals(final Sound sound, final PedalChain fullChain, final float pitch, final boolean echoTail) {
+        // Live effects aren't rendered, so turning their knobs never renders anything (see PedalLiveEffects)
+        final PedalChain chain = fullChain.rendered();
         if (chain.isEmpty() || sound == SoundManager.EMPTY_SOUND || sound == SoundManager.INTENTIONALLY_EMPTY_SOUND
             || sound.shouldStream() || sound.getType() != Sound.Type.FILE)
             return sound;

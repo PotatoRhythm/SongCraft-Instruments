@@ -37,6 +37,16 @@ final class PedalDsp {
     private static final double CRUSH_MAX_BITS = 12, CRUSH_MIN_BITS = 2,
         DOWNSAMPLE_MAX_HZ = 32000, DOWNSAMPLE_MIN_HZ = 1000;
     /**
+     * The Octave's filters: the low-pass its cycles are detected through, and the ones rounding off its octave
+     * below and above
+     */
+    private static final double OCTAVE_DETECT_HZ = 1000, OCTAVE_SUB_TONE_HZ = 1200, OCTAVE_UP_TONE_HZ = 5000;
+    /**
+     * How far past 0 the note must go for a crossing to count, out of its recent peak level,
+     * so small wiggles near 0 don't flip the octave below
+     */
+    private static final float OCTAVE_THRESHOLD = 0.1f, OCTAVE_MIN_THRESHOLD = 1e-4f;
+    /**
      * How much of a held note's sound its echo tail repeats (see {@link #echoSlice}), in seconds as heard
      */
     private static final double ECHO_SLICE_SECONDS = 0.3;
@@ -78,10 +88,13 @@ final class PedalDsp {
             switch (effect.type()) {
                 case FUZZ -> fuzz(channels, sampleRate, effect);
                 case BITCRUSH -> bitcrush(channels, sampleRate, effect);
+                case OCTAVE -> octave(channels, sampleRate, effect);
                 case DELAY -> {
                     channels = delay(channels, sampleRate, pitch, effect, dropDry);
                     dropDry = false;
                 }
+                // Applied while notes play instead, see PedalLiveEffects
+                case TREMOLO, VIBRATO -> {}
             }
         }
 
@@ -214,6 +227,73 @@ final class PedalDsp {
                     held = crushBits ? Math.round(x * levels) / levels : x;
                 }
                 samples[i] = x + mix * (held - x);
+            }
+        }
+    }
+
+    /**
+     * An octaver, built like the classic analog ones, so it works sample by sample and never changes a sound's length:
+     * <ul>
+     *     <li>The octave below comes from a flip-flop: the note's polarity flips on every other cycle (detected by
+     *     its zero crossings), which halves its pitch. Smoothed by a low-pass, for a round sub tone.</li>
+     *     <li>The octave above comes from folding the note's negative half up (its absolute value),
+     *     which doubles its pitch.</li>
+     * </ul>
+     * <p>Cycles are detected on all channels mixed together, so a Stereo sound's octave below stays in phase
+     * between them. Like a real octaver, it tracks single notes best: chords and samples with several notes
+     * confuse it into a glitchy, ring-modulated sound.</p>
+     * <p>Knobs: sub (the octave below's level), up (the octave above's level), dry (the note's own level).</p>
+     */
+    private static void octave(final float[][] channels, final float sampleRate, final PedalEffect effect) {
+        final float sub = effect.knobFraction(0), up = effect.knobFraction(1), dry = effect.knobFraction(2);
+
+        // Cycles are detected on the note with its upper harmonics smoothed off, so they don't add crossings
+        final float detectLp = onePoleCoefficient(OCTAVE_DETECT_HZ, sampleRate);
+        final float subLp = onePoleCoefficient(OCTAVE_SUB_TONE_HZ, sampleRate);
+        final float upLp = onePoleCoefficient(OCTAVE_UP_TONE_HZ, sampleRate);
+        final float dcBlock = 1 - (float) (2 * Math.PI * 20 / sampleRate);
+        final float envelopeRelease = (float) Math.exp(-1 / (0.02 * sampleRate));
+
+        final int channelCount = channels.length, frames = channels[0].length;
+        final float[] subState = new float[channelCount], upState = new float[channelCount];
+        final float[] dcIn = new float[channelCount], dcOut = new float[channelCount];
+
+        float detect = 0, envelope = 0;
+        // A cycle counts once the note has gone clearly below 0, then clearly back above it
+        boolean wentBelow = false;
+        float flip = 1;
+
+        for (int i = 0; i < frames; i++) {
+            float mono = 0;
+            for (final float[] samples : channels)
+                mono += samples[i];
+            mono /= channelCount;
+
+            detect += detectLp * (mono - detect);
+            final float level = Math.abs(detect);
+            envelope = (level > envelope) ? level : envelope * envelopeRelease;
+            final float threshold = Math.max(envelope * OCTAVE_THRESHOLD, OCTAVE_MIN_THRESHOLD);
+            if (detect < -threshold) {
+                wentBelow = true;
+            } else if (wentBelow && detect > threshold) {
+                wentBelow = false;
+                flip = -flip;
+            }
+
+            for (int c = 0; c < channelCount; c++) {
+                final float x = channels[c][i];
+
+                subState[c] += subLp * (x * flip - subState[c]);
+
+                // Folding leaves the note's average level behind as a DC offset, and twice the signal makes up
+                // for the octave above being quieter than the note it comes from
+                final float folded = Math.abs(x);
+                final float dc = folded - dcIn[c] + dcBlock * dcOut[c];
+                dcIn[c] = folded;
+                dcOut[c] = dc;
+                upState[c] += upLp * (2 * dc - upState[c]);
+
+                channels[c][i] = dry * x + sub * subState[c] + up * upState[c];
             }
         }
     }

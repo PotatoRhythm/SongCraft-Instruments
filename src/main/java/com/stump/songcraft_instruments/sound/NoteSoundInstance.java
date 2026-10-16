@@ -4,6 +4,7 @@ import com.stump.songcraft_instruments.networking.buttonidentifier.NoteButtonIde
 import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMetadata;
 import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
+import com.stump.songcraft_instruments.sound.pedal.PedalSoundInstance;
 import com.stump.songcraft_instruments.sound.pedal.PedalSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -21,7 +22,7 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class NoteSoundInstance extends AbstractTickableSoundInstance
-        implements DampenableSoundInstance, WorldOriginSoundInstance {
+        implements DampenableSoundInstance, WorldOriginSoundInstance, PedalSoundInstance {
 
     public static final float FADE_TIME = 0.5f;
     /**
@@ -135,6 +136,11 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
             this.y = meta.pos().getY() + 0.5;
             this.z = meta.pos().getZ() + 0.5;
         }
+    }
+
+    @Override
+    public PedalChain getPedalChain() {
+        return pedalChain;
     }
 
     @Override

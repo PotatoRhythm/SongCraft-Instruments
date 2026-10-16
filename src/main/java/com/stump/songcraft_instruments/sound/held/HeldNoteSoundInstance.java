@@ -9,6 +9,7 @@ import com.stump.songcraft_instruments.sound.NearestCopyFilter;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.WorldOriginSoundInstance;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound.Phase;
+import com.stump.songcraft_instruments.sound.pedal.PedalSoundInstance;
 import com.stump.songcraft_instruments.sound.pedal.PedalSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
@@ -30,7 +31,7 @@ import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
-        implements DampenableSoundInstance, WorldOriginSoundInstance {
+        implements DampenableSoundInstance, WorldOriginSoundInstance, PedalSoundInstance {
     public final HeldNoteSound heldSoundContainer;
     public final HeldNoteSound.Phase phase;
     private int particleTimer = 10;
@@ -294,6 +295,15 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
         return (crossfadePos != null) ? crossfadePos : getSourcePos();
     }
 
+
+    /**
+     * @return The note's whole chain, though only its release gets effects that play out over time.
+     * Live effects (like a tremolo) apply to all of it, as it's held.
+     */
+    @Override
+    public PedalChain getPedalChain() {
+        return pedalChain;
+    }
 
     @Override
     public WeighedSoundEvents resolve(final SoundManager manager) {

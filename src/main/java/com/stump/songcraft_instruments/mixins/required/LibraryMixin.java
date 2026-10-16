@@ -3,6 +3,7 @@ package com.stump.songcraft_instruments.mixins.required;
 import com.mojang.blaze3d.audio.Library;
 import com.stump.songcraft_instruments.sound.UnderwaterMuffling;
 import com.stump.songcraft_instruments.sound.pedal.PedalBufferCache;
+import com.stump.songcraft_instruments.sound.pedal.PedalLiveEffects;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,5 +27,6 @@ public abstract class LibraryMixin {
         UnderwaterMuffling.onLibraryCleanup();
         // While the context is still there to delete the buffers from
         PedalBufferCache.clear();
+        PedalLiveEffects.clear();
     }
 }

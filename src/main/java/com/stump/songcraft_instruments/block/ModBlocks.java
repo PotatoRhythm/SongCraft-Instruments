@@ -56,6 +56,15 @@ public class ModBlocks {
         )),
         BITCRUSHER_PEDAL = BLOCKS.register("bitcrusher_pedal", () -> new PedalBlock(PedalEffectType.BITCRUSH,
             BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        TREMOLO_PEDAL = BLOCKS.register("tremolo_pedal", () -> new PedalBlock(PedalEffectType.TREMOLO,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        VIBRATO_PEDAL = BLOCKS.register("vibrato_pedal", () -> new PedalBlock(PedalEffectType.VIBRATO,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
+        )),
+        OCTAVE_PEDAL = BLOCKS.register("octave_pedal", () -> new PedalBlock(PedalEffectType.OCTAVE,
+            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
         ))
         ;
 }

@@ -1,6 +1,7 @@
 package com.stump.songcraft_instruments.sound;
 
 import com.stump.songcraft_instruments.pedal.PedalChain;
+import com.stump.songcraft_instruments.sound.pedal.PedalSoundInstance;
 import com.stump.songcraft_instruments.sound.pedal.PedalSounds;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -21,7 +22,8 @@ import javax.annotation.Nullable;
  * via {@link #update}, on top of the volume defined in sounds.json. It stops itself once the Stereo sound is stopped.</p>
  */
 @OnlyIn(Dist.CLIENT)
-public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance implements WorldOriginSoundInstance {
+public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance
+        implements WorldOriginSoundInstance, PedalSoundInstance {
     private final AbstractTickableSoundInstance stereo;
     /**
      * The effects pedals the note is played through, same as its Stereo sound's
@@ -54,6 +56,11 @@ public class CrossfadeMonoSoundInstance extends AbstractTickableSoundInstance im
         this.y = pos.y;
         this.z = pos.z;
         this.volume = volume;
+    }
+
+    @Override
+    public PedalChain getPedalChain() {
+        return pedalChain;
     }
 
     @Override

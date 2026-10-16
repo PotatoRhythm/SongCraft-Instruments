@@ -332,6 +332,15 @@ public class ModItems {
         BITCRUSHER_PEDAL = registerBlockItem(ModBlocks.BITCRUSHER_PEDAL, "bitcrusher_pedal",
             SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
         ),
+        TREMOLO_PEDAL = registerBlockItem(ModBlocks.TREMOLO_PEDAL, "tremolo_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
+        VIBRATO_PEDAL = registerBlockItem(ModBlocks.VIBRATO_PEDAL, "vibrato_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
+        OCTAVE_PEDAL = registerBlockItem(ModBlocks.OCTAVE_PEDAL, "octave_pedal",
+            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
+        ),
 
         LOOPER_ADAPTER = register("looper_adapter",
             () -> new LooperAdapterItem(new Properties().stacksTo(1)),

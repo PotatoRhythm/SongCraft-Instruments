@@ -2,6 +2,9 @@
     "values": [
         "songcraft_instruments:fuzz_pedal",
         "songcraft_instruments:delay_pedal",
-        "songcraft_instruments:bitcrusher_pedal"
+        "songcraft_instruments:bitcrusher_pedal",
+        "songcraft_instruments:tremolo_pedal",
+        "songcraft_instruments:vibrato_pedal",
+        "songcraft_instruments:octave_pedal"
     ]
 }

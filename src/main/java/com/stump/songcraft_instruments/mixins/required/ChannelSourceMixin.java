@@ -5,6 +5,7 @@ import com.mojang.blaze3d.audio.SoundBuffer;
 import com.stump.songcraft_instruments.sound.ChannelSource;
 import com.stump.songcraft_instruments.sound.UnderwaterMuffling;
 import com.stump.songcraft_instruments.sound.pedal.PedalBufferCache;
+import com.stump.songcraft_instruments.sound.pedal.PedalLiveEffects;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,6 +30,7 @@ public abstract class ChannelSourceMixin implements ChannelSource {
     private void songcraft_instruments$untrackMuffling(CallbackInfo ci) {
         UnderwaterMuffling.onChannelDestroyed(source);
         PedalBufferCache.onDetach(source);
+        PedalLiveEffects.onChannelDestroyed(source);
     }
 
     /**

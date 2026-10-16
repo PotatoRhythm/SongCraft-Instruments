@@ -8,11 +8,38 @@ import javax.annotation.Nullable;
  */
 public enum PedalEffectType {
     // Level starts fully up: as loud as the instrument without the pedal, which pedals never go past
-    FUZZ("fuzz", false, new Knob("drive", 9), new Knob("tone", 8), new Knob("level", 15)),
+    FUZZ("fuzz", Kind.RENDERED, new Knob("drive", 9), new Knob("tone", 8), new Knob("level", 15)),
     // See DelayParams for what the knobs map to
-    DELAY("delay", true, new Knob("time", 7), new Knob("feedback", 6), new Knob("mix", 8)),
+    DELAY("delay", Kind.TIME_BASED, new Knob("time", 7), new Knob("feedback", 6), new Knob("mix", 8)),
     // Both crush knobs turn up towards more crushing (fewer bits, a lower sample rate)
-    BITCRUSH("bitcrush", false, new Knob("crush", 8), new Knob("downsample", 6), new Knob("mix", 15));
+    BITCRUSH("bitcrush", Kind.RENDERED, new Knob("crush", 8), new Knob("downsample", 6), new Knob("mix", 15)),
+    // See TremoloParams for what the knobs map to
+    TREMOLO("tremolo", Kind.LIVE, new Knob("speed", 7), new Knob("depth", 9), new Knob("shape", 3)),
+    // See VibratoParams for what the knobs map to
+    VIBRATO("vibrato", Kind.LIVE, new Knob("speed", 7), new Knob("depth", 6), new Knob("shape", 0)),
+    // The levels of the octave below, the octave above, and the original note
+    OCTAVE("octave", Kind.RENDERED, new Knob("sub", 10), new Knob("up", 0), new Knob("dry", 15));
+
+    /**
+     * How an effect is applied to the notes played through it
+     */
+    public enum Kind {
+        /**
+         * Rendered into the sound ahead of time, once per sound file and setting
+         */
+        RENDERED,
+        /**
+         * Rendered into the sound ahead of time, for the exact pitch a note plays at, as it plays out over time
+         * (like echoes): notes are pitched by resampling, which would otherwise stretch or squash its timing.
+         * Held notes only get these on their release.
+         */
+        TIME_BASED,
+        /**
+         * Applied to notes while they play (like a tremolo's volume), so it also reaches sustained notes
+         * as they're held. Not rendered, so turning its knobs never renders anything.
+         */
+        LIVE
+    }
 
     /**
      * Knob values are quantized to this many steps (0 to {@code KNOB_STEPS - 1}),
@@ -34,20 +61,25 @@ public enum PedalEffectType {
      * Used in rendered sound paths and translation keys, so must stay lowercase [a-z]
      */
     public final String id;
+    public final Kind kind;
     /**
-     * Whether the effect plays out over time (like echoes), so has to be rendered for the exact pitch a note
-     * plays at: notes are pitched by resampling, which would otherwise stretch or squash its timing.
-     * Held notes only get such effects on their release.
+     * See {@link Kind#TIME_BASED}
      */
     public final boolean timeBased;
+    /**
+     * See {@link Kind#LIVE}
+     */
+    public final boolean live;
     private final Knob[] knobs;
 
-    PedalEffectType(final String id, final boolean timeBased, final Knob... knobs) {
+    PedalEffectType(final String id, final Kind kind, final Knob... knobs) {
         if (knobs.length > MAX_KNOBS)
             throw new IllegalArgumentException("A pedal can have at most " + MAX_KNOBS + " knobs");
 
         this.id = id;
-        this.timeBased = timeBased;
+        this.kind = kind;
+        this.timeBased = (kind == Kind.TIME_BASED);
+        this.live = (kind == Kind.LIVE);
         this.knobs = knobs;
     }
 

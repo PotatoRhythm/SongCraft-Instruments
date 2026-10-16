@@ -31,7 +31,8 @@ public class ModBlockEntities {
     public static final RegistryObject<BlockEntityType<PedalBlockEntity>> PEDAL = BLOCK_ENTITIES.register("pedal", () ->
         BlockEntityType.Builder.of(
             PedalBlockEntity::new, ModBlocks.FUZZ_PEDAL.get(), ModBlocks.DELAY_PEDAL.get(),
-            ModBlocks.BITCRUSHER_PEDAL.get()
+            ModBlocks.BITCRUSHER_PEDAL.get(), ModBlocks.TREMOLO_PEDAL.get(), ModBlocks.VIBRATO_PEDAL.get(),
+            ModBlocks.OCTAVE_PEDAL.get()
         ).build(null)
     );
     

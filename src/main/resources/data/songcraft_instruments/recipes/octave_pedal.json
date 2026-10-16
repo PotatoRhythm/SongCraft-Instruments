@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " P ",
+        "RCR",
+        "III"
+    ],
+    "key": {
+        "P": { "item": "minecraft:stone_pressure_plate" },
+        "R": { "item": "minecraft:redstone" },
+        "C": { "item": "minecraft:quartz" },
+        "I": { "item": "minecraft:iron_ingot" }
+    },
+    "result": { "item": "songcraft_instruments:octave_pedal", "count": 1 }
+}

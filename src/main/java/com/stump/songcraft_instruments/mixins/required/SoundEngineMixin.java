@@ -4,6 +4,7 @@ import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.NoteSoundInstance;
 import com.stump.songcraft_instruments.sound.UnderwaterMuffling;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSoundInstance;
+import com.stump.songcraft_instruments.sound.pedal.PedalLiveEffects;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
@@ -41,7 +42,8 @@ public class SoundEngineMixin {
         // playing notes over an octave from their sample at a different pitch than their Stereo sound
         if (sound instanceof NoteSoundInstance || sound instanceof HeldNoteSoundInstance
                 || sound instanceof CrossfadeMonoSoundInstance) {
-            cir.setReturnValue(sound.getPitch());
+            // Through their pedals' live effects (like a vibrato)
+            cir.setReturnValue(PedalLiveEffects.onPitch(sound, sound.getPitch()));
         }
     }
 
@@ -61,11 +63,25 @@ public class SoundEngineMixin {
     private Object songcraft_instruments$trackMuffling(Object instance) {
         final SoundInstance sound = (SoundInstance) instance;
         UnderwaterMuffling.onSoundPlay(sound, instanceToChannel.get(sound));
+        PedalLiveEffects.onSoundPlay(sound, instanceToChannel.get(sound));
         return instance;
     }
 
     @Inject(method = "tickNonPaused", at = @At("TAIL"))
     private void songcraft_instruments$updateMuffling(CallbackInfo ci) {
         UnderwaterMuffling.tick(instanceToChannel, executor);
+        PedalLiveEffects.tick(executor);
+    }
+
+    /**
+     * The volume vanilla gives playing sounds every tick, through their pedals' live effects (like a tremolo)
+     */
+    @Inject(
+            method = "calculateVolume(Lnet/minecraft/client/resources/sounds/SoundInstance;)F",
+            at = @At("RETURN"),
+            cancellable = true
+    )
+    private void songcraft_instruments$applyLivePedals(SoundInstance sound, CallbackInfoReturnable<Float> cir) {
+        cir.setReturnValue(PedalLiveEffects.onVolume(sound, cir.getReturnValue()));
     }
 }

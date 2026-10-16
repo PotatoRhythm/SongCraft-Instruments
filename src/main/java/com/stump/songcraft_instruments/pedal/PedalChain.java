@@ -52,6 +52,60 @@ public record PedalChain(List<PedalEffect> effects) {
     }
 
     /**
+     * @return This chain without its live effects (see {@link PedalEffectType.Kind#LIVE}): the part rendered
+     * into sounds. Live effects apply on top of it, as if they came last in the chain.
+     */
+    public PedalChain rendered() {
+        if (!hasLive())
+            return this;
+        return new PedalChain(effects.stream().filter((effect) -> !effect.type().live).toList());
+    }
+    /**
+     * @return Whether any of the effects is applied to notes while they play, see {@link PedalEffectType.Kind#LIVE}
+     */
+    public boolean hasLive() {
+        for (final PedalEffect effect : effects)
+            if (effect.type().live)
+                return true;
+        return false;
+    }
+
+    /**
+     * @param seconds The time on a free-running clock
+     * @return The volume the chain's live effects give a note at that time, from 0 to 1
+     */
+    public double liveGainAt(final double seconds) {
+        double gain = 1;
+        for (final PedalEffect effect : effects) {
+            if (effect.type() == PedalEffectType.TREMOLO)
+                gain *= TremoloParams.of(effect).gainAt(seconds);
+        }
+        return gain;
+    }
+
+    /**
+     * @param seconds The time on a free-running clock
+     * @return The pitch multiplier the chain's live effects give a note at that time
+     */
+    public double livePitchAt(final double seconds) {
+        double pitch = 1;
+        for (final PedalEffect effect : effects) {
+            if (effect.type() == PedalEffectType.VIBRATO)
+                pitch *= VibratoParams.of(effect).pitchAt(seconds);
+        }
+        return pitch;
+    }
+    /**
+     * @return Whether the chain has an effect of the given type
+     */
+    public boolean has(final PedalEffectType type) {
+        for (final PedalEffect effect : effects)
+            if (effect.type() == type)
+                return true;
+        return false;
+    }
+
+    /**
      * @return How long the chain's effects ring on after a note ends (its echoes), in seconds
      */
     public double tailSeconds() {
