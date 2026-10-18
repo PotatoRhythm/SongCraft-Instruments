@@ -96,7 +96,7 @@ final class PedalDsp {
                 case BITCRUSH -> bitcrush(channels, playRate, effect);
                 case OCTAVE -> octave(channels, playRate, effect);
                 case EQ -> eq(channels, playRate, effect);
-                // Its tape tone; its wobble and dropouts are applied while notes play, see PedalLiveEffects
+                // Its tape tone; its wobble is applied while notes play, see PedalLiveEffects
                 case LOFI -> lofi(channels, playRate, effect);
                 case DELAY -> {
                     channels = delay(channels, playRate, effect, dropDry);
@@ -335,21 +335,31 @@ final class PedalDsp {
     }
 
     /**
-     * A worn cassette tape's tone: its narrow bandwidth (lows and highs rolled off, more as it ages)
-     * and its saturation, which rounds off the peaks (see {@link LofiParams}).
-     * <p>Its wobble and dropouts are applied while notes play instead, and its hiss rolls on its own,
-     * so neither is rendered here.</p>
-     * <p>Knobs: age (used here), wobble, dropouts.</p>
+     * A worn cassette tape's tone (see {@link LofiParams}):
+     * <ul>
+     *     <li>Its narrow bandwidth: lows and highs rolled off, more as it ages.</li>
+     *     <li>Its warmth: soft saturation that rounds off the peaks, slightly lopsided for the even harmonics of tape,
+     *     then a little more body in the low mids and softer highs. Left out entirely at no warmth.</li>
+     * </ul>
+     * <p>Its wobble is applied while notes play instead, and its hiss rolls on its own, so neither is rendered here.</p>
+     * <p>Knobs: age, wobble (not used here), warmth.</p>
      */
     private static void lofi(final float[][] channels, final float playRate, final PedalEffect effect) {
         final LofiParams params = LofiParams.of(effect);
         // Two poles each way, for a tape's gentle but definite roll-off
         final float highpass = onePoleCoefficient(params.highpassHz(), playRate);
         final float lowpass = onePoleCoefficient(params.lowpassHz(), playRate);
-        final float drive = (float) params.saturationDrive();
+
+        final boolean saturate = params.warmth() > 0;
+        final double drive = params.saturationDrive(), bias = params.saturationBias();
+        final double biasOffset = Math.tanh(bias);
+        // The clipper's slope through 0, so quiet sounds pass at their own level, however hard it's driven
+        final double unity = drive * (1 - biasOffset * biasOffset);
+        final float dcBlock = 1 - (float) (2 * Math.PI * 20 / playRate);
 
         for (final float[] samples : channels) {
             float hp1 = 0, hp2 = 0, lp1 = 0, lp2 = 0;
+            float dcIn = 0, dcOut = 0;
             for (int i = 0; i < samples.length; i++) {
                 float x = samples[i];
 
@@ -360,10 +370,27 @@ final class PedalDsp {
 
                 lp1 += lowpass * (x - lp1);
                 lp2 += lowpass * (lp1 - lp2);
+                x = lp2;
 
-                // Unity gain for quiet sounds, rounding off the peaks the harder it's driven
-                samples[i] = (float) Math.tanh(drive * lp2) / drive;
+                if (saturate) {
+                    final float y = (float) ((Math.tanh(drive * x + bias) - biasOffset) / unity);
+                    // The lopsided clipping leaves a DC offset
+                    final float dc = y - dcIn + dcBlock * dcOut;
+                    dcIn = y;
+                    dcOut = dc;
+                    x = dc;
+                }
+                samples[i] = x;
             }
+        }
+
+        final double[] body = peak(LofiParams.WARMTH_BODY_HZ, LofiParams.WARMTH_BODY_Q, params.bodyDb(), playRate);
+        final double[] soften = shelf(LofiParams.WARMTH_SOFTEN_HZ, params.softenDb(), playRate, true);
+        for (final float[] samples : channels) {
+            if (body != null)
+                biquad(samples, body);
+            if (soften != null)
+                biquad(samples, soften);
         }
     }
 

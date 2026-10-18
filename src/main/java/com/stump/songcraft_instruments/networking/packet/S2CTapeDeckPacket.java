@@ -67,7 +67,7 @@ public class S2CTapeDeckPacket implements IModPacket {
     public final String deckId;
     public final Action action;
     /**
-     * The deck's Lo-fi effect, whose Age sets its hiss and whose dropouts it dips with
+     * The deck's Lo-fi effect, whose Age sets how loud its hiss is
      */
     public final PedalEffect effect;
     /**

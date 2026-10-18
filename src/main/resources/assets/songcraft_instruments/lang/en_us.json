@@ -526,7 +526,7 @@
     "gui.songcraft_instruments.pedal.knob.decay": "Decay",
     "gui.songcraft_instruments.pedal.knob.age": "Age",
     "gui.songcraft_instruments.pedal.knob.wobble": "Wobble",
-    "gui.songcraft_instruments.pedal.knob.dropouts": "Dropouts",
+    "gui.songcraft_instruments.pedal.knob.warmth": "Warmth",
     "gui.songcraft_instruments.pedal.chain": "Pedals:",
     "gui.songcraft_instruments.pedal.knob_value": "%s: %s",
     "gui.songcraft_instruments.pedal.effect.fuzz": "Fuzz",

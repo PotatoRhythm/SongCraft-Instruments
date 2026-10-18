@@ -55,7 +55,7 @@ public final class PedalLiveEffects {
         Live(final SoundInstance instance, final PedalChain chain) {
             this.instance = instance;
             this.chain = chain;
-            this.changesVolume = chain.has(PedalEffectType.TREMOLO) || chain.has(PedalEffectType.LOFI);
+            this.changesVolume = chain.has(PedalEffectType.TREMOLO);
             this.changesPitch = chain.has(PedalEffectType.VIBRATO) || chain.has(PedalEffectType.LOFI);
         }
     }
@@ -106,7 +106,7 @@ public final class PedalLiveEffects {
             return volume;
 
         live.baseVolume = volume;
-        return volume * (float) live.chain.liveGainAt(now(), TapeClock.seconds());
+        return volume * (float) live.chain.liveGainAt(now());
     }
     /**
      * Called on the main thread when vanilla works out a playing sound's pitch (every tick)
@@ -167,7 +167,7 @@ public final class PedalLiveEffects {
                 // Until vanilla gives it a volume and pitch, it plays at the ones it started with
                 final float volume = live.baseVolume, pitch = live.basePitch;
                 if (live.changesVolume && volume >= 0)
-                    channel.setVolume(volume * (float) live.chain.liveGainAt(now, tapeNow));
+                    channel.setVolume(volume * (float) live.chain.liveGainAt(now));
                 if (live.changesPitch && pitch >= 0)
                     channel.setPitch(pitch * (float) live.chain.livePitchAt(now, tapeNow));
             }

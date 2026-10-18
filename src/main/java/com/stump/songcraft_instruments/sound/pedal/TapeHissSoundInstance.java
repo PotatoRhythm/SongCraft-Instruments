@@ -2,7 +2,6 @@ package com.stump.songcraft_instruments.sound.pedal;
 
 import com.stump.songcraft_instruments.networking.packet.S2CTapeDeckPacket.Emitter;
 import com.stump.songcraft_instruments.pedal.LofiParams;
-import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.pedal.PedalEffect;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import net.minecraft.client.Minecraft;
@@ -18,17 +17,22 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * A Lo-fi tape deck's hiss, rolling at one of the places its instrument is heard (see {@code TapeDeckPlayer}).
+ * A Lo-fi tape's hiss, as heard by the local player (see {@code TapeDeckPlayer}): one sound however many places the
+ * tape is heard from, like the room tone of the band. It isn't positioned; instead it's louder the nearer the player is
+ * to the nearest of them (an instrument or speaker playing through the tape), fading out at the distance notes do.
  * <p>Fades in, or spins up like a tape motor getting to speed; and fades out, or winds down in pitch like a tape
- * stopping. It's played through the deck's Lo-fi effect, so the tape's dropouts dip the hiss along with the notes
- * (see {@link PedalLiveEffects}).</p>
+ * stopping.</p>
  */
 @OnlyIn(Dist.CLIENT)
-public class TapeHissSoundInstance extends AbstractTickableSoundInstance implements PedalSoundInstance {
+public class TapeHissSoundInstance extends AbstractTickableSoundInstance {
     /**
      * The hiss sound file's own loudness (its RMS), which {@link LofiParams#hissGain} is relative to full scale from
      */
     private static final double FILE_GAIN = Math.pow(10, -18 / 20.0);
+    /**
+     * How far from the nearest place the hiss fades out to silence, the same as instrument notes
+     */
+    private static final double FADE_DISTANCE = 32;
     /**
      * How long a spin-up takes, and the pitch the motor starts from
      */
@@ -47,44 +51,41 @@ public class TapeHissSoundInstance extends AbstractTickableSoundInstance impleme
 
     private enum State { STARTING, ROLLING, STOPPING }
 
-    private final Emitter emitter;
-    private final PedalChain chain;
     private double hissGain;
     private float deckVolume;
+    private List<Emitter> emitters;
 
     private State state = State.STARTING;
     /**
      * Whether it starts and stops with the motor (spinning up and winding down) rather than by fading
      */
-    private boolean motorStart, motorStop;
+    private final boolean motorStart;
+    private boolean motorStop;
     private int stateTicks = 0;
 
-    public TapeHissSoundInstance(final SoundEvent hiss, final Emitter emitter, final PedalEffect effect,
+    public TapeHissSoundInstance(final SoundEvent hiss, final List<Emitter> emitters, final PedalEffect effect,
                                  final float deckVolume, final boolean motorStart) {
         super(hiss, NoteSound.INSTRUMENT_SOUND_SOURCE, SoundInstance.createUnseededRandom());
-        this.emitter = emitter;
-        // Its dropouts are applied live; its tone isn't rendered into the hiss, which is the tape itself
-        this.chain = new PedalChain(List.of(effect));
         this.motorStart = motorStart;
-        setSettings(effect, deckVolume);
+        setSettings(effect, deckVolume, emitters);
 
         this.looping = true;
         this.delay = 0;
-        this.attenuation = Attenuation.LINEAR;
-        updatePosition();
+        // Heard as room tone rather than from a spot: its volume follows the distance itself, see updateLevel
+        this.relative = true;
+        this.attenuation = Attenuation.NONE;
+        this.x = this.y = this.z = 0;
         updateLevel();
     }
 
-    public Emitter getEmitter() {
-        return emitter;
-    }
-
     /**
-     * Changes the deck's settings: its Age, which sets how loud the hiss is, and the volume it plays at
+     * Changes the tape's settings: its Age, which sets how loud the hiss is, the volume it plays at,
+     * and the places it's heard from
      */
-    public void setSettings(final PedalEffect effect, final float deckVolume) {
+    public void setSettings(final PedalEffect effect, final float deckVolume, final List<Emitter> emitters) {
         this.hissGain = LofiParams.of(effect).hissGain();
         this.deckVolume = deckVolume;
+        this.emitters = List.copyOf(emitters);
     }
 
     /**
@@ -96,11 +97,6 @@ public class TapeHissSoundInstance extends AbstractTickableSoundInstance impleme
         state = State.STOPPING;
         motorStop = withMotor;
         stateTicks = 0;
-    }
-
-    @Override
-    public PedalChain getPedalChain() {
-        return chain;
     }
 
     @Override
@@ -119,7 +115,6 @@ public class TapeHissSoundInstance extends AbstractTickableSoundInstance impleme
             return;
         }
 
-        updatePosition();
         updateLevel();
     }
 
@@ -142,22 +137,49 @@ public class TapeHissSoundInstance extends AbstractTickableSoundInstance impleme
             default -> {}
         }
 
-        final Vec3 at = emitterPosition();
-        this.volume = (at == null) ? MIN_VOLUME : Math.max(MIN_VOLUME, (float) (hissGain / FILE_GAIN) * deckVolume * level);
+        final float proximity = (float) proximity();
+        this.volume = Math.max(MIN_VOLUME, (float) (hissGain / FILE_GAIN) * deckVolume * level * proximity);
         this.pitch = pitch;
     }
 
-    private void updatePosition() {
-        final Vec3 at = emitterPosition();
-        if (at == null)
-            return;
-        this.x = at.x;
-        this.y = at.y;
-        this.z = at.z;
+    /**
+     * @return From 1 (at the nearest place) to 0 (at {@link #FADE_DISTANCE} or further), falling off linearly like notes
+     */
+    private double proximity() {
+        final Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null)
+            return 0;
+
+        final Vec3 nearest = nearestOf(emitters, minecraft.player.position());
+        return (nearest == null) ? 0
+            : Math.max(0, 1 - nearest.distanceTo(minecraft.player.position()) / FADE_DISTANCE);
     }
 
+    /**
+     * @return Where the nearest of the places is to the given point, or null if none of them can be found
+     */
     @Nullable
-    private Vec3 emitterPosition() {
+    public static Vec3 nearestOf(final List<Emitter> emitters, final Vec3 to) {
+        Vec3 nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (final Emitter emitter : emitters) {
+            final Vec3 at = positionOf(emitter);
+            if (at == null)
+                continue;
+            final double distance = at.distanceToSqr(to);
+            if (distance < nearestDistance) {
+                nearest = at;
+                nearestDistance = distance;
+            }
+        }
+        return nearest;
+    }
+
+    /**
+     * @return Where a place is: its block, or the entity it follows; null if that entity isn't loaded here
+     */
+    @Nullable
+    public static Vec3 positionOf(final Emitter emitter) {
         if (emitter.pos() != null)
             return emitter.pos().getCenter();
 

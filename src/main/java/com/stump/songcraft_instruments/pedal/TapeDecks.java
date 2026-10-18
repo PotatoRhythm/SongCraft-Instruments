@@ -38,11 +38,13 @@ import java.util.UUID;
 
 /**
  * The Lo-fi pedal's tape decks: each Lo-fi pedal is one tape, whose hiss rolls while anyone plays through it.
- * <p>A deck starts rolling (its play key clunks) with the first note played through its pedal. Each player playing
- * through it is a source: their instrument and its speakers hiss while they play or hold notes, fading in and out
- * as they start and go quiet. Once all of them have gone quiet for {@link #IDLE_TICKS} (or closed their instruments),
+ * <p>A deck starts rolling (its play key clunks) when a player opens an instrument plugged into its pedal, or plays the
+ * first note through it. Each player playing
+ * through it is a source: their instrument and its speakers are places the tape is heard from while they play or hold
+ * notes. Each listener hears one hiss per tape, as loud as they are near its nearest place (see
+ * {@code TapeHissSoundInstance}). Once all of them have gone quiet for {@link #IDLE_TICKS} (or closed their instruments),
  * the stop key clunks and the tape winds down, like a tape deck that stops when the band does.</p>
- * <p>A looper plays back each tape it recorded as a deck of its own, at the looper and its speakers, so a recording
+ * <p>A looper plays back each tape it recorded as a deck of its own, heard from the looper and its speakers, so a recording
  * starts and stops its tapes as they did when it was played.</p>
  * <p>Players within range are told when a deck starts, changes, or stops, and when they come within or go out of its
  * range; their own game plays the hiss and the deck's key clunks (see {@code TapeDeckPlayer}). Server only.</p>
@@ -50,9 +52,9 @@ import java.util.UUID;
 @EventBusSubscriber(bus = Bus.FORGE, modid = SCInstrumentMod.MODID)
 public final class TapeDecks {
     /**
-     * How long a source keeps its places hissing after its last note, with no notes held
+     * How long a source keeps the tape rolling after its last note (or opening their instrument), with no notes held
      */
-    private static final int IDLE_TICKS = 5 * 20;
+    private static final int IDLE_TICKS = 10 * 20;
     /**
      * How far from any of its places a deck's hiss is sent, a little past where notes are heard
      */
@@ -255,9 +257,17 @@ public final class TapeDecks {
 
     @SubscribeEvent
     public static void onInstrumentOpenChanged(final InstrumentOpenStateChangedEvent event) {
-        // Closing the instrument stops its player's part at once; the tape stops if they were the last on it
-        if (!event.isOpen && !event.player.level().isClientSide)
+        if (event.player.level().isClientSide)
+            return;
+
+        if (event.isOpen) {
+            // Opening an instrument plugged into a Lo-fi pedal starts its tape, as if a note were played.
+            // At full volume until their first note says otherwise
+            onPlayerNote(event.player, InstrumentPedals.chainOfOpenInstrument(event.player), 100, null, null);
+        } else {
+            // Closing the instrument stops its player's part at once; the tape stops if they were the last on it
             leavePlayer(event.player);
+        }
     }
     @SubscribeEvent
     public static void onLoggedOut(final PlayerEvent.PlayerLoggedOutEvent event) {

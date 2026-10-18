@@ -37,8 +37,8 @@ These apply to every pedal, so the per-pedal sections don't repeat them.
   since echoes of a looping sound would pile up while it's held.
 - **Live effects (Tremolo, Vibrato) aren't rendered at all.** They change a note's volume or pitch while it plays, so they reach
   held notes the whole time they're held, and turning their knobs never renders anything. They always act as if
-  they were last in the chain, wherever the pedal actually sits. The Lo-fi pedal is partly live: its wobble and
-  dropouts are, while its tape tone is rendered like any other pedal.
+  they were last in the chain, wherever the pedal actually sits. The Lo-fi pedal is partly live: its wobble
+  is, while its tape tone is rendered like any other pedal.
 - **The level is set from the sound file's own loudness.** The volume trims in `sounds.json`, the instrument's
   volume slider and distance are all applied afterwards. Pedals don't change how loud instruments are relative
   to each other, but anything that depends on the file's level (such as the fuzz's gate) treats quiet and loud
@@ -406,46 +406,60 @@ stereo sounds come out wide.
 ## Lo-fi Pedal
 
 **Signal path:** a worn cassette tape, in four parts:
-- **Tape tone** (rendered): two-pole low and high cuts for the tape's narrow bandwidth, then soft saturation that
-  rounds off the peaks. The more worn the tape, the narrower and warmer.
+- **Bandwidth** (rendered): two-pole low and high cuts for the tape's narrow range, narrower the older it is.
+- **Warmth** (rendered): soft tape saturation that rounds off the peaks, slightly lopsided so it adds the even
+  harmonics of tape rather than a fuzz's odd ones; then a little more body in the low mids and softer highs.
 - **Wow and flutter** (live): the pitch drifts slowly and unevenly, with a faster, finer shimmer on top.
-- **Dropouts** (live): brief, random dips where the tape loses contact with the head, smoothed so they never click.
-- **Tape hiss** (its own sound): rolls on its own while the instrument plays, rather than with each note.
+- **Tape noise** (its own sound): a soft bed of tape hiss and vinyl crackle with faint pops, rolling on its own while
+  the instrument plays, rather than with each note.
 
 | Knob | Range | Effect |
 |---|---|---|
-| Age | Fresh to 30 years old | Low: clean, with a faint hiss. High: muffled (highs from 16 kHz down to 3.5 kHz), saturated, and hissy (-54 to -34 dB of hiss) |
+| Age | Fresh to 30 years old | Low: full range, with a faint hiss. High: muffled (highs from 16 kHz down to 3.5 kHz, lows from 30 up to 150 Hz) and hissy (-54 to -34 dB of hiss) |
 | Wobble | None to ±30 cents of wow, plus ±8 of flutter | Low: steady. Middle: a gentle, nostalgic drift. High: a seasick, warped tape |
-| Dropouts | None to about one a second | Low: none. Middle: an occasional dip. High: frequent, deep dropouts (6 to 30 dB) |
+| Warmth | Clean to fully saturated | Low: clean (fully down, no saturation or tilt at all). Middle: rounded, thicker notes. High: driven tape, with up to +4.5 dB of body around 200 Hz and -3 dB above 5 kHz |
 
 **The tape deck:**
-- **It rolls while you play.** The first note presses the play key: a clunk, and the motor spinning the hiss up to
-  speed. It keeps rolling between notes, and while notes are held. About 5 seconds after the last note, the stop
-  key clunks and the motor winds the hiss down in pitch, like a tape stopping. Closing the instrument stops it at once.
-- **The hiss plays where the instrument is heard:** from the player (or the instrument block), and from each of its
-  speakers. Players coming within range of a rolling deck hear its hiss fade in, without the clunk.
-- **The hiss follows the instrument's volume,** and dips with the tape's dropouts.
-- **Loopers have tape decks too.** A looper playing back notes recorded through a Lo-fi pedal rolls its own deck
-  while it plays them, with its own hiss, at the looper and its speakers.
-- **Everyone hears the same tape.** The wobble and dropouts follow the world's game time, through a repeatable random
-  function, so every player hears the same drift and the same dropouts at the same moment, give or take a tick
-  (50 ms). Every note through it, on every player's game, wobbles and drops out together, like one tape.
+- **Each Lo-fi pedal is one tape.** Everyone plugged into the same Lo-fi pedal (directly, or through other pedals
+  first) plays through the same tape, so a band sharing one hears one tape deck.
+- **It rolls while anyone plays.** Opening an instrument plugged into it, or the first note through it, presses the
+  play key: a click, and the motor spinning the noise up to speed. It keeps rolling between notes, and while notes are
+  held. Once everyone on it has gone quiet for 10 seconds (or closed their instruments), the stop key clicks and the
+  motor winds the noise down in pitch, like a tape stopping.
+- **One hiss per tape, like the band's room tone.** However many players and speakers a tape has, each listener
+  hears one hiss for it, not coming from any one spot. It's louder the nearer they are to the nearest place the tape
+  is heard from (a player playing through it, or one of their speakers), and fades out 32 blocks away, as notes do.
+  A player counts as a place while they play, and stops counting once they go quiet, without stopping the tape for
+  the others. Players coming within range of a rolling tape hear its hiss fade in, without the clunk.
+- **The key clunks come from the nearest place,** so they're heard from where the band is.
+- **The hiss follows the loudest player's volume.**
+- **Recordings roll their tapes as they were played.** Each recorded note keeps which Lo-fi pedal it went through,
+  and a looper plays back each tape as a deck of its own, at the looper and its speakers: starting with its first
+  note, and stopping 10 seconds after its last, just as it did live. Two players recorded through two different Lo-fi
+  pedals play back as two tapes.
+- **Everyone hears the same tape.** The wobble follows the world's game time, through a repeatable random
+  function, so every player hears the same drift at the same moment, give or take a tick (50 ms). Every note through
+  it, on every player's game, wobbles together, like one tape.
 
 **How it changes the tone:**
-- **Nostalgic and warm.** A little Age and Wobble gives the classic lo-fi hip hop sound; more gives a worn, warped
-  VHS or answering-machine sound.
+- **Nostalgic and warm.** A little Age, Wobble and Warmth gives the classic lo-fi hip hop sound; more gives a worn,
+  warped VHS or answering-machine sound.
+- **Warmth on its own** works as a gentle tape saturator, for thickening any instrument without the worn sound.
 - **Held notes and chords wobble together**, since the whole tape drifts at once.
 
 **Issues and shortcomings:**
 - **Out of tune with other instruments** at high Wobble, by design: a warped tape drifts against the band.
-- **The hiss is synthesized,** as are the key clunks. They can be swapped for recordings by replacing the files in
-  `sounds/lofi_pedal` (the masters are in `InstrumentSoundFiles/Lofi_Pedal`).
+- **Its sounds are real recordings, all CC0 from Freesound** (no credit required), mixed into a seamless 12 second
+  loop: tape hiss from "Tape Hiss" by D.S.G. (freesound.org/s/241415), crackle from "CRACKLE (6).wav" by DefySolipsis
+  (freesound.org/s/531438), pops picked out of "Audio Mistakes, Pops" by f-r-a-g-i-l-e (freesound.org/s/512504) and
+  "StaticAndPop.wav" by transitking (freesound.org/s/59289). The play and stop keys are the first two presses of
+  "Tape Deck Buttons and Switches" by Nekkowe (freesound.org/s/403247). They're cut from Freesound's high quality
+  previews; the masters are in `InstrumentSoundFiles/Lofi_Pedal`, with the other candidates in its `Candidates` folder.
+- **Opening an instrument starts the tape at full volume** until its first note sets the player's volume.
 - **The motor sounds only reach the hiss.** A tape stopping also slows the music down, but by then the notes have
   usually finished; notes still ringing when it stops don't wind down with it.
-- **Dropouts only dip the volume.** A real dropout also dulls the highs for a moment; that could be added later
-  through the live filters the underwater muffling already uses.
-- **Turning Dropouts while a deck rolls** changes the notes' dropouts at once, but the hiss keeps its old setting until
-  the deck next starts.
+- **Warmth's saturation only bites on loud notes.** Quiet notes and decaying tails pass at their own level, so they
+  get Warmth's tone tilt but little of its harmonics, as on real tape.
 - **A deck's places update with its notes,** so a looper on a moving boat or minecart leaves its hiss behind until
   its next note.
 

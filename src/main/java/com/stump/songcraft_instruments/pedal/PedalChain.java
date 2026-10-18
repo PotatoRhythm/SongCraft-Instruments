@@ -69,25 +69,22 @@ public record PedalChain(List<PedalEffect> effects) {
     }
 
     /**
-     * @param seconds The time on a smooth, free-running clock, for effects that only need to be steady
-     * @param tapeSeconds The time on the world's game clock, the same for every player, for effects whose randomness
-     *                    every player should hear alike (a tape's dropouts); see {@link LofiParams}
+     * @param seconds The time on a smooth, free-running clock
      * @return The volume the chain's live effects give a note at that time, from 0 to 1
      */
-    public double liveGainAt(final double seconds, final double tapeSeconds) {
+    public double liveGainAt(final double seconds) {
         double gain = 1;
         for (final PedalEffect effect : effects) {
             if (effect.type() == PedalEffectType.TREMOLO)
                 gain *= TremoloParams.of(effect).gainAt(seconds);
-            else if (effect.type() == PedalEffectType.LOFI)
-                gain *= LofiParams.of(effect).gainAt(tapeSeconds);
         }
         return gain;
     }
 
     /**
-     * @param seconds See {@link #liveGainAt}
-     * @param tapeSeconds See {@link #liveGainAt}
+     * @param seconds The time on a smooth, free-running clock, for effects that only need to be steady
+     * @param tapeSeconds The time on the world's game clock, the same for every player, for effects whose randomness
+     *                    every player should hear alike (a tape's wobble); see {@link LofiParams}
      * @return The pitch multiplier the chain's live effects give a note at that time
      */
     public double livePitchAt(final double seconds, final double tapeSeconds) {

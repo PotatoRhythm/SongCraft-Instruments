@@ -29,7 +29,7 @@ public enum PedalEffectType {
     // See ReverbParams for what the knobs map to
     REVERB("reverb", Kind.TIME_BASED, new Knob("decay", 7), new Knob("tone", 8), new Knob("mix", 5)),
     // A worn cassette tape; see LofiParams
-    LOFI("lofi", Kind.RENDERED_AND_LIVE, new Knob("age", 8), new Knob("wobble", 6), new Knob("dropouts", 4));
+    LOFI("lofi", Kind.RENDERED_AND_LIVE, new Knob("age", 8), new Knob("wobble", 6), new Knob("warmth", 7));
 
     /**
      * How an effect is applied to the notes played through it
@@ -51,7 +51,7 @@ public enum PedalEffectType {
         LIVE,
         /**
          * Partly rendered (like {@link #RENDERED}) and partly applied live (like {@link #LIVE}),
-         * such as a tape's tone, and its wobble and dropouts
+         * such as a tape's tone, and its wobble
          */
         RENDERED_AND_LIVE
     }

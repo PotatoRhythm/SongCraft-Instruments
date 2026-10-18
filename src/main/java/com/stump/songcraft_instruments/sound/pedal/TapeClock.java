@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
 /**
  * A clock every player shares: the world's game time, smoothed between ticks.
- * <p>Live effects whose randomness every player should hear alike (a tape's wobble and dropouts, see
+ * <p>Live effects whose randomness every player should hear alike (a tape's wobble, see
  * {@code LofiParams}) run off it, so the whole audience hears them at the same moment, give or take a tick.
  * Read from any thread.</p>
  */

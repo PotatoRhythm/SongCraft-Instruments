@@ -36429,18 +36429,12 @@
   },
   "pedal_tape_start": {
     "sounds": [
-      {
-        "name": "songcraft_instruments:lofi_pedal/tape_start",
-        "volume": 0.6
-      }
+      "songcraft_instruments:lofi_pedal/tape_start"
     ]
   },
   "pedal_tape_stop": {
     "sounds": [
-      {
-        "name": "songcraft_instruments:lofi_pedal/tape_stop",
-        "volume": 0.6
-      }
+      "songcraft_instruments:lofi_pedal/tape_stop"
     ]
   },
   "pipa_regular_note_0": {
