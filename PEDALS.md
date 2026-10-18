@@ -33,8 +33,9 @@ These apply to every pedal, so the per-pedal sections don't repeat them.
 - **Transposing costs memory, not playing at the default pitch.** Most instruments have a sound file per note, so
   at the default transpose notes play at their file's own pitch and share one rendered copy. Each other transpose
   (or octave swap, or MIDI note past the instrument's range) renders its own copies, as much again as the default.
-- **Held notes only get time-based effects (the Delay and Reverb) on release.** Their attack and hold go through the rest of the chain,
-  since echoes of a looping sound would pile up while it's held.
+- **Held notes only get the Delay on release.** Their attack and hold go through the rest of the chain, Reverb
+  included, since echoes of a looping sound would pile up while it's held. The Reverb is baked into the hold
+  instead (see the Reverb Pedal).
 - **Live effects (Tremolo, Vibrato) aren't rendered at all.** They change a note's volume or pitch while it plays, so they reach
   held notes the whole time they're held, and turning their knobs never renders anything. They always act as if
   they were last in the chain, wherever the pedal actually sits. The Lo-fi pedal is partly live: its wobble
@@ -277,53 +278,6 @@ the rest of the chain, the same way as the Tremolo (which moves the volume inste
 - **Out of tune with other instruments** at high depth, by design: a wide vibrato on one instrument in an
   ensemble sounds detuned against the rest.
 
-## Octave Pedal
-
-**Signal path:** three parts mixed together, built like a classic analog octaver so it never changes a sound's
-length:
-- **Sub:** the octave below, from a flip-flop. The note's polarity flips every other cycle (counted at its zero
-  crossings), which halves its pitch. A 1.2 kHz low-pass rounds it off.
-- **Up:** the octave above, from folding the note's negative half up (its absolute value), which doubles its
-  pitch. A 5 kHz low-pass tames it.
-- **Dry:** the note itself.
-
-| Knob | Range | Effect |
-|---|---|---|
-| Sub | 0% to 100% (default about 67%) | Low: a hint of weight. High: a big, organ-like bass under every note |
-| Up | 0% to 100% (default off) | Low: a ringing shimmer. High: a bright, glassy octave on top |
-| Dry | 0% to 100% (default 100%) | Turn it down to hear only the octaves, for a bass line or a synth-like tone |
-
-**How it changes the tone:**
-- **Fuller and organ-like.** Sub fills out thin instruments; Sub and Up together sound like organ stops.
-- **The sub is buzzy, not pure.** The flip-flop also adds a tone a fifth above the note, at 1.5x its
-  frequency, which gives it the hollow, synth-like buzz of analog octavers. The low-pass rounds most of it off.
-- **The octave up is bright and ring-like,** with other even harmonics on top.
-- **Octave fuzz.** Octave then Fuzz gives the classic screaming octave-fuzz tone.
-
-**How it behaves:**
-- **No echoes, so no extra length:** held notes get it from attack to release.
-- **Stays in tune at every pitch.** The octaves are worked out from each sound itself, so they stay octaves
-  when the note is pitched, and its filters sit where they're set whatever the note.
-- **Stereo-safe.** Cycles are counted on both channels mixed together, so the octave below stays in phase
-  between left and right.
-- **Within the loudness cap.** All three knobs up gets louder than the note, so the cap turns it back down.
-
-**Issues and shortcomings:**
-- **Tracks single notes best, like any real octaver.** Chords, samples with several notes in them, bells and
-  other instruments with strong, clashing overtones (steel drum, kalimba, bells) can confuse the cycle counting,
-  turning the sub into a glitchy, sputtering ring-mod sound. Drums and percussion mostly sputter.
-- **It can lock onto an overtone.** On sounds whose fundamental is weak next to their overtones, the "octave
-  below" can come out an octave below an overtone instead, so it sounds like the wrong note.
-- **Possible thumps on held notes.** The attack, hold and release are rendered separately, so the octave below
-  can restart flipped at each loop of the hold sound, heard as a soft thump or click at each repeat. Most likely
-  with high Sub on held instruments.
-- **Octave up disappears after heavy fuzz.** A Fuzz turned up squares the note off, and folding a square wave
-  leaves it nearly flat, so a Fuzz-then-Octave chain with high drive barely has an octave above. Put the Octave
-  first for octave fuzz.
-- **Bitcrusher before it** gives the cycle counting stepped, noisy edges, so the sub tends to sputter.
-- **Decays sputter at the very end.** As a note fades into its noise floor, the counting can go erratic for a
-  moment before it stops.
-
 ## EQ Pedal
 
 **Signal path:** three filters in a row, like an amp's tone stack: a low shelf for the bass, a wide peak for the
@@ -381,8 +335,20 @@ stereo sounds come out wide.
 
 **How it behaves:**
 - **Same at every pitch,** like every pedal: the decay and tone come out as set whatever the note.
-- **Held notes get it on release,** like the Delay: instruments with a release sound play it through the reverb,
-  and those without ring on from a short slice of the held sound. While held, they play dry.
+- **Held notes get it the whole time they're held.** A held note's hold sound repeats every couple of seconds,
+  each repeat overlapping the end of the last. Each repeat is rendered with the reverb that's ringing while it
+  plays (its own, plus what's left of the earlier repeats' tails) baked in, and crossfades into the next one's,
+  so the reverb carries on smoothly without piling up. The attack plays once, so it rings on with its own reverb.
+- **The reverb builds up as a note starts.** The first repeat only carries its own reverb, and later ones the
+  full amount, so long decays swell in over the first few seconds as they would in a room.
+- **Held notes ring on when let go,** with the reverb they'd built up dying away at the Decay's rate, plus that
+  of the note as it fades out. The reverb baked into the hold fades out with the note, so a release tail rendered
+  for it takes over: the hold's repeats played out through the reverb, then faded as the note fades, keeping what
+  rings on from the release. It fades in by just as much as the hold's reverb has gone. A note let go before its
+  reverb had built up rings on with as much as it had. Instruments with a release sound play it through the
+  reverb too.
+- **Pedals after the Reverb apply to the note and its reverb together** on held notes too, so Reverb then Fuzz
+  fuzzes the whole reverberant sound, as on other notes.
 - **Dampening fades instead of cutting,** over up to 2 seconds, like the Delay, so the reverb dies away rather than
   stopping dead.
 - **Fast to render**: about 20 ms for a 2 second stereo note with the longest decay, so a first note after a knob
@@ -391,9 +357,32 @@ stereo sounds come out wide.
   Reverb then Delay repeats the whole reverberant sound, which gets muddy quickly.
 
 **Issues and shortcomings:**
-- **Held notes are dry while held.** The biggest compromise: sustained instruments, where reverb matters most,
-  only get it once let go. A live reverb that reaches held notes (through OpenAL, like Sound Physics Remastered's)
-  could be added later as another mode.
+- **Held notes' reverb can waver where repeats overlap.** Repeats start on game ticks, so usually a few
+  milliseconds off from exactly on time, which puts the note's tone in their two reverbs at a random phase to
+  each other for the 0.15 s they crossfade. They may briefly add up or partly cancel, a few dB either way,
+  most on low, steady notes at a high Mix. The note itself is unaffected.
+- **Held notes' release tail is rendered for a release halfway into a repeat.** Let go anywhere else, it's at a
+  random phase to the hold's reverb as they hand over, so it's within about 3 dB of the real reverb while the
+  note fades, and 1 to 3 dB after (tested on the saxophone, Irina and cello against the reverb played out in full).
+  Let go within a few milliseconds of halfway, the two add up in phase, up to 4 dB too loud while the note fades.
+- **The release tail assumes the reverb dies away and builds up evenly,** at its Decay's rate. Close for this
+  reverb, which tested within 1 to 2 dB on notes let go half a second to a few seconds in.
+- **Held notes' release tail ignores volume drops while fading.** Instruments whose holds get quieter as they
+  repeat (most held ones) drop a step if a new repeat starts while the note fades, which the tail doesn't follow.
+- **The reverb on a held note's second repeat is a touch too strong.** It also carries tails of repeats from
+  before the note started, which never played. Measured at under 0.1 dB even at the longest decay, so inaudible.
+- **Hold sounds must be longer than the time between repeats.** One that isn't leaves gaps that can't be
+  crossfaded, so it would only get the reverb on release, from a short slice of the held sound. Every held
+  instrument's holds overlap by at least 0.38 s (the Guild Wars 2 organ's), so none do; keep it in mind when
+  adding held instruments.
+- **Turning its knobs renders held instruments' attacks and holds again.** Each step is a new set of them, two
+  holds per note (the first repeat and the rest), an attack up to 4 seconds longer and a release tail of the fade
+  plus up to 4 seconds, about 3.1 MB per stereo note, against about 1.6 MB without the Reverb. Renders are quick
+  (about 20 ms per hold, 60 ms per release tail, in the background), and the instrument the player has open is
+  rendered ahead of time. Each note's release tail is rendered ahead as it starts, for a release at its starting
+  volume. A note let go at another volume (most held instruments get quieter as their holds repeat) or early on
+  (when held notes fade out faster) renders its own the first time, starting about 60 ms late, while it's still
+  fading in, so it's barely heard.
 - **Notes ring on.** Up to 4 seconds past each note, so fast passages blur together, more notes sound at once
   (towards Minecraft's limit on simultaneous sounds), and each rendered note takes more cache memory, like the Delay.
 - **The loudness cap can turn notes down.** The reverb adds to the note while it's sounding, so at a high Mix the

@@ -53,6 +53,23 @@ public record HeldNoteSound (
         };
     }
 
+    /**
+     * @param pitch The pitch the note plays at
+     * @return How many ticks apart its hold sounds start: each starts once the previous one has played
+     * {@code holdDuration + chainedHoldDelay} seconds of its sound, which a higher pitch plays through faster
+     */
+    public int holdPeriodTicks(final float pitch) {
+        final int threshold = (int) ((holdDuration + chainedHoldDelay) * 20);
+        if (threshold <= 0 || pitch <= 0)
+            return 0;
+
+        // The first tick at which (ticks * pitch) reaches it, in the same float math as it's checked in
+        int ticks = Math.max(0, (int) Math.ceil(threshold / pitch) - 2);
+        while (ticks * pitch < threshold)
+            ticks++;
+        return ticks;
+    }
+
     public static NoteSound[] getSounds(final HeldNoteSound[] sounds, final Phase phase) {
         return Arrays.stream(sounds)
             .map((sound) -> sound.getSound(phase))

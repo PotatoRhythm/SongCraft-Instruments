@@ -63,9 +63,6 @@ public class ModBlocks {
         VIBRATO_PEDAL = BLOCKS.register("vibrato_pedal", () -> new PedalBlock(PedalEffectType.VIBRATO,
             BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
         )),
-        OCTAVE_PEDAL = BLOCKS.register("octave_pedal", () -> new PedalBlock(PedalEffectType.OCTAVE,
-            BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
-        )),
         EQ_PEDAL = BLOCKS.register("eq_pedal", () -> new PedalBlock(PedalEffectType.EQ,
             BlockBehaviour.Properties.of().noOcclusion().strength(0.8f).sound(SoundType.METAL)
         )),

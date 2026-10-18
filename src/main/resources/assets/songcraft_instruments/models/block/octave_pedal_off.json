@@ -1,6 +1,0 @@
-{
-    "parent": "songcraft_instruments:block/octave_pedal",
-    "textures": {
-        "led": "minecraft:block/gray_concrete"
-    }
-}

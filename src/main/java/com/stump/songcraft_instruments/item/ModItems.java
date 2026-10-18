@@ -338,9 +338,6 @@ public class ModItems {
         VIBRATO_PEDAL = registerBlockItem(ModBlocks.VIBRATO_PEDAL, "vibrato_pedal",
             SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
         ),
-        OCTAVE_PEDAL = registerBlockItem(ModBlocks.OCTAVE_PEDAL, "octave_pedal",
-            SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
-        ),
         EQ_PEDAL = registerBlockItem(ModBlocks.EQ_PEDAL, "eq_pedal",
             SCCreativeModeTabs.MUSIC_PRODUCTION_TAB.getKey(), CreativeModeTabs.FUNCTIONAL_BLOCKS
         ),

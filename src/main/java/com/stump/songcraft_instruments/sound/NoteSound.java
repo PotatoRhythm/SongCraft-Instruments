@@ -12,6 +12,7 @@ import com.stump.songcraft_instruments.sound.registrar.NoteSoundRegistrar;
 import com.stump.songcraft_instruments.util.LabelUtil;
 import com.stump.songcraft_instruments.util.ParticleColorUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 /**
  * A class holding sound information for an instrument's note
@@ -264,13 +266,10 @@ public class NoteSound {
     public void playLocally(float pitch, NoteSoundMetadata meta, double playDistSqr,
             Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId, PedalChain pedalChain,
             boolean echoTail) {
-        final Minecraft minecraft = Minecraft.getInstance();
-        final SoundEvent sound = getByDistance(playDistSqr);
-
-        if (sound == null)
+        if (getByDistance(playDistSqr) == null)
             return;
 
-        final NoteSoundInstance instance = new NoteSoundInstance(
+        play(new NoteSoundInstance(
                 this,
                 pitch,
                 meta,
@@ -279,7 +278,35 @@ public class NoteSound {
                 oInitiatorId,
                 pedalChain,
                 echoTail
-        );
+        ));
+    }
+    /**
+     * Plays this sound locally through the given pedals. Treats the given {@code pitch} as a Minecraft pitch.
+     * @param withPedals Swaps the sound for the rendered copy of it to play through the pedals
+     * @param volumeRamp What to multiply its volume by on each of its ticks as it fades in, see {@link NoteSoundInstance}
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playLocally(float pitch, NoteSoundMetadata meta, double playDistSqr,
+            Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId, PedalChain pedalChain,
+            UnaryOperator<Sound> withPedals, @Nullable float[] volumeRamp) {
+        if (getByDistance(playDistSqr) == null)
+            return;
+
+        play(new NoteSoundInstance(
+                this,
+                pitch,
+                meta,
+                playDistSqr,
+                initiatorId,
+                oInitiatorId,
+                pedalChain,
+                withPedals,
+                volumeRamp
+        ));
+    }
+    @OnlyIn(Dist.CLIENT)
+    private static void play(final NoteSoundInstance instance) {
+        final Minecraft minecraft = Minecraft.getInstance();
 
         minecraft.getSoundManager().play(instance);
         instance.getMonoCrossfade().ifPresent(minecraft.getSoundManager()::play);
@@ -339,27 +366,44 @@ public class NoteSound {
     @OnlyIn(Dist.CLIENT)
     public void playLocally(float pitch, float volume, BlockPos pos, PedalChain pedalChain, boolean echoTail) {
         final Minecraft minecraft = Minecraft.getInstance();
-
-        final double playDistSqr =
-                minecraft.player.position().distanceToSqr(pos.getCenter());
-
-        final NoteSoundMetadata meta = new NoteSoundMetadata(
+        playLocally(
+                pitch,
+                localMeta(volume, pos),
+                minecraft.player.position().distanceToSqr(pos.getCenter()),
+                Optional.of(minecraft.player.getId()),
+                Optional.empty(),
+                pedalChain,
+                echoTail
+        );
+    }
+    /**
+     * Plays this sound locally through the given pedals. Treats the given {@code pitch} as a Minecraft pitch.
+     * @param withPedals Swaps the sound for the rendered copy of it to play through the pedals
+     * @param volumeRamp What to multiply its volume by on each of its ticks as it fades in, see {@link NoteSoundInstance}
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void playLocally(float pitch, float volume, BlockPos pos, PedalChain pedalChain,
+                            UnaryOperator<Sound> withPedals, @Nullable float[] volumeRamp) {
+        final Minecraft minecraft = Minecraft.getInstance();
+        playLocally(
+                pitch,
+                localMeta(volume, pos),
+                minecraft.player.position().distanceToSqr(pos.getCenter()),
+                Optional.of(minecraft.player.getId()),
+                Optional.empty(),
+                pedalChain,
+                withPedals,
+                volumeRamp
+        );
+    }
+    private NoteSoundMetadata localMeta(final float volume, final BlockPos pos) {
+        return new NoteSoundMetadata(
                 pos,
                 0,
                 (int)(volume * 100),
                 ParticleColorUtil.getNoteRGB(index, 0),
                 baseSoundLocation,
                 Optional.empty()
-        );
-
-        playLocally(
-                pitch,
-                meta,
-                playDistSqr,
-                Optional.of(minecraft.player.getId()),
-                Optional.empty(),
-                pedalChain,
-                echoTail
         );
     }
 

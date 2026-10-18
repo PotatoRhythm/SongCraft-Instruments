@@ -178,7 +178,13 @@ public final class PedalBufferCache {
         final ChannelTwinSounds.Decoded dry = ChannelTwinSounds.decode(resources, fx.original());
         ByteBuffer samples;
         try {
-            samples = PedalDsp.render(dry, fx.chain(), fx.pitch(), fx.echoTail());
+            samples = switch (fx.kind()) {
+                case NOTE -> PedalDsp.render(dry, fx.chain(), fx.pitch(), false);
+                case ECHO_TAIL -> PedalDsp.render(dry, fx.chain(), fx.pitch(), true);
+                case FIRST_HOLD -> PedalDsp.renderHold(dry, fx.chain(), fx.pitch(), fx.periodTicks(), true);
+                case HOLD -> PedalDsp.renderHold(dry, fx.chain(), fx.pitch(), fx.periodTicks(), false);
+                case RELEASE_TAIL -> PedalDsp.renderReleaseTail(dry, fx.chain(), fx.pitch(), fx.periodTicks(), fx.fadeTicks());
+            };
         } catch (RuntimeException e) {
             // Better heard dry than not at all
             LOGGER.error("Failed to render {} through pedals {}; playing it without them", fx.original(), fx.chain().key(), e);

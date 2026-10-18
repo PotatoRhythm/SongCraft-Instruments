@@ -30,7 +30,7 @@ import java.util.zip.GZIPOutputStream;
  * <pre>
  * "SCRC", varint version
  * varint length + 1 (0 for an unfinished recording)
- * instrument ID palette, sound type palette, pedal chain palette (version 2+): varint count, UTF strings
+ * instrument ID palette, sound type palette, pedal chain palette: varint count, UTF strings
  *   (pedal chains are PedalChain keys, e.g. "fuzz9a8_delay768", or "" for none, each optionally followed by
  *   "@" and the ID of the Lo-fi pedal it went through, e.g. "lofi864@1b4e28ba-2fa1-11d2-883f-0016d3cca427")
  * performers: varint count, then UUID (2 longs), UTF name, varint color count, int colors
@@ -38,18 +38,16 @@ import java.util.zip.GZIPOutputStream;
  * varint note count, then per note:
  *   varint ticks since the previous note
  *   byte flags: bits 0-1 type, bit 2 held release, bit 3 same performer as the previous note,
- *               bits 4-7 same sound / pitch / volume / color as the performer's previous note
- *   [varint performer] [varint instrument, varint sound type] varint sound index [zigzag pitch] [zigzag volume] [varint color]
- *   varint pedal chain (version 2+; version 1 notes have none)
+ *               bits 4-7 same sound (instrument, sound type and pedal chain) / pitch / volume / color
+ *               as the performer's previous note
+ *   [varint performer] [varint instrument, varint sound type, varint pedal chain] varint sound index
+ *   [zigzag pitch] [zigzag volume] [varint color]
  *   (dampens end after the performer)
  * </pre>
  */
 public final class RecordingCodec {
     private static final byte[] MAGIC = {'S', 'C', 'R', 'C'};
-    /**
-     * 2 added the effects pedals each note was played through. Version 1 files are still read, without pedals.
-     */
-    public static final int VERSION = 2;
+    public static final int VERSION = 1;
 
     /**
      * Notes may not be later than a day in. Bounds the playback index of imported files.
@@ -177,7 +175,8 @@ public final class RecordingCodec {
                     flags |= FLAG_RELEASE;
                 if (previous != null) {
                     if (previous[Recording.INSTRUMENT_ID] == note[Recording.INSTRUMENT_ID]
-                            && previous[Recording.SOUND_TYPE] == note[Recording.SOUND_TYPE])
+                            && previous[Recording.SOUND_TYPE] == note[Recording.SOUND_TYPE]
+                            && previous[Recording.PEDALS] == note[Recording.PEDALS])
                         flags |= FLAG_SAME_SOUND;
                     if (previous[Recording.PITCH] == note[Recording.PITCH])
                         flags |= FLAG_SAME_PITCH;
@@ -202,6 +201,7 @@ public final class RecordingCodec {
             if ((flags & FLAG_SAME_SOUND) == 0) {
                 writeVarInt(out, note[Recording.INSTRUMENT_ID]);
                 writeVarInt(out, note[Recording.SOUND_TYPE]);
+                writeVarInt(out, note[Recording.PEDALS]);
             }
             writeVarInt(out, note[Recording.SOUND_INDEX]);
             if ((flags & FLAG_SAME_PITCH) == 0)
@@ -210,7 +210,6 @@ public final class RecordingCodec {
                 writeVarInt(out, zigzag(note[Recording.VOLUME]));
             if ((flags & FLAG_SAME_COLOR) == 0)
                 writeVarInt(out, colorIndices.get(note[Recording.PARTICLE_COLOR]));
-            writeVarInt(out, note[Recording.PEDALS]);
 
             previousByPerformer.put(performer, note);
         }
@@ -276,15 +275,14 @@ public final class RecordingCodec {
         }
 
         final int version = readVarInt(in);
-        if (version < 1 || version > VERSION)
+        if (version != VERSION)
             throw new InvalidRecordingException("Unsupported recording version " + version);
 
         final int length = readVarInt(in) - 1;
         check(length >= -1 && length <= MAX_TICK, "length");
 
         final List<String> instrumentIds = readStrings(in), soundTypes = readStrings(in);
-        // Version 1 recordings were all played without pedals
-        final List<String> pedalChains = (version >= 2) ? readStrings(in) : List.of("");
+        final List<String> pedalChains = readStrings(in);
 
         final int performerCount = readVarInt(in);
         check(performerCount >= 0 && performerCount <= MAX_PERFORMERS, "performer count");
@@ -341,6 +339,8 @@ public final class RecordingCodec {
             final int soundType = sameSound ? previous[Recording.SOUND_TYPE] : readVarInt(in);
             check(instrument >= 0 && instrument < instrumentIds.size(), "note instrument");
             check(soundType >= 0 && soundType < soundTypes.size(), "note sound type");
+            final int pedals = sameSound ? previous[Recording.PEDALS] : readVarInt(in);
+            check(pedals >= 0 && pedals < pedalChains.size(), "note pedal chain");
 
             final int soundIndex = readVarInt(in);
             final int pitch = samePitch ? previous[Recording.PITCH] : unzigzag(readVarInt(in));
@@ -354,9 +354,6 @@ public final class RecordingCodec {
                 check(colorIndex >= 0 && colorIndex < colors.size(), "note color");
                 color = colors.get(colorIndex);
             }
-
-            final int pedals = (version >= 2) ? readVarInt(in) : 0;
-            check(pedals >= 0 && pedals < pedalChains.size(), "note pedal chain");
 
             final int[] note = (type == Recording.TYPE_HELD)
                 ? new int[] {tick, type, performer, pitch, volume, color, instrument, soundType, soundIndex, pedals,

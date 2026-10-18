@@ -32,7 +32,7 @@ public class ModBlockEntities {
         BlockEntityType.Builder.of(
             PedalBlockEntity::new, ModBlocks.FUZZ_PEDAL.get(), ModBlocks.DELAY_PEDAL.get(),
             ModBlocks.BITCRUSHER_PEDAL.get(), ModBlocks.TREMOLO_PEDAL.get(), ModBlocks.VIBRATO_PEDAL.get(),
-            ModBlocks.OCTAVE_PEDAL.get(), ModBlocks.EQ_PEDAL.get(), ModBlocks.REVERB_PEDAL.get(),
+            ModBlocks.EQ_PEDAL.get(), ModBlocks.REVERB_PEDAL.get(),
             ModBlocks.LOFI_PEDAL.get()
         ).build(null)
     );

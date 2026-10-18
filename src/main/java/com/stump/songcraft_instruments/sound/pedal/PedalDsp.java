@@ -5,16 +5,20 @@ import com.stump.songcraft_instruments.pedal.EqParams;
 import com.stump.songcraft_instruments.pedal.LofiParams;
 import com.stump.songcraft_instruments.pedal.PedalChain;
 import com.stump.songcraft_instruments.pedal.PedalEffect;
+import com.stump.songcraft_instruments.pedal.PedalEffectType;
 import com.stump.songcraft_instruments.pedal.ReverbParams;
 import com.stump.songcraft_instruments.sound.ChannelTwinSounds;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.BufferUtils;
 
+import javax.annotation.Nullable;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Renders a sound through a chain of pedal effects, ahead of time.
@@ -40,16 +44,6 @@ final class PedalDsp {
     private static final double CRUSH_MAX_BITS = 12, CRUSH_MIN_BITS = 2,
         DOWNSAMPLE_MAX_HZ = 32000, DOWNSAMPLE_MIN_HZ = 1000;
     /**
-     * The Octave's filters: the low-pass its cycles are detected through, and the ones rounding off its octave
-     * below and above
-     */
-    private static final double OCTAVE_DETECT_HZ = 1000, OCTAVE_SUB_TONE_HZ = 1200, OCTAVE_UP_TONE_HZ = 5000;
-    /**
-     * How far past 0 the note must go for a crossing to count, out of its recent peak level,
-     * so small wiggles near 0 don't flip the octave below
-     */
-    private static final float OCTAVE_THRESHOLD = 0.1f, OCTAVE_MIN_THRESHOLD = 1e-4f;
-    /**
      * How much of a held note's sound its echo tail repeats (see {@link #echoSlice}), in seconds as heard
      */
     private static final double ECHO_SLICE_SECONDS = 0.3;
@@ -61,6 +55,18 @@ final class PedalDsp {
      * Rendered tails end once every channel stays below this (about -80 dB)
      */
     private static final float TAIL_SILENCE = 1e-4f;
+    /**
+     * How much a held note's holds must overlap, as heard, for their reverb to be baked in (see {@link #renderHold}).
+     * Holds that leave gaps can't be crossfaded, so play without it.
+     */
+    private static final double MIN_HOLD_OVERLAP_SECONDS = 0.02;
+    /**
+     * How long, as heard, one hold's baked reverb crossfades into the next one's, at most (and at most their overlap).
+     * Holds start on game ticks, so usually a few milliseconds off from a period apart, which puts the note's tone
+     * in the two reverbs at a random phase to each other: they partly cancel or add up while they crossfade.
+     * Short keeps that brief, while long enough not to be heard as a sudden change.
+     */
+    private static final double HOLD_CROSSFADE_SECONDS = 0.15;
 
     private PedalDsp() {}
 
@@ -87,14 +93,263 @@ final class PedalDsp {
         final double dryRms = rms(channels, dryFrames);
         final float dryPeak = peak(channels);
 
-        // A held note's own sound fades out as usual, so its echo tail leaves out the dry sound, but only once:
-        // a second delay (or a reverb) repeats the first one's echoes along with its own
-        boolean dropDry = echoTail;
-        for (final PedalEffect effect : chain.effects()) {
+        // A held note's own sound fades out as usual, so its echo tail leaves out the dry sound
+        channels = applyEffects(channels, chain, playRate, echoTail);
+
+        channels = trimTail(channels, playRate, dryFrames);
+        scale(channels, loudnessScale(channels, dryRms, dryPeak, dryFrames));
+        for (final float[] channel : channels)
+            softLimit(channel);
+        return toPcm(channels);
+    }
+
+    /**
+     * Renders a held note's hold sound with its reverb baked in.
+     * <p>Holds repeat while a note is held, each starting {@code periodTicks} after the last and overlapping its end,
+     * so a reverb ringing on past each one would pile up as they repeat. Instead each hold carries the reverb that's
+     * ringing while it plays:</p>
+     * <ol>
+     *     <li>The hold is rendered through the chain up to its last reverb, with the reverb's whole tail.</li>
+     *     <li>What the reverbs added (the result without the hold itself) is cut into pieces one period long,
+     *     which are added up: the tails of the holds before it that are still ringing, plus its own reverb.
+     *     That repeats every period, so it loops seamlessly from one hold to the next.</li>
+     *     <li>It's added to the hold, crossfading into the next hold's at the start of where the two overlap
+     *     (see {@link #HOLD_CROSSFADE_SECONDS}), and the rest of the chain after the reverb is applied to them
+     *     together.</li>
+     * </ol>
+     * <p>The first hold carries only its own reverb, so the reverb builds up as the note starts. Later holds carry
+     * the tails of holds before the first too, so the second is slightly more reverberant than it should be.</p>
+     * <p>Holds that don't overlap the next one (their sound being shorter than the time between them) can't be
+     * crossfaded, so are rendered without their reverb, as held notes used to be.</p>
+     * @param chain The chain the note is played through while held, without its delays
+     * @param periodTicks How many ticks apart the note's holds start
+     * @param first Whether this is the note's first hold, which no hold before it rings into
+     * @return The hold's samples, the same length and format as the given sound's
+     */
+    static ByteBuffer renderHold(final ChannelTwinSounds.Decoded sound, final PedalChain chain, final float pitch,
+                                 final int periodTicks, final boolean first) {
+        final float playRate = sound.format().getSampleRate() * pitch;
+        final float[][] original = toFloat(sound.samples(), sound.format().getChannels());
+
+        final HeldReverb held = HeldReverb.of(original, chain, playRate, periodTicks);
+        if (held == null) {
+            final PedalChain withoutReverb = withoutTimeBased(chain);
+            // Nothing left to render: played as it is, as it would be without pedals
+            return withoutReverb.isEmpty() ? sound.samples() : render(sound, withoutReverb, pitch, false);
+        }
+
+        final float[][] result;
+        if (first) {
+            // Only its own reverb, fading out as the next hold's fades in
+            final float[][] firstHold = new float[original.length][held.frames()];
+            for (int i = 0; i < held.frames(); i++) {
+                final float fadeOut = held.fadeOut(i);
+                for (int c = 0; c < original.length; c++)
+                    firstHold[c][i] = held.dry()[c][i] + fadeOut * held.reverb()[c][i];
+            }
+            result = applyEffects(firstHold, held.afterReverb(), playRate, false);
+        } else {
+            result = held.later();
+        }
+
+        // Every hold is turned down alike, by how much the later ones need, so the reverb doesn't jump as it builds up
+        scale(result, held.scale());
+        for (final float[] channel : result)
+            softLimit(channel);
+        return toPcm(result);
+    }
+
+    /**
+     * Renders what a held note's reverb rings on with once it's let go, played as the note fades out (see
+     * {@code HeldNoteSoundInstance#setReleased}). Its holds' baked reverb (see {@link #renderHold}) fades out with them,
+     * so this takes over from it: the reverb the note had built up dying away, plus that of the note as it fades out.
+     * <p>Rendered by playing the note out: its holds repeating as they do while it's held, for as long as the reverb
+     * rings, then fading out over {@code fadeTicks} as it does when released, all through the reverb. What the reverb
+     * rings with from the release on is kept, at the same level as is baked into the holds. The note is let go
+     * halfway through a hold, standing in for wherever it was.</p>
+     * <p>Holds that can't have their reverb baked in (see {@link #renderHold}) ring on from a short slice of
+     * their sound instead, as held notes used to.</p>
+     * @param chain The chain the note is played through while held, without its delays
+     * @param periodTicks How many ticks apart the note's holds start
+     * @param fadeTicks How many ticks the note takes to fade out once released
+     * @return The reverb, starting from the release
+     */
+    static ByteBuffer renderReleaseTail(final ChannelTwinSounds.Decoded sound, final PedalChain chain,
+                                        final float pitch, final int periodTicks, final int fadeTicks) {
+        final float playRate = sound.format().getSampleRate() * pitch;
+        final float[][] original = toFloat(sound.samples(), sound.format().getChannels());
+
+        final HeldReverb held = HeldReverb.of(original, chain, playRate, periodTicks);
+        if (held == null)
+            return render(sound, chain, pitch, true);
+
+        // Each hold goes through the chain up to its first reverb on its own, as it does when played,
+        // and the reverbs (and what's between them) take all of them together
+        final List<PedalEffect> toReverb = held.toReverb().effects();
+        int firstReverb = 0;
+        while (toReverb.get(firstReverb).type() != PedalEffectType.REVERB)
+            firstReverb++;
+        final float[][] hold = applyEffects(copy(original), new PedalChain(toReverb.subList(0, firstReverb)), playRate, false);
+        final PedalChain reverbs = new PedalChain(toReverb.subList(firstReverb, toReverb.size()));
+
+        final int channelCount = original.length, frames = held.frames(), period = held.periodFrames();
+        final int fadeFrames = Math.max(1, (int) Math.round(fadeTicks / 20.0 * playRate));
+        final int tailFrames = (int) Math.round(Math.min(chain.tailSeconds(), DelayParams.MAX_TAIL_SECONDS) * playRate);
+
+        // Holds start every period from the start, enough of them before the release for the reverb to have settled,
+        // and go on chaining while the note fades out
+        final int settledHolds = (tailFrames + frames) / period + 2;
+        final int release = settledHolds * period + period / 2;
+        final int fadeEnd = release + fadeFrames;
+        final int holds = (fadeEnd - 1) / period + 1;
+        final float[][] played = new float[channelCount][(holds - 1) * period + frames];
+        for (int k = 0; k < holds; k++)
+            for (int c = 0; c < channelCount; c++)
+                for (int i = 0; i < frames; i++)
+                    played[c][k * period + i] += hold[c][i];
+        for (final float[] samples : played)
+            for (int i = release; i < samples.length; i++)
+                samples[i] *= (i < fadeEnd) ? 1 - (float) (i - release) / fadeFrames : 0;
+
+        // Only what the reverbs add, as loud as in the holds (whose reverbs' gains are by their place in the chain)
+        final double[] reverbGains = Arrays.copyOfRange(held.reverbGains(), firstReverb, toReverb.size());
+        final float[][] rung = applyEffects(played, reverbs, playRate, true, reverbGains);
+        float[][] tail = new float[channelCount][];
+        for (int c = 0; c < channelCount; c++)
+            tail[c] = Arrays.copyOfRange(rung[c], release, rung[c].length);
+
+        tail = applyEffects(tail, held.afterReverb(), playRate, false);
+        tail = trimTail(tail, playRate, Math.min(fadeFrames, tail[0].length - 1));
+        scale(tail, held.scale());
+        for (final float[] channel : tail)
+            softLimit(channel);
+        return toPcm(tail);
+    }
+
+    /**
+     * What a held note's holds and their release tail are rendered from: a hold through its chain, with the reverb
+     * that's ringing while it plays (see {@link #renderHold})
+     * @param frames How long the hold is
+     * @param periodFrames How far apart holds start, in the hold's samples
+     * @param crossfadeFrames How long each hold's baked reverb crossfades into the next one's
+     * @param toReverb The chain up to its last reverb, which plays out over time
+     * @param afterReverb The rest of the chain, applied to each hold as a whole
+     * @param dry The hold through {@code toReverb}, without what its reverbs add
+     * @param reverb What its reverbs add to it, with their whole tail
+     * @param later A later hold, with the reverb of the holds before it baked in, through the whole chain
+     * @param scale How much every hold (and the tail) is turned down, so the later ones aren't louder than the hold
+     * @param reverbGains How loud each of the chain's reverbs is made, for the hold (see {@link #reverb})
+     */
+    private record HeldReverb(int frames, int periodFrames, int crossfadeFrames,
+                              PedalChain toReverb, PedalChain afterReverb,
+                              float[][] dry, float[][] reverb, float[][] later, double scale, double[] reverbGains) {
+        /**
+         * @return Or null if the chain has no reverb, or the holds don't overlap enough to be crossfaded
+         */
+        @Nullable
+        static HeldReverb of(final float[][] original, final PedalChain chain, final float playRate,
+                             final int periodTicks) {
+            final int channelCount = original.length, frames = original[0].length;
+            // Ticks pass as heard, while the sound plays through pitch times as many of its samples
+            final int periodFrames = (int) Math.round(periodTicks / 20.0 * playRate);
+            final int overlapFrames = frames - periodFrames;
+
+            final List<PedalEffect> effects = chain.effects();
+            int lastReverb = -1;
+            for (int i = 0; i < effects.size(); i++)
+                if (effects.get(i).type() == PedalEffectType.REVERB)
+                    lastReverb = i;
+            if (lastReverb < 0 || periodFrames <= 0 || overlapFrames < MIN_HOLD_OVERLAP_SECONDS * playRate)
+                return null;
+
+            // Up to its last reverb, the chain plays out over time; after it, it's applied to each hold as a whole
+            final PedalChain toReverb = new PedalChain(effects.subList(0, lastReverb + 1));
+            final PedalChain afterReverb = withoutTimeBased(new PedalChain(effects.subList(lastReverb + 1, effects.size())));
+
+            // The hold as the chain leaves it up to the reverb, with and without what its reverbs add. Both go through
+            // its other effects alike, so the reverbs' part is exactly the difference between them.
+            final double[] reverbGains = new double[effects.size()];
+            Arrays.fill(reverbGains, Double.NaN);
+            final float[][] dry = applyEffects(copy(original), withoutTimeBased(toReverb), playRate, false);
+            final float[][] reverb = applyEffects(copy(original), toReverb, playRate, false, reverbGains);
+            for (int c = 0; c < channelCount; c++)
+                for (int i = 0; i < frames; i++)
+                    reverb[c][i] -= dry[c][i];
+
+            // Every hold before this one started a whole number of periods earlier, so what's left of their reverbs
+            // lines up with this one's period by period
+            final float[][] loop = new float[channelCount][periodFrames];
+            for (int c = 0; c < channelCount; c++)
+                for (int i = 0; i < reverb[c].length; i++)
+                    loop[c][i % periodFrames] += reverb[c][i];
+
+            // Each hold's reverb fades in over the start of its overlap with the last hold, as that one's fades out
+            final int crossfadeFrames = Math.min(Math.min(overlapFrames, periodFrames),
+                (int) Math.round(HOLD_CROSSFADE_SECONDS * playRate));
+            final HeldReverb held = new HeldReverb(frames, periodFrames, crossfadeFrames, toReverb, afterReverb,
+                dry, reverb, new float[channelCount][frames], 1, reverbGains);
+            for (int i = 0; i < frames; i++) {
+                final float fade = held.fadeIn(i) * held.fadeOut(i);
+                for (int c = 0; c < channelCount; c++)
+                    held.later[c][i] = dry[c][i] + fade * loop[c][i % periodFrames];
+            }
+
+            final float[][] later = applyEffects(held.later, afterReverb, playRate, false);
+            final double scale = loudnessScale(later, rms(original, frames), peak(original), frames);
+            return new HeldReverb(frames, periodFrames, crossfadeFrames, toReverb, afterReverb,
+                dry, reverb, later, scale, reverbGains);
+        }
+
+        /**
+         * @return How much of a hold's baked reverb is heard at the given sample, as it fades in from the last hold's
+         */
+        float fadeIn(final int i) {
+            return (i < crossfadeFrames) ? holdCrossfade((double) i / crossfadeFrames) : 1;
+        }
+        /**
+         * @return How much of a hold's baked reverb is heard at the given sample, as it fades out into the next hold's
+         */
+        float fadeOut(final int i) {
+            if (i < periodFrames)
+                return 1;
+            return (i < periodFrames + crossfadeFrames)
+                ? holdCrossfade(1 - (double) (i - periodFrames) / crossfadeFrames) : 0;
+        }
+    }
+
+    /**
+     * An equal-power crossfade, which keeps the level steady when what's crossfaded is at a random phase to each
+     * other, as holds' reverbs usually are (see {@link #HOLD_CROSSFADE_SECONDS})
+     * @param position From 0 (the start of the crossfade) to 1 (its end)
+     * @return How much of a hold's baked reverb is heard as it fades in over the start of its overlap with the last
+     * hold. Fades out mirrored: {@code holdCrossfade(1 - position)}.
+     */
+    private static float holdCrossfade(final double position) {
+        return (float) Math.sin(Math.PI / 2 * position);
+    }
+
+    /**
+     * Runs the samples through the chain's rendered effects, in signal order
+     * @param dropDry Whether the first effect that plays out over time leaves the sound itself out, and keeps only
+     *                its echoes. Only once: a second delay (or a reverb) repeats the first one's echoes along with its own.
+     * @return The channels as the effects leave them, longer than the ones given if they played out over time
+     */
+    private static float[][] applyEffects(final float[][] channels, final PedalChain chain, final float playRate,
+                                          final boolean dropDry) {
+        return applyEffects(channels, chain, playRate, dropDry, null);
+    }
+    /**
+     * @param reverbGains How loud each reverb's reverb is made, by its place in the chain (see {@link #reverb}).
+     *                    One that's NaN is worked out from the sound reaching it, and stored.
+     */
+    private static float[][] applyEffects(float[][] channels, final PedalChain chain, final float playRate,
+                                          boolean dropDry, @Nullable final double[] reverbGains) {
+        final List<PedalEffect> effects = chain.effects();
+        for (int i = 0; i < effects.size(); i++) {
+            final PedalEffect effect = effects.get(i);
             switch (effect.type()) {
                 case FUZZ -> fuzz(channels, playRate, effect);
                 case BITCRUSH -> bitcrush(channels, playRate, effect);
-                case OCTAVE -> octave(channels, playRate, effect);
                 case EQ -> eq(channels, playRate, effect);
                 // Its tape tone; its wobble is applied while notes play, see PedalLiveEffects
                 case LOFI -> lofi(channels, playRate, effect);
@@ -103,19 +358,18 @@ final class PedalDsp {
                     dropDry = false;
                 }
                 case REVERB -> {
-                    channels = reverb(channels, playRate, effect, dropDry);
+                    channels = reverb(channels, playRate, effect, dropDry, reverbGains, i);
                     dropDry = false;
                 }
                 // Applied while notes play instead, see PedalLiveEffects
                 case TREMOLO, VIBRATO -> {}
             }
         }
+        return channels;
+    }
 
-        channels = trimTail(channels, playRate, dryFrames);
-        capLoudness(channels, dryRms, dryPeak, dryFrames);
-        for (final float[] channel : channels)
-            softLimit(channel);
-        return toPcm(channels);
+    private static PedalChain withoutTimeBased(final PedalChain chain) {
+        return new PedalChain(chain.effects().stream().filter((effect) -> !effect.type().timeBased).toList());
     }
 
     /**
@@ -124,9 +378,10 @@ final class PedalDsp {
      * played through pedals is never louder than the same note played at that volume without them.</p>
      * @param dryFrames How long the sound was before effects; loudness is compared over that much of it,
      *                  so an echo tail doesn't count as making it quieter
+     * @return What to multiply the rendered sound by, at most 1
      */
-    private static void capLoudness(final float[][] channels, final double dryRms, final float dryPeak,
-                                    final int dryFrames) {
+    private static double loudnessScale(final float[][] channels, final double dryRms, final float dryPeak,
+                                        final int dryFrames) {
         final double wetRms = rms(channels, dryFrames);
         final float wetPeak = peak(channels);
 
@@ -135,9 +390,11 @@ final class PedalDsp {
             scale = dryRms / wetRms;
         if (wetPeak * scale > dryPeak)
             scale = dryPeak / wetPeak;
+        return Math.min(scale, 1);
+    }
+    private static void scale(final float[][] channels, final double scale) {
         if (scale >= 1)
             return;
-
         for (final float[] samples : channels)
             for (int i = 0; i < samples.length; i++)
                 samples[i] *= (float) scale;
@@ -240,73 +497,6 @@ final class PedalDsp {
                     held = crushBits ? Math.round(x * levels) / levels : x;
                 }
                 samples[i] = x + mix * (held - x);
-            }
-        }
-    }
-
-    /**
-     * An octaver, built like the classic analog ones, so it works sample by sample and never changes a sound's length:
-     * <ul>
-     *     <li>The octave below comes from a flip-flop: the note's polarity flips on every other cycle (detected by
-     *     its zero crossings), which halves its pitch. Smoothed by a low-pass, for a round sub tone.</li>
-     *     <li>The octave above comes from folding the note's negative half up (its absolute value),
-     *     which doubles its pitch.</li>
-     * </ul>
-     * <p>Cycles are detected on all channels mixed together, so a Stereo sound's octave below stays in phase
-     * between them. Like a real octaver, it tracks single notes best: chords and samples with several notes
-     * confuse it into a glitchy, ring-modulated sound.</p>
-     * <p>Knobs: sub (the octave below's level), up (the octave above's level), dry (the note's own level).</p>
-     */
-    private static void octave(final float[][] channels, final float playRate, final PedalEffect effect) {
-        final float sub = effect.knobFraction(0), up = effect.knobFraction(1), dry = effect.knobFraction(2);
-
-        // Cycles are detected on the note with its upper harmonics smoothed off, so they don't add crossings
-        final float detectLp = onePoleCoefficient(OCTAVE_DETECT_HZ, playRate);
-        final float subLp = onePoleCoefficient(OCTAVE_SUB_TONE_HZ, playRate);
-        final float upLp = onePoleCoefficient(OCTAVE_UP_TONE_HZ, playRate);
-        final float dcBlock = 1 - (float) (2 * Math.PI * 20 / playRate);
-        final float envelopeRelease = (float) Math.exp(-1 / (0.02 * playRate));
-
-        final int channelCount = channels.length, frames = channels[0].length;
-        final float[] subState = new float[channelCount], upState = new float[channelCount];
-        final float[] dcIn = new float[channelCount], dcOut = new float[channelCount];
-
-        float detect = 0, envelope = 0;
-        // A cycle counts once the note has gone clearly below 0, then clearly back above it
-        boolean wentBelow = false;
-        float flip = 1;
-
-        for (int i = 0; i < frames; i++) {
-            float mono = 0;
-            for (final float[] samples : channels)
-                mono += samples[i];
-            mono /= channelCount;
-
-            detect += detectLp * (mono - detect);
-            final float level = Math.abs(detect);
-            envelope = (level > envelope) ? level : envelope * envelopeRelease;
-            final float threshold = Math.max(envelope * OCTAVE_THRESHOLD, OCTAVE_MIN_THRESHOLD);
-            if (detect < -threshold) {
-                wentBelow = true;
-            } else if (wentBelow && detect > threshold) {
-                wentBelow = false;
-                flip = -flip;
-            }
-
-            for (int c = 0; c < channelCount; c++) {
-                final float x = channels[c][i];
-
-                subState[c] += subLp * (x * flip - subState[c]);
-
-                // Folding leaves the note's average level behind as a DC offset, and twice the signal makes up
-                // for the octave above being quieter than the note it comes from
-                final float folded = Math.abs(x);
-                final float dc = folded - dcIn[c] + dcBlock * dcOut[c];
-                dcIn[c] = folded;
-                dcOut[c] = dc;
-                upState[c] += upLp * (2 * dc - upState[c]);
-
-                channels[c][i] = dry * x + sub * subState[c] + up * upState[c];
             }
         }
     }
@@ -458,10 +648,14 @@ final class PedalDsp {
      * <p>Knobs: decay (from {@link ReverbParams#MIN_DECAY_SECONDS} to {@link ReverbParams#MAX_DECAY_SECONDS}),
      * tone (how bright it is), mix (how loud it is).</p>
      * @param dropDry Whether to leave the note itself out, and keep only its reverb
+     * @param gains How loud the reverb is made, by the reverb's index: so a sound rendered from another
+     *              (like a held note's release tail, from its holds) rings at the same level as it.
+     *              If null, or NaN at the index, worked out from this sound as usual, and stored there.
      * @return The channels with the reverb, longer than the ones given
      */
     private static float[][] reverb(final float[][] channels, final float playRate,
-                                    final PedalEffect effect, final boolean dropDry) {
+                                    final PedalEffect effect, final boolean dropDry,
+                                    @Nullable final double[] gains, final int index) {
         final ReverbParams params = ReverbParams.of(effect);
         final int frames = channels[0].length;
         final int tailFrames = (int) Math.round(params.tailSeconds() * playRate);
@@ -519,7 +713,14 @@ final class PedalDsp {
         }
 
         // The reverb's loudness follows the mix knob, not how many echoes its loops happen to build up
-        final float wetGain = (wetEnergy > 1e-12) ? (float) (params.mix() * Math.sqrt(dryEnergy / wetEnergy)) : 0;
+        final float wetGain;
+        if (gains != null && !Double.isNaN(gains[index])) {
+            wetGain = (float) gains[index];
+        } else {
+            wetGain = (wetEnergy > 1e-12) ? (float) (params.mix() * Math.sqrt(dryEnergy / wetEnergy)) : 0;
+            if (gains != null)
+                gains[index] = wetGain;
+        }
         for (int c = 0; c < channels.length; c++) {
             final float[] in = channels[c], out = result[c];
             for (int i = 0; i < out.length; i++)
@@ -684,6 +885,12 @@ final class PedalDsp {
             for (final float sample : samples)
                 peak = Math.max(peak, Math.abs(sample));
         return peak;
+    }
+    private static float[][] copy(final float[][] channels) {
+        final float[][] copy = new float[channels.length][];
+        for (int c = 0; c < channels.length; c++)
+            copy[c] = channels[c].clone();
+        return copy;
     }
     private static double rms(final float[][] channels) {
         return rms(channels, Integer.MAX_VALUE);

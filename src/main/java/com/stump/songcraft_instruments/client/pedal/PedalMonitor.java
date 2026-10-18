@@ -103,15 +103,18 @@ public final class PedalMonitor {
 
             final HeldNoteSound held = heldOf(heldSounds, sound);
             if (held == null) {
-                played.add(new Played(sound, pitch, chain));
+                played.add(new Played(sound, pitch, chain, Played.NOT_HOLD, false));
                 continue;
             }
 
-            // Held notes only get effects that play out over time on their release
-            played.add(new Played(held.attack(), pitch, chain.withoutTimeBased()));
-            played.add(new Played(held.hold(), pitch, chain.withoutTimeBased()));
+            // Held notes only get their delays' echoes on their release, and their holds have their reverb baked in
+            final PedalChain whileHeld = chain.withoutDelays();
+            final int periodTicks = held.holdPeriodTicks(pitch);
+            played.add(new Played(held.attack(), pitch, whileHeld, Played.NOT_HOLD, false));
+            played.add(new Played(held.hold(), pitch, whileHeld, periodTicks, true));
+            played.add(new Played(held.hold(), pitch, whileHeld, periodTicks, false));
             if (held.release() != null)
-                played.add(new Played(held.release(), pitch, chain));
+                played.add(new Played(held.release(), pitch, chain, Played.NOT_HOLD, false));
         }
 
         final SoundManager soundManager = Minecraft.getInstance().getSoundManager();
@@ -120,12 +123,24 @@ public final class PedalMonitor {
         for (final Played sound : played) {
             if (sound.chain().isEmpty())
                 continue;
-            addRendered(rendered, soundManager, random, sound.sound().getStereo(), sound.chain(), sound.pitch());
-            addRendered(rendered, soundManager, random, sound.sound().getMono(), sound.chain(), sound.pitch());
+            addRendered(rendered, soundManager, random, sound.sound().getStereo(), sound);
+            addRendered(rendered, soundManager, random, sound.sound().getMono(), sound);
         }
         PedalBufferCache.prewarm(rendered);
     }
-    private record Played(NoteSound sound, float pitch, PedalChain chain) {}
+    /**
+     * @param holdPeriodTicks For a held note's hold, how many ticks apart its holds start; otherwise {@link #NOT_HOLD}
+     * @param firstHold For a hold, whether it's the note's first
+     */
+    private record Played(NoteSound sound, float pitch, PedalChain chain, int holdPeriodTicks, boolean firstHold) {
+        static final int NOT_HOLD = -1;
+
+        Sound withPedals(final Sound sound) {
+            return (holdPeriodTicks == NOT_HOLD)
+                ? PedalSounds.withPedals(sound, chain, pitch)
+                : PedalSounds.holdWithPedals(sound, chain, pitch, holdPeriodTicks, firstHold);
+        }
+    }
 
     @Nullable
     private static HeldNoteSound heldOf(@Nullable final HeldNoteSound[] heldSounds, final NoteSound attack) {
@@ -138,14 +153,13 @@ public final class PedalMonitor {
     }
 
     private static void addRendered(final List<Sound> rendered, final SoundManager soundManager,
-                                    final RandomSource random, @Nullable final SoundEvent event,
-                                    final PedalChain chain, final float pitch) {
+                                    final RandomSource random, @Nullable final SoundEvent event, final Played played) {
         if (event == null)
             return;
 
         final WeighedSoundEvents sounds = soundManager.getSoundEvent(event.getLocation());
         if (sounds != null)
-            addVariants(rendered, sounds, chain, pitch, random, 0);
+            addVariants(rendered, sounds, played, random, 0);
     }
 
     /**
@@ -153,15 +167,15 @@ public final class PedalMonitor {
      * Nested sound events are followed; any other kind of entry (like vanilla's references to other events)
      * only has one of its sounds picked.
      */
-    private static void addVariants(final List<Sound> rendered, final Weighted<Sound> entry, final PedalChain chain,
-                                    final float pitch, final RandomSource random, final int depth) {
+    private static void addVariants(final List<Sound> rendered, final Weighted<Sound> entry, final Played played,
+                                    final RandomSource random, final int depth) {
         if (entry instanceof Sound sound) {
-            rendered.add(PedalSounds.withPedals(sound, chain, pitch));
+            rendered.add(played.withPedals(sound));
         } else if (entry instanceof WeighedSoundEvents events && depth < MAX_VARIANT_DEPTH) {
             for (final Weighted<Sound> variant : ((WeighedSoundEventsAccessor) events).songcraft_instruments$getList())
-                addVariants(rendered, variant, chain, pitch, random, depth + 1);
+                addVariants(rendered, variant, played, random, depth + 1);
         } else {
-            rendered.add(PedalSounds.withPedals(entry.getSound(random), chain, pitch));
+            rendered.add(played.withPedals(entry.getSound(random)));
         }
     }
 

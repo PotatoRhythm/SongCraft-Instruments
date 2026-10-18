@@ -19,8 +19,6 @@ public enum PedalEffectType {
     TREMOLO("tremolo", Kind.LIVE, new Knob("speed", 7), new Knob("depth", 9), new Knob("shape", 3)),
     // See VibratoParams for what the knobs map to
     VIBRATO("vibrato", Kind.LIVE, new Knob("speed", 7), new Knob("depth", 6), new Knob("shape", 0)),
-    // The levels of the octave below, the octave above, and the original note
-    OCTAVE("octave", Kind.RENDERED, new Knob("sub", 10), new Knob("up", 0), new Knob("dry", 15)),
     // Each band's boost or cut, flat in the middle; see EqParams
     EQ("eq", Kind.RENDERED,
         new Knob("bass", EqParams.FLAT, EqParams::formatGain),

@@ -9,6 +9,7 @@ import com.stump.songcraft_instruments.sound.pedal.PedalSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.client.sounds.WeighedSoundEvents;
@@ -20,6 +21,7 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public class NoteSoundInstance extends AbstractTickableSoundInstance
         implements DampenableSoundInstance, WorldOriginSoundInstance, PedalSoundInstance {
@@ -47,9 +49,16 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
      */
     private final PedalChain pedalChain;
     /**
-     * Whether this note plays only the echoes of its sound, for a held note's release; see {@link PedalSounds}
+     * Swaps the sound for the rendered copy of it this note plays through its pedals (see {@link PedalSounds}),
+     * such as only the echoes of its sound, for a held note's release
      */
-    private final boolean echoTail;
+    private final UnaryOperator<Sound> withPedals;
+    /**
+     * What to multiply this note's volume by on each of its ticks, from its first, as it fades in.
+     * The last applies from then on. Null if it plays at its volume throughout.
+     */
+    private final @Nullable float[] volumeRamp;
+    private int ticks;
     /**
      * How long this note takes to fade out when dampened, in seconds
      */
@@ -79,6 +88,20 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
             Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId, PedalChain pedalChain,
             boolean echoTail
     ) {
+        // The pitch it plays at, same as SoundEngineMixin gives it
+        this(noteSound, pitch, meta, playDistSqr, initiatorId, oInitiatorId, pedalChain,
+            (sound) -> PedalSounds.withPedals(sound, pedalChain, pitch, echoTail), null);
+    }
+    /**
+     * @param pedalChain The pedals the note is played through, whose live effects apply to it
+     * @param withPedals Swaps the sound for the rendered copy of it to play through the pedals
+     * @param volumeRamp What to multiply the note's volume by on each of its ticks, from its first; the last applies
+     *                   from then on. Null to play at its volume throughout.
+     */
+    public NoteSoundInstance(NoteSound noteSound, float pitch, NoteSoundMetadata meta, double playDistSqr,
+            Optional<Integer> initiatorId, Optional<InitiatorID> oInitiatorId, PedalChain pedalChain,
+            UnaryOperator<Sound> withPedals, @Nullable float[] volumeRamp
+    ) {
         super(
                 noteSound.getByDistance(playDistSqr),
                 SoundSource.RECORDS,
@@ -99,7 +122,10 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
         this.initiatorId = initiatorId;
         this.oInitiatorId = oInitiatorId;
         this.pedalChain = pedalChain;
-        this.echoTail = echoTail;
+        this.withPedals = withPedals;
+        this.volumeRamp = (volumeRamp == null || volumeRamp.length == 0) ? null : volumeRamp;
+        if (this.volumeRamp != null)
+            this.volume = rampedVolume();
         this.fadeTime = Mth.clamp((float) pedalChain.tailSeconds(), FADE_TIME, MAX_PEDAL_FADE_TIME);
 
         this.sourcePos = meta.pos().getCenter();
@@ -119,7 +145,7 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
             this.y = 0;
             this.z = 0;
 
-            this.monoCrossfade = new CrossfadeMonoSoundInstance(noteSound.getMono(), this, pitch, pedalChain, echoTail);
+            this.monoCrossfade = new CrossfadeMonoSoundInstance(noteSound.getMono(), this, pitch, pedalChain, withPedals);
             updateCrossfade();
         } else if (playDistSqr <= NoteSound.LOCAL_RANGE * NoteSound.LOCAL_RANGE) {
             this.attenuation = Attenuation.NONE;
@@ -146,8 +172,7 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
     @Override
     public WeighedSoundEvents resolve(final SoundManager manager) {
         final WeighedSoundEvents events = super.resolve(manager);
-        // The pitch it plays at, same as SoundEngineMixin gives it
-        sound = PedalSounds.withPedals(sound, pedalChain, getPitch(), echoTail);
+        sound = withPedals.apply(sound);
         return events;
     }
 
@@ -166,7 +191,18 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
             volume = currentVolume;
         }
 
+        if (volumeRamp != null)
+            volume = rampedVolume();
         updateCrossfade();
+        ticks++;
+    }
+
+    /**
+     * @return The note's volume, as far as it has faded in by its volume ramp
+     */
+    private float rampedVolume() {
+        return (volumeRamp == null) ? currentVolume
+            : currentVolume * volumeRamp[Math.min(ticks, volumeRamp.length - 1)];
     }
 
     /**
@@ -177,8 +213,15 @@ public class NoteSoundInstance extends AbstractTickableSoundInstance
             return;
 
         final double dist = NoteSound.listenerPos().distanceTo(sourcePos);
-        volume = currentVolume * NoteSound.stereoGain(dist);
-        monoCrossfade.update(sourcePos, currentVolume * NoteSound.crossfadeMonoGain(dist));
+        final float rampedVolume = rampedVolume();
+        volume = rampedVolume * NoteSound.stereoGain(dist);
+        monoCrossfade.update(sourcePos, rampedVolume * NoteSound.crossfadeMonoGain(dist));
+    }
+
+    // A note that fades in may start silent, and must still start so it can
+    @Override
+    public boolean canStartSilent() {
+        return volumeRamp != null;
     }
 
     public Optional<CrossfadeMonoSoundInstance> getMonoCrossfade() {

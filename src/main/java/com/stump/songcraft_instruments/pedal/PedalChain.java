@@ -39,13 +39,14 @@ public record PedalChain(List<PedalEffect> effects) {
         return false;
     }
     /**
-     * @return This chain without its effects that play out over time, as held notes are played through
-     * until their release
+     * @return This chain without its delays, as held notes are played through until their release:
+     * echoes of a held sound would pile up as it repeats. Their reverb is kept, baked into their holds
+     * (see {@code PedalDsp#renderHold}), while their echoes only come with their release.
      */
-    public PedalChain withoutTimeBased() {
-        if (!isTimeBased())
+    public PedalChain withoutDelays() {
+        if (!has(PedalEffectType.DELAY))
             return this;
-        return new PedalChain(effects.stream().filter((effect) -> !effect.type().timeBased).toList());
+        return new PedalChain(effects.stream().filter((effect) -> effect.type() != PedalEffectType.DELAY).toList());
     }
 
     /**
@@ -131,6 +132,18 @@ public record PedalChain(List<PedalEffect> effects) {
                 tail += ReverbParams.of(effect).tailSeconds();
         }
         return Math.min(tail, DelayParams.MAX_TAIL_SECONDS);
+    }
+
+    /**
+     * @return How long the chain's reverb takes to die away by 60 dB, in seconds: the longest of its reverbs',
+     * or 0 if it has none
+     */
+    public double reverbDecaySeconds() {
+        double decay = 0;
+        for (final PedalEffect effect : effects)
+            if (effect.type() == PedalEffectType.REVERB)
+                decay = Math.max(decay, ReverbParams.of(effect).decaySeconds());
+        return decay;
     }
 
     /**
