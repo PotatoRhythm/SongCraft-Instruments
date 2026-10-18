@@ -33,9 +33,6 @@ These apply to every pedal, so the per-pedal sections don't repeat them.
 - **Transposing costs memory, not playing at the default pitch.** Most instruments have a sound file per note, so
   at the default transpose notes play at their file's own pitch and share one rendered copy. Each other transpose
   (or octave swap, or MIDI note past the instrument's range) renders its own copies, as much again as the default.
-- **Held notes only get the Delay on release.** Their attack and hold go through the rest of the chain, Reverb
-  included, since echoes of a looping sound would pile up while it's held. The Reverb is baked into the hold
-  instead (see the Reverb Pedal).
 - **Live effects (Tremolo, Vibrato) aren't rendered at all.** They change a note's volume or pitch while it plays, so they reach
   held notes the whole time they're held, and turning their knobs never renders anything. They always act as if
   they were last in the chain, wherever the pedal actually sits. The Lo-fi pedal is partly live: its wobble
@@ -61,6 +58,52 @@ These apply to every pedal, so the per-pedal sections don't repeat them.
   pedals are stomped or plugged in. Hovering a pedal's name shows its knobs, from 0 to 10 as on the pedal. It
   doesn't show which pedal block is which.
 - **Sound Physics Remastered** (when installed) adds its room reverb after the pedals, as a room would.
+
+### Held notes through the Delay and Reverb
+
+A held note's hold sound repeats every couple of seconds (2.5 s for most instruments), each repeat overlapping
+the end of the last, so echoes and reverb ringing on past each repeat would pile up. Instead:
+
+- **Each repeat has what's ringing while it plays baked in:** its own echoes and reverb, plus what's left of the
+  earlier repeats'. It crossfades into the next repeat's over 0.15 s where they overlap, so it carries on smoothly.
+  While held, a note sounds as through a real pedal: steady and thickened by its echoes, ringing in its room.
+- **It builds up as a note starts.** The first repeat only carries its own, and later ones the full amount.
+  The attack plays once, so it rings on with its own echoes and reverb.
+- **Pedals after the Delay or Reverb apply to the note and its echoes together,** as on other notes: Delay then
+  Fuzz gives held notes the same dense wall.
+- **Held notes ring on when let go.** What's baked into the attack and holds fades out with the note, so a release
+  tail takes over: the note played out through the pedals as it was played (its attack, then its holds), let go
+  when it was and fading out as it does. Its echoes come when they would, of what was playing just before it was
+  let go: a short press echoes its attack. The tail fades in by just as much as the holds' ringing has gone.
+  Instruments with a release sound play it through the pedals too.
+- **Tested against the real thing** (a note played out through the pedals in full, on real saxophone, Irina and
+  cello holds, delays from short to long and with high feedback, and both orders with the Reverb): exact while
+  held with repeats on time, and within about 1 dB once a released note has faded.
+
+**Issues and shortcomings:**
+- **What rings can waver where repeats overlap.** Repeats start on game ticks, so usually a few milliseconds off
+  from exactly on time, which puts the note's tone in what the two ring with at a random phase to each other for
+  the 0.15 s they crossfade. They may briefly add up or partly cancel, a few dB either way, most on low, steady
+  notes at a high Mix. The note itself is unaffected.
+- **The same goes for the release,** while the holds' ringing hands over to the tail as the note fades (usually
+  over a second or two): within about 5 dB either way, then within about 1 dB once the note is gone.
+- **The second repeat rings a touch too much.** It also carries what repeats from before the note started would
+  ring with, which never played: under 0.1 dB with the Reverb, up to 1 dB with long, high-feedback delays.
+- **The release tail ignores volume drops while fading.** Instruments whose holds get quieter as they repeat (most
+  held ones) drop a step if a new repeat starts while the note fades, which the tail doesn't follow.
+- **Hold sounds must be longer than the time between repeats.** One that isn't leaves gaps that can't be
+  crossfaded, so it would only get the Delay and Reverb on release, from a short slice of the held sound. Every held
+  instrument's holds overlap by at least 0.38 s (the Guild Wars 2 organ's), so none do; keep it in mind when
+  adding held instruments.
+- **Turning a Delay or Reverb knob renders held instruments' attacks and holds again.** Each step is a new set
+  of them: two holds per note (the first repeat and the rest) and an attack up to 4 seconds longer, about 2.1 MB
+  per stereo note, against about 0.8 MB without them. Holds render in about 7 ms with a Delay, 20 ms with the
+  Reverb and 30 ms with both, and the instrument the player has open is rendered ahead of time.
+- **Release tails are rendered when a note is let go,** as they depend on when: about 15 ms with a Delay, 35 to
+  65 ms with the Reverb and up to 95 ms with both, while the tail is still fading in, so it's barely heard. Each is
+  about 1 MB. Once settled (after 7 to 11 seconds held), notes let go at the same point of a repeat share one,
+  so a note has at most one per tick of its repeat (50) for each fade and setting; shorter presses each have
+  their own.
 
 ## Fuzz Pedal
 
@@ -133,9 +176,8 @@ tape delay.
 - **Dampening fades instead of cutting.** A dampened note with echoes fades out over its tail's length (between
   0.5 and 2 seconds) instead of the usual 0.5, so the echoes trail off rather than stopping dead. The note itself
   fades out more slowly too.
-- **Held notes echo on release.** Instruments with a release sound (like the flute) play their release through
-  the delay. Those without one play echoes of a short slice of the held sound (0.3 s, fading out) when the
-  note is let go, while the note itself fades out as usual.
+- **Held notes echo the whole time they're held,** and ring on when let go; see "Held notes through the Delay
+  and Reverb" above.
 - **Order with the Fuzz matters.** Fuzz then Delay gives clean echoes of a fuzzed note. Delay then Fuzz fuzzes
   the echoes along with the note: they intermodulate into a dense, sustained wall, and the fuzz's compression
   brings the later echoes up nearly as loud as the note.
@@ -154,9 +196,8 @@ tape delay.
   delay takes up to about 70 MB (the long bass samples), a good share of the default 256 MB cache. With several
   players' delays heard at once, other variants get let go more often. Raise `pedal_cache_mb` if notes start to
   take a moment to sound again.
-- **Held-note echo tails are an approximation.** They echo a slice of the held sound, not exactly what was
-  playing when the note was let go, and at the volume the note had then. Very short presses (released during
-  the attack) use the same slice.
+- **A note let go in its very first tick** (before its hold has even started) echoes a short slice of its held
+  sound instead of its attack.
 - **Dampened notes fade more slowly.** Notes through a delay fade out over up to 2 seconds when dampened, so
   quick dampen-and-replay playing sounds smeared.
 
@@ -218,7 +259,7 @@ the rest of the chain, rather than rendered into the sound.
   added harmonics.
 
 **How it behaves:**
-- **Held notes pulse the whole time,** from attack through hold to release, unlike the Delay.
+- **Held notes pulse the whole time,** from attack through hold to release.
 - **Every note on a client shares one clock,** so chords and fast passages pulse together, as through one real
   pedal.
 - **Volume updates every 10 ms,** fast enough for smooth pulses up to the top speed. It goes through the same path
@@ -335,20 +376,8 @@ stereo sounds come out wide.
 
 **How it behaves:**
 - **Same at every pitch,** like every pedal: the decay and tone come out as set whatever the note.
-- **Held notes get it the whole time they're held.** A held note's hold sound repeats every couple of seconds,
-  each repeat overlapping the end of the last. Each repeat is rendered with the reverb that's ringing while it
-  plays (its own, plus what's left of the earlier repeats' tails) baked in, and crossfades into the next one's,
-  so the reverb carries on smoothly without piling up. The attack plays once, so it rings on with its own reverb.
-- **The reverb builds up as a note starts.** The first repeat only carries its own reverb, and later ones the
-  full amount, so long decays swell in over the first few seconds as they would in a room.
-- **Held notes ring on when let go,** with the reverb they'd built up dying away at the Decay's rate, plus that
-  of the note as it fades out. The reverb baked into the hold fades out with the note, so a release tail rendered
-  for it takes over: the hold's repeats played out through the reverb, then faded as the note fades, keeping what
-  rings on from the release. It fades in by just as much as the hold's reverb has gone. A note let go before its
-  reverb had built up rings on with as much as it had. Instruments with a release sound play it through the
-  reverb too.
-- **Pedals after the Reverb apply to the note and its reverb together** on held notes too, so Reverb then Fuzz
-  fuzzes the whole reverberant sound, as on other notes.
+- **Held notes get it the whole time they're held,** building up as they start, as long decays would in a room,
+  and ring on when let go; see "Held notes through the Delay and Reverb" above.
 - **Dampening fades instead of cutting,** over up to 2 seconds, like the Delay, so the reverb dies away rather than
   stopping dead.
 - **Fast to render**: about 20 ms for a 2 second stereo note with the longest decay, so a first note after a knob
@@ -357,32 +386,8 @@ stereo sounds come out wide.
   Reverb then Delay repeats the whole reverberant sound, which gets muddy quickly.
 
 **Issues and shortcomings:**
-- **Held notes' reverb can waver where repeats overlap.** Repeats start on game ticks, so usually a few
-  milliseconds off from exactly on time, which puts the note's tone in their two reverbs at a random phase to
-  each other for the 0.15 s they crossfade. They may briefly add up or partly cancel, a few dB either way,
-  most on low, steady notes at a high Mix. The note itself is unaffected.
-- **Held notes' release tail is rendered for a release halfway into a repeat.** Let go anywhere else, it's at a
-  random phase to the hold's reverb as they hand over, so it's within about 3 dB of the real reverb while the
-  note fades, and 1 to 3 dB after (tested on the saxophone, Irina and cello against the reverb played out in full).
-  Let go within a few milliseconds of halfway, the two add up in phase, up to 4 dB too loud while the note fades.
-- **The release tail assumes the reverb dies away and builds up evenly,** at its Decay's rate. Close for this
-  reverb, which tested within 1 to 2 dB on notes let go half a second to a few seconds in.
-- **Held notes' release tail ignores volume drops while fading.** Instruments whose holds get quieter as they
-  repeat (most held ones) drop a step if a new repeat starts while the note fades, which the tail doesn't follow.
-- **The reverb on a held note's second repeat is a touch too strong.** It also carries tails of repeats from
-  before the note started, which never played. Measured at under 0.1 dB even at the longest decay, so inaudible.
-- **Hold sounds must be longer than the time between repeats.** One that isn't leaves gaps that can't be
-  crossfaded, so it would only get the reverb on release, from a short slice of the held sound. Every held
-  instrument's holds overlap by at least 0.38 s (the Guild Wars 2 organ's), so none do; keep it in mind when
-  adding held instruments.
-- **Turning its knobs renders held instruments' attacks and holds again.** Each step is a new set of them, two
-  holds per note (the first repeat and the rest), an attack up to 4 seconds longer and a release tail of the fade
-  plus up to 4 seconds, about 3.1 MB per stereo note, against about 1.6 MB without the Reverb. Renders are quick
-  (about 20 ms per hold, 60 ms per release tail, in the background), and the instrument the player has open is
-  rendered ahead of time. Each note's release tail is rendered ahead as it starts, for a release at its starting
-  volume. A note let go at another volume (most held instruments get quieter as their holds repeat) or early on
-  (when held notes fade out faster) renders its own the first time, starting about 60 ms late, while it's still
-  fading in, so it's barely heard.
+- **Held notes' reverb can waver** where their repeats overlap and as they're let go; see "Held notes through
+  the Delay and Reverb" above.
 - **Notes ring on.** Up to 4 seconds past each note, so fast passages blur together, more notes sound at once
   (towards Minecraft's limit on simultaneous sounds), and each rendered note takes more cache memory, like the Delay.
 - **The loudness cap can turn notes down.** The reverb adds to the note while it's sounding, so at a high Mix the

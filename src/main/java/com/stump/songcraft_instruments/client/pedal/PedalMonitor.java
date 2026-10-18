@@ -107,12 +107,11 @@ public final class PedalMonitor {
                 continue;
             }
 
-            // Held notes only get their delays' echoes on their release, and their holds have their reverb baked in
-            final PedalChain whileHeld = chain.withoutDelays();
+            // Held notes' holds have their echoes and reverb baked in, the first and later ones differently
             final int periodTicks = held.holdPeriodTicks(pitch);
-            played.add(new Played(held.attack(), pitch, whileHeld, Played.NOT_HOLD, false));
-            played.add(new Played(held.hold(), pitch, whileHeld, periodTicks, true));
-            played.add(new Played(held.hold(), pitch, whileHeld, periodTicks, false));
+            played.add(new Played(held.attack(), pitch, chain, Played.NOT_HOLD, false));
+            played.add(new Played(held.hold(), pitch, chain, periodTicks, true));
+            played.add(new Played(held.hold(), pitch, chain, periodTicks, false));
             if (held.release() != null)
                 played.add(new Played(held.release(), pitch, chain, Played.NOT_HOLD, false));
         }

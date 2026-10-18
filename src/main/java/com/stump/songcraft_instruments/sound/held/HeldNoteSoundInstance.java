@@ -3,7 +3,6 @@ package com.stump.songcraft_instruments.sound.held;
 import com.stump.songcraft_instruments.client.util.ClientUtil;
 import com.stump.songcraft_instruments.particle.ModParticles;
 import com.stump.songcraft_instruments.pedal.PedalChain;
-import com.stump.songcraft_instruments.pedal.PedalEffectType;
 import com.stump.songcraft_instruments.sound.CrossfadeMonoSoundInstance;
 import com.stump.songcraft_instruments.sound.DampenableSoundInstance;
 import com.stump.songcraft_instruments.sound.NearestCopyFilter;
@@ -30,7 +29,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -65,8 +66,8 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
     private boolean dampened;
     /**
      * The effects pedals this note (and its holds and release) are played through, see {@link PedalSounds}.
-     * Its delays' echoes only apply to its release, while its reverb is baked into its holds
-     * (see {@link PedalSounds#holdWithPedals}).
+     * Its echoes and reverb are baked into its holds (see {@link PedalSounds#holdWithPedals}), and ring on from
+     * its release tail.
      */
     private final PedalChain pedalChain;
     /**
@@ -252,16 +253,12 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
 
         }
 
-        // A hold's reverb is baked in, and rings on from its own release tail as it fades out
-        final boolean reverbTail = (phase == Phase.HOLD) && pedalChain.has(PedalEffectType.REVERB);
-        if (reverbTail)
+        // A hold's echoes and reverb are baked in, and ring on from its own release tail as it fades out
+        if (phase == Phase.HOLD && pedalChain.isTimeBased())
             playReleaseTail();
 
-        // Without a release sound, a delay's echoes come from a slice of the held sound instead (as does the reverb
-        // of an attack). An attack that hasn't started its hold yet stands in for it; once it has, the hold plays them
-        final boolean releasesHold = (phase == Phase.HOLD) || (phase == Phase.ATTACK && !chainedHolding);
-        final boolean sliceTail = pedalChain.has(PedalEffectType.DELAY) || (pedalChain.isTimeBased() && !reverbTail);
-        if (releasesHold && heldSoundContainer.release() == null && sliceTail) {
+        // An attack let go before its hold even started rings on from a slice of the held sound instead
+        if (phase == Phase.ATTACK && !chainedHolding && heldSoundContainer.release() == null && pedalChain.isTimeBased()) {
             final Vec3 pos = getSourcePos();
 
             heldSoundContainer.hold().playLocally(
@@ -273,44 +270,85 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
     }
 
     /**
-     * Plays what this note's reverb rings on with as it fades out (see {@link PedalSounds#releaseTailWithPedals}).
-     * <p>Its holds' baked reverb fades out with them, so the tail fades in as they do, by just as much as the reverb
-     * the holds have lost by then: the reverb, dying away at its own rate, takes over from the holds fading at
-     * theirs. The two are usually at a random phase to each other, so it's their power that adds up.</p>
-     * <p>A note let go before its reverb has built up rings on with as much of it as it has. The reverb builds up,
-     * and dies away, as any reverb does, at the rate its decay sets.</p>
+     * The longest a held note's holds and attack are, in ticks, as far as it matters to when what rings has settled
+     */
+    private static final int MAX_SOUND_TICKS = 3 * 20;
+
+    /**
+     * Plays what this note's echoes and reverb ring on with as it fades out
+     * (see {@link PedalSounds#releaseTailWithPedals}).
+     * <p>What's baked into its attack and holds fades out with them, so the tail fades in as they do, by just as much
+     * as they've lost by then: what rings, dying away at its own rate, takes over from the holds fading at theirs.
+     * The two are usually at a random phase to each other, so it's their power that adds up. When what rings comes
+     * back, and how much, goes by the chain (see {@link PedalChain#ringingByTick}).</p>
+     * <p>Each tail is played out from the note's attack as it was held, so its echoes come when they would, of
+     * what was playing just before it was let go. Once what rings has settled, notes let go at the same point of
+     * a hold sound the same, so share one.</p>
      */
     private void playReleaseTail() {
-        final double decay = pedalChain.reverbDecaySeconds();
-        if (volume <= 0 || decay <= 0)
+        final double[] ringing = pedalChain.ringingByTick();
+        if (volume <= 0 || ringing.length == 0)
             return;
         final float[] fade = releaseFade(volume, overallTimeAlive);
 
-        // The reverb's energy, out of what it holds to while the note's held, as it dies away each tick and is fed
-        // by what's left of the note
-        final double keep = Math.exp(-6 * Math.log(10) / (decay * 20));
-        final double builtUp = Math.sqrt(1 - Math.pow(10, -6 * (overallTimeAlive / 20.0) / decay));
+        // How long it has sounded, from its attack (a tick before its first hold, see handleChainHolding)
+        final int attackLeadTicks = (int) (heldSoundContainer.holdDelay() * 20) + 1;
+        final int soundedTicks = overallTimeAlive + attackLeadTicks;
+        // Once settled, as the shortest time it would sound the same at: as far into a hold
+        final int settledTicks = ringing.length + MAX_SOUND_TICKS;
+        final int heldTicks = (soundedTicks < settledTicks || holdPeriodTicks <= 0) ? soundedTicks
+            : settledTicks + Math.floorMod(soundedTicks - settledTicks, holdPeriodTicks);
+
+        // What rings each tick from the release (out of what it rings with once settled), from the note as it sounded
+        // before the release and as it fades, and how much of it the holds still carry
         final float[] ramp = new float[fade.length + 1];
-        double energy = 1;
-        for (int i = 0; i < fade.length; i++) {
-            final double left = fade[i] / volume;
-            energy = energy * keep + (1 - keep) * left * left;
-            ramp[i] = (float) (builtUp * Math.sqrt(Math.max(0, 1 - left * left / energy)));
+        for (int tick = 0; tick < ramp.length; tick++) {
+            double ringingNow = 0, carried = 0;
+            for (int lag = 0; lag < ringing.length; lag++) {
+                final int from = tick - lag;
+                final double power = (from >= 0) ? ((from < fade.length) ? square(fade[from] / volume) : 0)
+                    : (-from <= soundedTicks) ? 1 : 0;
+                ringingNow += ringing[lag] * power;
+                if (lag <= soundedTicks + tick)
+                    carried += ringing[lag];
+            }
+
+            final double left = (tick < fade.length) ? square(fade[tick] / volume) : 0;
+            ramp[tick] = (ringingNow <= 1e-9) ? 1 : (float) Math.sqrt(Math.max(0, 1 - left * carried / ringingNow));
         }
-        // Once the note's gone, all that's left of the reverb is the tail
-        ramp[fade.length] = (float) builtUp;
+
+        // Each of the hold's sound files (Stereo, and Mono) rings with the attack's of the same kind
+        final SoundManager manager = Minecraft.getInstance().getSoundManager();
+        final Map<ResourceLocation, Sound> attacks = new HashMap<>();
+        putAttack(attacks, manager, heldSoundContainer.hold().getStereo(), heldSoundContainer.attack().getStereo());
+        putAttack(attacks, manager, heldSoundContainer.hold().getMono(), heldSoundContainer.attack().getMono());
 
         final int fadeTicks = fade.length + 1, periodTicks = holdPeriodTicks;
-        final PedalChain whileHeld = pedalChain.withoutDelays();
         final float tailPitch = getPitch();
+        final PedalChain chain = pedalChain;
         final Vec3 pos = getSourcePos();
         heldSoundContainer.hold().playLocally(
             pitch, volume,
             new BlockPos((int) pos.x, (int) pos.y, (int) pos.z),
             pedalChain,
-            (sound) -> PedalSounds.releaseTailWithPedals(sound, whileHeld, tailPitch, periodTicks, fadeTicks),
+            (sound) -> PedalSounds.releaseTailWithPedals(sound, chain, tailPitch, periodTicks, fadeTicks, heldTicks,
+                attacks.get(sound.getLocation()), attackLeadTicks),
             ramp
         );
+    }
+    private void putAttack(final Map<ResourceLocation, Sound> attacks, final SoundManager manager,
+                           @Nullable final SoundEvent hold, @Nullable final SoundEvent attack) {
+        final Sound holdSound = soundOf(manager, hold), attackSound = soundOf(manager, attack);
+        if (holdSound != null && attackSound != null)
+            attacks.put(holdSound.getLocation(), attackSound);
+    }
+    @Nullable
+    private Sound soundOf(final SoundManager manager, @Nullable final SoundEvent event) {
+        final WeighedSoundEvents events = (event == null) ? null : manager.getSoundEvent(event.getLocation());
+        return (events == null) ? null : events.getSound(random);
+    }
+    private static double square(final double value) {
+        return value * value;
     }
 
     /**
@@ -403,8 +441,7 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
 
 
     /**
-     * @return The note's whole chain, though only its release gets its delays' echoes.
-     * Live effects (like a tremolo) apply to all of it, as it's held.
+     * @return The note's whole chain. Live effects (like a tremolo) apply to all of it, as it's held.
      */
     @Override
     public PedalChain getPedalChain() {
@@ -421,27 +458,26 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
 
     /**
      * @return The rendered copy this note plays of one of its sounds (its Stereo sound, or its Mono crossfade's)
-     * through its pedals. Its delays' echoes only come with its release, as they'd pile up as its holds repeat,
-     * while its reverb is baked into its holds. Its attack plays once, so it rings on with its own reverb.
+     * through its pedals. Its echoes and reverb are baked into its holds, as they'd pile up as its holds repeat.
+     * Its attack plays once, so it rings on with its own.
      */
     private Sound withPedals(final Sound sound) {
-        final PedalChain chain = pedalChain.withoutDelays();
         return (phase == Phase.HOLD)
-            ? PedalSounds.holdWithPedals(sound, chain, getPitch(), holdPeriodTicks, firstHold)
-            : PedalSounds.withPedals(sound, chain, getPitch());
+            ? PedalSounds.holdWithPedals(sound, pedalChain, getPitch(), holdPeriodTicks, firstHold)
+            : PedalSounds.withPedals(sound, pedalChain, getPitch());
     }
 
     /**
      * Starts rendering the hold that follows this sound, if it's a different copy than this note has played so far
-     * (with a reverb baked into its holds, see {@link PedalSounds#holdWithPedals}), so it's ready when it starts:
+     * (with echoes and reverb baked into its holds, see {@link PedalSounds#holdWithPedals}), so it's ready when it starts:
      * the first hold starts right after the attack, and the second, the first not to be the first, after it.
-     * The first hold also starts rendering the note's release tail.
+     * (A release tail depends on when the note's let go, so is rendered then.)
      */
     private void prepareNextHold(final SoundManager manager) {
-        if (!pedalChain.has(PedalEffectType.REVERB) || (phase == Phase.HOLD && !firstHold))
+        if (!pedalChain.isTimeBased() || (phase == Phase.HOLD && !firstHold))
             return;
 
-        final PedalChain whileHeld = pedalChain.withoutDelays();
+        final PedalChain whileHeld = pedalChain;
         final float pitch = getPitch();
         if (phase == Phase.ATTACK) {
             prepareHolds(manager, (sound) -> PedalSounds.holdWithPedals(sound, whileHeld, pitch, holdPeriodTicks, true));
@@ -449,10 +485,6 @@ public class HeldNoteSoundInstance extends AbstractTickableSoundInstance
         }
 
         prepareHolds(manager, (sound) -> PedalSounds.holdWithPedals(sound, whileHeld, pitch, holdPeriodTicks, false));
-        // Its release tail too, for the fade it's most likely to have: let go once past the quicker early fades
-        final int fadeTicks = releaseFade(volume, Math.max(overallTimeAlive,
-            (int) Math.ceil(heldSoundContainer.fullHoldFadeoutTime() * 20))).length + 1;
-        prepareHolds(manager, (sound) -> PedalSounds.releaseTailWithPedals(sound, whileHeld, pitch, holdPeriodTicks, fadeTicks));
     }
     /**
      * Starts rendering the given copy of the note's hold sound, as it'd be played from here: Stereo or Mono,

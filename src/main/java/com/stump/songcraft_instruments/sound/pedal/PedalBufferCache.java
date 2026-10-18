@@ -183,7 +183,12 @@ public final class PedalBufferCache {
                 case ECHO_TAIL -> PedalDsp.render(dry, fx.chain(), fx.pitch(), true);
                 case FIRST_HOLD -> PedalDsp.renderHold(dry, fx.chain(), fx.pitch(), fx.periodTicks(), true);
                 case HOLD -> PedalDsp.renderHold(dry, fx.chain(), fx.pitch(), fx.periodTicks(), false);
-                case RELEASE_TAIL -> PedalDsp.renderReleaseTail(dry, fx.chain(), fx.pitch(), fx.periodTicks(), fx.fadeTicks());
+                case RELEASE_TAIL -> {
+                    // A note let go early rings with the echoes of its attack too
+                    final ResourceLocation attack = PedalSounds.attackOf(fx.original());
+                    yield PedalDsp.renderReleaseTail(dry, (attack == null) ? null : ChannelTwinSounds.decode(resources, attack),
+                        fx.chain(), fx.pitch(), fx.periodTicks(), fx.fadeTicks(), fx.heldTicks(), fx.attackLeadTicks());
+                }
             };
         } catch (RuntimeException e) {
             // Better heard dry than not at all

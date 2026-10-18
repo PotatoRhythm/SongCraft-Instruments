@@ -38,16 +38,6 @@ public record PedalChain(List<PedalEffect> effects) {
                 return true;
         return false;
     }
-    /**
-     * @return This chain without its delays, as held notes are played through until their release:
-     * echoes of a held sound would pile up as it repeats. Their reverb is kept, baked into their holds
-     * (see {@code PedalDsp#renderHold}), while their echoes only come with their release.
-     */
-    public PedalChain withoutDelays() {
-        if (!has(PedalEffectType.DELAY))
-            return this;
-        return new PedalChain(effects.stream().filter((effect) -> effect.type() != PedalEffectType.DELAY).toList());
-    }
 
     /**
      * @return The part of this chain rendered into sounds: without its purely live effects
@@ -135,15 +125,60 @@ public record PedalChain(List<PedalEffect> effects) {
     }
 
     /**
-     * @return How long the chain's reverb takes to die away by 60 dB, in seconds: the longest of its reverbs',
-     * or 0 if it has none
+     * How the chain's effects that play out over time ring with a note's sound after it: echoes, reverb, and the
+     * reverb of echoes (or echoes of reverb), as they add up in order.
+     * <p>Each effect's own ringing goes by its knobs: a delay's echoes every echo time, each feedback times as loud
+     * as the last, and a reverb's ringing dying away evenly over its decay, as loud in all as its mix. Counted in
+     * energy, as what's rung with adds up at a random phase. A delay's echoes also darken as they repeat,
+     * which isn't counted.</p>
+     * @return The share of all the energy they ring with that comes the given number of ticks after the sound
+     * that rings with it, by tick. Adds up to 1, or empty if nothing in the chain rings on.
      */
-    public double reverbDecaySeconds() {
-        double decay = 0;
-        for (final PedalEffect effect : effects)
-            if (effect.type() == PedalEffectType.REVERB)
-                decay = Math.max(decay, ReverbParams.of(effect).decaySeconds());
-        return decay;
+    public double[] ringingByTick() {
+        // The sound itself, then each effect's ringing added to everything before it
+        double[] ringing = {1};
+        for (final PedalEffect effect : effects) {
+            final double[] own;
+            if (effect.type() == PedalEffectType.DELAY) {
+                final DelayParams params = DelayParams.of(effect);
+                own = new double[ticks(params.tailSeconds()) + 1];
+                double echo = params.mix();
+                for (int n = 1; n * params.seconds() <= params.tailSeconds() + 1e-9; n++) {
+                    own[Math.min(own.length - 1, (int) Math.round(n * params.seconds() * 20))] += echo * echo;
+                    echo *= params.feedback();
+                }
+            } else if (effect.type() == PedalEffectType.REVERB) {
+                final ReverbParams params = ReverbParams.of(effect);
+                own = new double[ticks(params.tailSeconds()) + 1];
+                // Dying away by 60 dB over its decay, tick by tick, and as loud in all as its mix
+                final double perTick = Math.pow(10, -6 / (params.decaySeconds() * 20));
+                final double total = 1 - Math.pow(perTick, own.length);
+                for (int n = 0; n < own.length && total > 0; n++)
+                    own[n] = params.mix() * params.mix() * Math.pow(perTick, n) * (1 - perTick) / total;
+            } else {
+                continue;
+            }
+            own[0] += 1;
+
+            final double[] combined = new double[ringing.length + own.length - 1];
+            for (int i = 0; i < ringing.length; i++)
+                for (int j = 0; j < own.length; j++)
+                    combined[i + j] += ringing[i] * own[j];
+            ringing = combined;
+        }
+
+        ringing[0] -= 1;
+        double sum = 0;
+        for (final double share : ringing)
+            sum += share;
+        if (sum <= 1e-12)
+            return new double[0];
+        for (int i = 0; i < ringing.length; i++)
+            ringing[i] /= sum;
+        return ringing;
+    }
+    private static int ticks(final double seconds) {
+        return (int) Math.ceil(seconds * 20);
     }
 
     /**

@@ -56,14 +56,14 @@ final class PedalDsp {
      */
     private static final float TAIL_SILENCE = 1e-4f;
     /**
-     * How much a held note's holds must overlap, as heard, for their reverb to be baked in (see {@link #renderHold}).
-     * Holds that leave gaps can't be crossfaded, so play without it.
+     * How much a held note's holds must overlap, as heard, for their echoes and reverb to be baked in
+     * (see {@link #renderHold}). Holds that leave gaps can't be crossfaded, so play without them.
      */
     private static final double MIN_HOLD_OVERLAP_SECONDS = 0.02;
     /**
-     * How long, as heard, one hold's baked reverb crossfades into the next one's, at most (and at most their overlap).
+     * How long, as heard, one hold's baked ringing crossfades into the next one's, at most (and at most their overlap).
      * Holds start on game ticks, so usually a few milliseconds off from a period apart, which puts the note's tone
-     * in the two reverbs at a random phase to each other: they partly cancel or add up while they crossfade.
+     * in what the two ring with at a random phase to each other: they partly cancel or add up while they crossfade.
      * Short keeps that brief, while long enough not to be heard as a sudden change.
      */
     private static final double HOLD_CROSSFADE_SECONDS = 0.15;
@@ -104,24 +104,24 @@ final class PedalDsp {
     }
 
     /**
-     * Renders a held note's hold sound with its reverb baked in.
+     * Renders a held note's hold sound with its echoes and reverb baked in.
      * <p>Holds repeat while a note is held, each starting {@code periodTicks} after the last and overlapping its end,
-     * so a reverb ringing on past each one would pile up as they repeat. Instead each hold carries the reverb that's
+     * so echoes and reverb ringing on past each one would pile up as they repeat. Instead each hold carries what's
      * ringing while it plays:</p>
      * <ol>
-     *     <li>The hold is rendered through the chain up to its last reverb, with the reverb's whole tail.</li>
-     *     <li>What the reverbs added (the result without the hold itself) is cut into pieces one period long,
-     *     which are added up: the tails of the holds before it that are still ringing, plus its own reverb.
+     *     <li>The hold is rendered through the chain up to its last effect that plays out over time (a delay or
+     *     reverb), with its whole tail.</li>
+     *     <li>What those effects added (the result without the hold itself) is cut into pieces one period long,
+     *     which are added up: the echoes and reverb of the holds before it that are still ringing, plus its own.
      *     That repeats every period, so it loops seamlessly from one hold to the next.</li>
      *     <li>It's added to the hold, crossfading into the next hold's at the start of where the two overlap
-     *     (see {@link #HOLD_CROSSFADE_SECONDS}), and the rest of the chain after the reverb is applied to them
-     *     together.</li>
+     *     (see {@link #HOLD_CROSSFADE_SECONDS}), and the rest of the chain is applied to them together.</li>
      * </ol>
-     * <p>The first hold carries only its own reverb, so the reverb builds up as the note starts. Later holds carry
-     * the tails of holds before the first too, so the second is slightly more reverberant than it should be.</p>
+     * <p>The first hold carries only its own ringing, so it builds up as the note starts. Later holds carry
+     * the tails of holds before the first too, so the second rings slightly more than it should.</p>
      * <p>Holds that don't overlap the next one (their sound being shorter than the time between them) can't be
-     * crossfaded, so are rendered without their reverb, as held notes used to be.</p>
-     * @param chain The chain the note is played through while held, without its delays
+     * crossfaded, so are rendered without those effects, which only come with their release.</p>
+     * @param chain The chain the note is played through
      * @param periodTicks How many ticks apart the note's holds start
      * @param first Whether this is the note's first hold, which no hold before it rings into
      * @return The hold's samples, the same length and format as the given sound's
@@ -131,28 +131,28 @@ final class PedalDsp {
         final float playRate = sound.format().getSampleRate() * pitch;
         final float[][] original = toFloat(sound.samples(), sound.format().getChannels());
 
-        final HeldReverb held = HeldReverb.of(original, chain, playRate, periodTicks);
+        final HeldRinging held = HeldRinging.of(original, chain, playRate, periodTicks);
         if (held == null) {
-            final PedalChain withoutReverb = withoutTimeBased(chain);
+            final PedalChain withoutRinging = withoutTimeBased(chain);
             // Nothing left to render: played as it is, as it would be without pedals
-            return withoutReverb.isEmpty() ? sound.samples() : render(sound, withoutReverb, pitch, false);
+            return withoutRinging.isEmpty() ? sound.samples() : render(sound, withoutRinging, pitch, false);
         }
 
         final float[][] result;
         if (first) {
-            // Only its own reverb, fading out as the next hold's fades in
+            // Only its own ringing, fading out as the next hold's fades in
             final float[][] firstHold = new float[original.length][held.frames()];
             for (int i = 0; i < held.frames(); i++) {
                 final float fadeOut = held.fadeOut(i);
                 for (int c = 0; c < original.length; c++)
-                    firstHold[c][i] = held.dry()[c][i] + fadeOut * held.reverb()[c][i];
+                    firstHold[c][i] = held.dry()[c][i] + fadeOut * held.rung()[c][i];
             }
-            result = applyEffects(firstHold, held.afterReverb(), playRate, false);
+            result = applyEffects(firstHold, held.afterRinging(), playRate, false);
         } else {
             result = held.later();
         }
 
-        // Every hold is turned down alike, by how much the later ones need, so the reverb doesn't jump as it builds up
+        // Every hold is turned down alike, by how much the later ones need, so it doesn't jump as it builds up
         scale(result, held.scale());
         for (final float[] channel : result)
             softLimit(channel);
@@ -160,65 +160,83 @@ final class PedalDsp {
     }
 
     /**
-     * Renders what a held note's reverb rings on with once it's let go, played as the note fades out (see
-     * {@code HeldNoteSoundInstance#setReleased}). Its holds' baked reverb (see {@link #renderHold}) fades out with them,
-     * so this takes over from it: the reverb the note had built up dying away, plus that of the note as it fades out.
-     * <p>Rendered by playing the note out: its holds repeating as they do while it's held, for as long as the reverb
-     * rings, then fading out over {@code fadeTicks} as it does when released, all through the reverb. What the reverb
-     * rings with from the release on is kept, at the same level as is baked into the holds. The note is let go
-     * halfway through a hold, standing in for wherever it was.</p>
-     * <p>Holds that can't have their reverb baked in (see {@link #renderHold}) ring on from a short slice of
-     * their sound instead, as held notes used to.</p>
-     * @param chain The chain the note is played through while held, without its delays
+     * Renders what a held note's echoes and reverb ring on with once it's let go, played as the note fades out (see
+     * {@code HeldNoteSoundInstance#setReleased}). What's baked into its attack and holds (see {@link #renderHold})
+     * fades out with them, so this takes over from it: what the note had built up dying away, plus the echoes and
+     * reverb of the note as it fades out.
+     * <p>Rendered by playing the note out through the chain as it was played: its attack, then its holds, let go
+     * when it was, then fading out over {@code fadeTicks} as it does when released, its holds still chaining.
+     * What rings from the release on is kept, as loud as is baked into the holds. So its echoes come when they
+     * would, of what was playing just before it was let go.</p>
+     * <p>Holds that can't have what rings baked in (see {@link #renderHold}) ring on from a short slice of
+     * their sound instead.</p>
+     * @param attack The note's attack sound, in the same format, played {@code attackLeadTicks} before its first
+     *               hold; or null to leave it out
+     * @param chain The chain the note is played through
      * @param periodTicks How many ticks apart the note's holds start
      * @param fadeTicks How many ticks the note takes to fade out once released
-     * @return The reverb, starting from the release
+     * @param heldTicks How many ticks after its attack started the note was let go
+     * @return What rings on, starting from the release
      */
-    static ByteBuffer renderReleaseTail(final ChannelTwinSounds.Decoded sound, final PedalChain chain,
-                                        final float pitch, final int periodTicks, final int fadeTicks) {
+    static ByteBuffer renderReleaseTail(final ChannelTwinSounds.Decoded sound,
+                                        @Nullable final ChannelTwinSounds.Decoded attack, final PedalChain chain,
+                                        final float pitch, final int periodTicks, final int fadeTicks,
+                                        final int heldTicks, final int attackLeadTicks) {
         final float playRate = sound.format().getSampleRate() * pitch;
-        final float[][] original = toFloat(sound.samples(), sound.format().getChannels());
+        final int channelCount = sound.format().getChannels();
+        final float[][] original = toFloat(sound.samples(), channelCount);
 
-        final HeldReverb held = HeldReverb.of(original, chain, playRate, periodTicks);
+        final HeldRinging held = HeldRinging.of(original, chain, playRate, periodTicks);
         if (held == null)
             return render(sound, chain, pitch, true);
 
-        // Each hold goes through the chain up to its first reverb on its own, as it does when played,
-        // and the reverbs (and what's between them) take all of them together
-        final List<PedalEffect> toReverb = held.toReverb().effects();
-        int firstReverb = 0;
-        while (toReverb.get(firstReverb).type() != PedalEffectType.REVERB)
-            firstReverb++;
-        final float[][] hold = applyEffects(copy(original), new PedalChain(toReverb.subList(0, firstReverb)), playRate, false);
-        final PedalChain reverbs = new PedalChain(toReverb.subList(firstReverb, toReverb.size()));
+        // Each sound goes through the chain up to its first effect that plays out over time on its own, as it does
+        // when played, and those effects (and what's between them) take all of them together
+        final List<PedalEffect> ringingEffects = held.ringing().effects();
+        int firstRinging = 0;
+        while (!ringingEffects.get(firstRinging).type().timeBased)
+            firstRinging++;
+        final PedalChain beforeRinging = new PedalChain(ringingEffects.subList(0, firstRinging));
+        final PedalChain ringing = new PedalChain(ringingEffects.subList(firstRinging, ringingEffects.size()));
+        final float[][] hold = applyEffects(copy(original), beforeRinging, playRate, false);
 
-        final int channelCount = original.length, frames = held.frames(), period = held.periodFrames();
+        final int frames = held.frames(), period = held.periodFrames();
         final int fadeFrames = Math.max(1, (int) Math.round(fadeTicks / 20.0 * playRate));
-        final int tailFrames = (int) Math.round(Math.min(chain.tailSeconds(), DelayParams.MAX_TAIL_SECONDS) * playRate);
 
-        // Holds start every period from the start, enough of them before the release for the reverb to have settled,
-        // and go on chaining while the note fades out
-        final int settledHolds = (tailFrames + frames) / period + 2;
-        final int release = settledHolds * period + period / 2;
+        // From when the attack started: when the holds start, and when the note's let go
+        final float[][] attackSamples = (attack != null
+            && attack.format().getChannels() == channelCount
+            && attack.format().getSampleRate() == sound.format().getSampleRate())
+            ? applyEffects(toFloat(attack.samples(), channelCount), beforeRinging, playRate, false) : null;
+        final int firstHold = (int) Math.round(attackLeadTicks / 20.0 * playRate);
+        final int release = Math.max(firstHold, (int) Math.round(heldTicks / 20.0 * playRate));
         final int fadeEnd = release + fadeFrames;
-        final int holds = (fadeEnd - 1) / period + 1;
-        final float[][] played = new float[channelCount][(holds - 1) * period + frames];
-        for (int k = 0; k < holds; k++)
-            for (int c = 0; c < channelCount; c++)
+
+        // The holds go on chaining while the note fades out
+        final int holds = Math.max(1, (fadeEnd - 1 - firstHold) / period + 1);
+        final int length = Math.max(firstHold + (holds - 1) * period + frames,
+            (attackSamples == null) ? 0 : attackSamples[0].length);
+        final float[][] played = new float[channelCount][length];
+        for (int c = 0; c < channelCount; c++) {
+            if (attackSamples != null)
+                for (int i = 0; i < attackSamples[c].length; i++)
+                    played[c][i] += attackSamples[c][i];
+            for (int k = 0; k < holds; k++)
                 for (int i = 0; i < frames; i++)
-                    played[c][k * period + i] += hold[c][i];
+                    played[c][firstHold + k * period + i] += hold[c][i];
+        }
         for (final float[] samples : played)
             for (int i = release; i < samples.length; i++)
                 samples[i] *= (i < fadeEnd) ? 1 - (float) (i - release) / fadeFrames : 0;
 
-        // Only what the reverbs add, as loud as in the holds (whose reverbs' gains are by their place in the chain)
-        final double[] reverbGains = Arrays.copyOfRange(held.reverbGains(), firstReverb, toReverb.size());
-        final float[][] rung = applyEffects(played, reverbs, playRate, true, reverbGains);
+        // Only what those effects add, as loud as in the holds (whose reverbs' gains are by their place in the chain)
+        final double[] reverbGains = Arrays.copyOfRange(held.reverbGains(), firstRinging, ringingEffects.size());
+        final float[][] rung = applyEffects(played, ringing, playRate, true, reverbGains);
         float[][] tail = new float[channelCount][];
         for (int c = 0; c < channelCount; c++)
-            tail[c] = Arrays.copyOfRange(rung[c], release, rung[c].length);
+            tail[c] = Arrays.copyOfRange(rung[c], Math.min(release, rung[c].length - 1), rung[c].length);
 
-        tail = applyEffects(tail, held.afterReverb(), playRate, false);
+        tail = applyEffects(tail, held.afterRinging(), playRate, false);
         tail = trimTail(tail, playRate, Math.min(fadeFrames, tail[0].length - 1));
         scale(tail, held.scale());
         for (final float[] channel : tail)
@@ -227,87 +245,89 @@ final class PedalDsp {
     }
 
     /**
-     * What a held note's holds and their release tail are rendered from: a hold through its chain, with the reverb
-     * that's ringing while it plays (see {@link #renderHold})
+     * What a held note's holds and their release tail are rendered from: a hold through its chain, with the echoes
+     * and reverb ringing while it plays (see {@link #renderHold})
      * @param frames How long the hold is
      * @param periodFrames How far apart holds start, in the hold's samples
-     * @param crossfadeFrames How long each hold's baked reverb crossfades into the next one's
-     * @param toReverb The chain up to its last reverb, which plays out over time
-     * @param afterReverb The rest of the chain, applied to each hold as a whole
-     * @param dry The hold through {@code toReverb}, without what its reverbs add
-     * @param reverb What its reverbs add to it, with their whole tail
-     * @param later A later hold, with the reverb of the holds before it baked in, through the whole chain
+     * @param crossfadeFrames How long each hold's baked ringing crossfades into the next one's
+     * @param ringing The chain up to its last effect that plays out over time
+     * @param afterRinging The rest of the chain, applied to each hold as a whole
+     * @param dry The hold through {@code ringing}, without what its effects that play out over time add
+     * @param rung What they add to it, with their whole tail
+     * @param later A later hold, with what the holds before it ring with baked in, through the whole chain
      * @param scale How much every hold (and the tail) is turned down, so the later ones aren't louder than the hold
      * @param reverbGains How loud each of the chain's reverbs is made, for the hold (see {@link #reverb})
      */
-    private record HeldReverb(int frames, int periodFrames, int crossfadeFrames,
-                              PedalChain toReverb, PedalChain afterReverb,
-                              float[][] dry, float[][] reverb, float[][] later, double scale, double[] reverbGains) {
+    private record HeldRinging(int frames, int periodFrames, int crossfadeFrames,
+                               PedalChain ringing, PedalChain afterRinging,
+                               float[][] dry, float[][] rung, float[][] later, double scale, double[] reverbGains) {
         /**
-         * @return Or null if the chain has no reverb, or the holds don't overlap enough to be crossfaded
+         * @return Or null if nothing in the chain plays out over time, or the holds don't overlap enough to be
+         * crossfaded
          */
         @Nullable
-        static HeldReverb of(final float[][] original, final PedalChain chain, final float playRate,
-                             final int periodTicks) {
+        static HeldRinging of(final float[][] original, final PedalChain chain, final float playRate,
+                              final int periodTicks) {
             final int channelCount = original.length, frames = original[0].length;
             // Ticks pass as heard, while the sound plays through pitch times as many of its samples
             final int periodFrames = (int) Math.round(periodTicks / 20.0 * playRate);
             final int overlapFrames = frames - periodFrames;
 
             final List<PedalEffect> effects = chain.effects();
-            int lastReverb = -1;
+            int lastRinging = -1;
             for (int i = 0; i < effects.size(); i++)
-                if (effects.get(i).type() == PedalEffectType.REVERB)
-                    lastReverb = i;
-            if (lastReverb < 0 || periodFrames <= 0 || overlapFrames < MIN_HOLD_OVERLAP_SECONDS * playRate)
+                if (effects.get(i).type().timeBased)
+                    lastRinging = i;
+            if (lastRinging < 0 || periodFrames <= 0 || overlapFrames < MIN_HOLD_OVERLAP_SECONDS * playRate)
                 return null;
 
-            // Up to its last reverb, the chain plays out over time; after it, it's applied to each hold as a whole
-            final PedalChain toReverb = new PedalChain(effects.subList(0, lastReverb + 1));
-            final PedalChain afterReverb = withoutTimeBased(new PedalChain(effects.subList(lastReverb + 1, effects.size())));
+            // Up to its last effect that plays out over time, the chain rings on; after it, it's applied to each
+            // hold as a whole
+            final PedalChain ringing = new PedalChain(effects.subList(0, lastRinging + 1));
+            final PedalChain afterRinging = withoutTimeBased(new PedalChain(effects.subList(lastRinging + 1, effects.size())));
 
-            // The hold as the chain leaves it up to the reverb, with and without what its reverbs add. Both go through
-            // its other effects alike, so the reverbs' part is exactly the difference between them.
+            // The hold as the chain leaves it up to there, with and without what rings. Both go through its other
+            // effects alike, so what rings is exactly the difference between them.
             final double[] reverbGains = new double[effects.size()];
             Arrays.fill(reverbGains, Double.NaN);
-            final float[][] dry = applyEffects(copy(original), withoutTimeBased(toReverb), playRate, false);
-            final float[][] reverb = applyEffects(copy(original), toReverb, playRate, false, reverbGains);
+            final float[][] dry = applyEffects(copy(original), withoutTimeBased(ringing), playRate, false);
+            final float[][] rung = applyEffects(copy(original), ringing, playRate, false, reverbGains);
             for (int c = 0; c < channelCount; c++)
                 for (int i = 0; i < frames; i++)
-                    reverb[c][i] -= dry[c][i];
+                    rung[c][i] -= dry[c][i];
 
-            // Every hold before this one started a whole number of periods earlier, so what's left of their reverbs
+            // Every hold before this one started a whole number of periods earlier, so what's left of their ringing
             // lines up with this one's period by period
             final float[][] loop = new float[channelCount][periodFrames];
             for (int c = 0; c < channelCount; c++)
-                for (int i = 0; i < reverb[c].length; i++)
-                    loop[c][i % periodFrames] += reverb[c][i];
+                for (int i = 0; i < rung[c].length; i++)
+                    loop[c][i % periodFrames] += rung[c][i];
 
-            // Each hold's reverb fades in over the start of its overlap with the last hold, as that one's fades out
+            // Each hold's ringing fades in over the start of its overlap with the last hold, as that one's fades out
             final int crossfadeFrames = Math.min(Math.min(overlapFrames, periodFrames),
                 (int) Math.round(HOLD_CROSSFADE_SECONDS * playRate));
-            final HeldReverb held = new HeldReverb(frames, periodFrames, crossfadeFrames, toReverb, afterReverb,
-                dry, reverb, new float[channelCount][frames], 1, reverbGains);
+            final HeldRinging held = new HeldRinging(frames, periodFrames, crossfadeFrames, ringing, afterRinging,
+                dry, rung, new float[channelCount][frames], 1, reverbGains);
             for (int i = 0; i < frames; i++) {
                 final float fade = held.fadeIn(i) * held.fadeOut(i);
                 for (int c = 0; c < channelCount; c++)
                     held.later[c][i] = dry[c][i] + fade * loop[c][i % periodFrames];
             }
 
-            final float[][] later = applyEffects(held.later, afterReverb, playRate, false);
+            final float[][] later = applyEffects(held.later, afterRinging, playRate, false);
             final double scale = loudnessScale(later, rms(original, frames), peak(original), frames);
-            return new HeldReverb(frames, periodFrames, crossfadeFrames, toReverb, afterReverb,
-                dry, reverb, later, scale, reverbGains);
+            return new HeldRinging(frames, periodFrames, crossfadeFrames, ringing, afterRinging,
+                dry, rung, later, scale, reverbGains);
         }
 
         /**
-         * @return How much of a hold's baked reverb is heard at the given sample, as it fades in from the last hold's
+         * @return How much of a hold's baked ringing is heard at the given sample, as it fades in from the last hold's
          */
         float fadeIn(final int i) {
             return (i < crossfadeFrames) ? holdCrossfade((double) i / crossfadeFrames) : 1;
         }
         /**
-         * @return How much of a hold's baked reverb is heard at the given sample, as it fades out into the next hold's
+         * @return How much of a hold's baked ringing is heard at the given sample, as it fades out into the next hold's
          */
         float fadeOut(final int i) {
             if (i < periodFrames)
@@ -321,7 +341,7 @@ final class PedalDsp {
      * An equal-power crossfade, which keeps the level steady when what's crossfaded is at a random phase to each
      * other, as holds' reverbs usually are (see {@link #HOLD_CROSSFADE_SECONDS})
      * @param position From 0 (the start of the crossfade) to 1 (its end)
-     * @return How much of a hold's baked reverb is heard as it fades in over the start of its overlap with the last
+     * @return How much of a hold's baked ringing is heard as it fades in over the start of its overlap with the last
      * hold. Fades out mirrored: {@code holdCrossfade(1 - position)}.
      */
     private static float holdCrossfade(final double position) {
