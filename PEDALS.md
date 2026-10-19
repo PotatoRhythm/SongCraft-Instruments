@@ -13,8 +13,15 @@ These apply to every pedal, so the per-pedal sections don't repeat them.
   plugged into and every pedal after it.
 - **The effect follows the instrument everywhere.** Its notes sound through its pedals where it's played, through
   each of its speakers, and to its own player. Speakers just relay the instrument's sound.
-- **Pedals can be shared.** Several pedals (and instruments) can plug into the same pedal, so a band can each have
-  their own pedals, all ending at one shared pedal. Turning a shared pedal's knobs changes it for everyone.
+- **Pedals chain in a single line.** Each pedal has at most one pedal plugged into it and plugs into at most one.
+  Plugging a pedal into one that already has an input unplugs the old one. Several instruments can still plug into
+  the same pedal, so a band can share a chain. Turning a shared pedal's knobs changes it for everyone.
+- **Seeing the chains.** Holding the speaker cable or a pedal shows the cables between pedals as blue dashes
+  marching in signal order, and numbers each chained pedal 1–4 counting from the first in its chain (bypassed
+  pedals' numbers are grey). A held instrument shows them too, while pointed at a pedal, with
+  the cables its notes go through in green.
+  When a player plays, specks in their note color rise from every pedal their instrument plays through, so you can
+  see who is playing through which pedal. Held notes keep them rising until they're let go. Only live playing shows this, not looper playback.
 - **Pedals only apply while loaded.** An instrument plays dry while its pedal's chunk isn't loaded, or from another
   dimension. A chain stops at the first pedal that isn't loaded. A pedal that was broken (or replaced by another
   at the same spot) unplugs its instruments once its spot is loaded.

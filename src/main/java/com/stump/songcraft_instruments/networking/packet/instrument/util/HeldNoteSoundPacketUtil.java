@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMet
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CHeldNoteSoundPacket;
 import com.stump.songcraft_instruments.pedal.InstrumentPedals;
 import com.stump.songcraft_instruments.pedal.PedalChain;
+import com.stump.songcraft_instruments.pedal.PedalPulses;
 import com.stump.songcraft_instruments.pedal.TapeDecks;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
@@ -59,8 +60,10 @@ public class HeldNoteSoundPacketUtil {
         final PedalChain pedalChain = (initiator instanceof Player player)
             ? InstrumentPedals.chainOfOpenInstrument(player) : PedalChain.NONE;
         // A held note keeps the player's tape rolling until it's released
-        if (initiator instanceof Player player)
+        if (initiator instanceof Player player) {
             TapeDecks.onPlayerNote(player, pedalChain, soundMeta.volume(), phase, List.of(sound, soundMeta.pitch()));
+            PedalPulses.onPlayerHeldNote(player, phase, List.of(sound, soundMeta.pitch()), soundMeta.particleColor());
+        }
 
         fireEntityEvent(initiator,
             InstrumentPacketUtil.sendPlayerPlayNotePackets(

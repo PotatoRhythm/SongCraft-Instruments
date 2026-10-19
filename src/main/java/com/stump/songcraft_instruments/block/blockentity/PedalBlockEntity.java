@@ -8,31 +8,30 @@ import com.stump.songcraft_instruments.pedal.PedalLinks;
 import com.stump.songcraft_instruments.pedal.PedalMonitorSync;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 /**
  * An effects pedal: its effect's knobs, whether it is bypassed, and the pedals it is cabled to.
  * <p>Instruments plug into a pedal, and play through it and every pedal after it:
- * instrument → pedal → pedal. Several pedals may feed into the same one, so a band can share
- * a pedal at the end of their chains (see {@link PedalLinks}).</p>
+ * instrument → pedal → pedal. Each pedal has at most one pedal plugged into it, and plugs into at most one
+ * (see {@link PedalLinks}).</p>
  */
 public class PedalBlockEntity extends BlockEntity implements MenuProvider {
-    private static final String ID_TAG = "pedal_id", KNOBS_TAG = "knobs", INPUTS_TAG = "inputs", OUTPUT_TAG = "output";
+    private static final String ID_TAG = "pedal_id", KNOBS_TAG = "knobs", INPUT_TAG = "input", OUTPUT_TAG = "output";
 
     /**
      * The menu's data: one slot per knob, then the bypass state
@@ -50,9 +49,10 @@ public class PedalBlockEntity extends BlockEntity implements MenuProvider {
     private boolean idUnsaved = false;
     private PedalEffect effect;
     /**
-     * The pedals plugged into this one
+     * The pedal plugged into this one, or null
      */
-    private final Set<BlockPos> inputs = new HashSet<>();
+    @Nullable
+    private BlockPos input;
     /**
      * The pedal this one is plugged into, or null
      */
@@ -132,24 +132,21 @@ public class PedalBlockEntity extends BlockEntity implements MenuProvider {
      */
     public void resetAsNew() {
         pedalId = UUID.randomUUID();
-        inputs.clear();
+        input = null;
         output = null;
-        setChanged();
+        onLinksChanged();
     }
 
 
     //#region Links
 
-    public Set<BlockPos> getInputs() {
-        return Set.copyOf(inputs);
+    @Nullable
+    public BlockPos getInput() {
+        return input;
     }
-    public void addInput(final BlockPos pedalPos) {
-        if (inputs.add(pedalPos.immutable()))
-            setChanged();
-    }
-    public void removeInput(final BlockPos pedalPos) {
-        if (inputs.remove(pedalPos))
-            setChanged();
+    public void setInput(@Nullable final BlockPos source) {
+        input = (source == null) ? null : source.immutable();
+        onLinksChanged();
     }
 
     @Nullable
@@ -158,7 +155,17 @@ public class PedalBlockEntity extends BlockEntity implements MenuProvider {
     }
     public void setOutput(@Nullable final BlockPos target) {
         output = (target == null) ? null : target.immutable();
+        onLinksChanged();
+    }
+
+    /**
+     * Saves the links, and sends them to the clients, which show them while the speaker cable is held
+     * (see {@code PedalCableOverlay})
+     */
+    private void onLinksChanged() {
         setChanged();
+        if ((level != null) && !level.isClientSide)
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
     }
 
     //#endregion
@@ -184,18 +191,24 @@ public class PedalBlockEntity extends BlockEntity implements MenuProvider {
     }
 
 
+    // Clients get the links too, to show them while the speaker cable is held
+    @Override
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
+    }
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
     @Override
     protected void saveAdditional(final CompoundTag pTag) {
         super.saveAdditional(pTag);
         pTag.putUUID(ID_TAG, pedalId);
         pTag.putInt(KNOBS_TAG, effect.knobs());
 
-        if (!inputs.isEmpty()) {
-            final ListTag inputList = new ListTag();
-            for (final BlockPos input : inputs)
-                inputList.add(NbtUtils.writeBlockPos(input));
-            pTag.put(INPUTS_TAG, inputList);
-        }
+        if (input != null)
+            pTag.put(INPUT_TAG, NbtUtils.writeBlockPos(input));
         if (output != null)
             pTag.put(OUTPUT_TAG, NbtUtils.writeBlockPos(output));
     }
@@ -208,10 +221,7 @@ public class PedalBlockEntity extends BlockEntity implements MenuProvider {
         if (pTag.contains(KNOBS_TAG, Tag.TAG_INT))
             effect = new PedalEffect(typeOf(getBlockState()), pTag.getInt(KNOBS_TAG));
 
-        inputs.clear();
-        final ListTag inputList = pTag.getList(INPUTS_TAG, Tag.TAG_COMPOUND);
-        for (int i = 0; i < inputList.size(); i++)
-            inputs.add(NbtUtils.readBlockPos(inputList.getCompound(i)));
+        input = pTag.contains(INPUT_TAG, Tag.TAG_COMPOUND) ? NbtUtils.readBlockPos(pTag.getCompound(INPUT_TAG)) : null;
         output = pTag.contains(OUTPUT_TAG, Tag.TAG_COMPOUND) ? NbtUtils.readBlockPos(pTag.getCompound(OUTPUT_TAG)) : null;
     }
 }

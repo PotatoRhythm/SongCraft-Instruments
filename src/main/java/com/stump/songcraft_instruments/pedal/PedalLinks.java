@@ -12,9 +12,9 @@ import java.util.UUID;
 /**
  * Connects pedals to each other, in signal order. Instruments plug into a pedal (see {@link InstrumentPedals}),
  * and play through it and every pedal after it.
- * <p>Each pedal has one output (the next pedal), but any number of pedals may plug into the same one,
- * so a band can share a pedal at the end of their chains. A link is stored on both ends and only counts while both
- * agree, so a broken pedal, or a new one placed where an old one was, never leaves a stale link behind.
+ * <p>Each pedal has at most one input (the pedal before it) and one output (the pedal after it), so pedals form
+ * a single line. A link is stored on both ends and only counts while both agree, so a broken pedal, or a new one
+ * placed where an old one was, never leaves a stale link behind.
  * No chain through the pedals may be longer than {@link PedalChain#MAX_LENGTH}.</p>
  * <p>Server only.</p>
  */
@@ -39,7 +39,7 @@ public final class PedalLinks {
         final PedalBlockEntity source = pedalAt(level, from), target = pedalAt(level, to);
         return (source != null) && (target != null)
             && to.equals(source.getOutput())
-            && target.getInputs().contains(from);
+            && from.equals(target.getInput());
     }
 
     /**
@@ -52,11 +52,21 @@ public final class PedalLinks {
     }
 
 
+    /**
+     * @return The pedal validly plugged into the given one, or null
+     */
+    @Nullable
+    private static PedalBlockEntity upstreamOf(final Level level, final PedalBlockEntity pedal) {
+        final BlockPos source = pedal.getInput();
+        return ((source != null) && isLinked(level, source, pedal.getBlockPos())) ? pedalAt(level, source) : null;
+    }
+
+
     //#region Connecting
 
     /**
      * Plugs the pedal at {@code pedalPos} into the pedal at {@code targetPos}.
-     * Whatever the first was plugged into before is unplugged; the target keeps its other inputs.
+     * Whatever the first was plugged into before, and whatever was plugged into the target before, is unplugged.
      */
     public static ConnectResult connect(final Level level, final BlockPos pedalPos, final BlockPos targetPos) {
         if (pedalPos.equals(targetPos))
@@ -72,13 +82,15 @@ public final class PedalLinks {
         final List<BlockPos> downstream = pedalsFrom(level, target);
         if (downstream.contains(pedalPos))
             return ConnectResult.LOOP;
-        // The longest chain of pedals into (and including) this one, then the target's
-        if (longestUpstream(level, pedal, 0) + downstream.size() > PedalChain.MAX_LENGTH)
+        // The pedals into (and including) this one, then the target and the pedals after it.
+        // Whatever plugged into the target is unplugged, so its pedals don't count
+        if (upstreamCount(level, pedal) + downstream.size() > PedalChain.MAX_LENGTH)
             return ConnectResult.TOO_LONG;
 
         unplugOutput(level, pedal);
+        unplugInput(level, target);
         pedal.setOutput(targetPos);
-        target.addInput(pedalPos);
+        target.setInput(pedalPos);
         PedalMonitorSync.onPedalsChanged(level);
         return ConnectResult.CONNECTED;
     }
@@ -87,13 +99,7 @@ public final class PedalLinks {
      * Unplugs every cable of the pedal: the ones into it, and the one out of it
      */
     public static void disconnect(final Level level, final PedalBlockEntity pedal) {
-        for (final BlockPos inputPos : pedal.getInputs()) {
-            final PedalBlockEntity input = pedalAt(level, inputPos);
-            if ((input != null) && pedal.getBlockPos().equals(input.getOutput()))
-                input.setOutput(null);
-            pedal.removeInput(inputPos);
-        }
-
+        unplugInput(level, pedal);
         unplugOutput(level, pedal);
         PedalMonitorSync.onPedalsChanged(level);
     }
@@ -102,12 +108,7 @@ public final class PedalLinks {
      * @return Whether any pedal is plugged into the given one, or it into another
      */
     public static boolean isConnected(final Level level, final PedalBlockEntity pedal) {
-        if (downstreamOf(level, pedal) != null)
-            return true;
-        for (final BlockPos input : pedal.getInputs())
-            if (isLinked(level, input, pedal.getBlockPos()))
-                return true;
-        return false;
+        return (downstreamOf(level, pedal) != null) || (upstreamOf(level, pedal) != null);
     }
 
     private static void unplugOutput(final Level level, final PedalBlockEntity pedal) {
@@ -117,26 +118,29 @@ public final class PedalLinks {
             return;
 
         final PedalBlockEntity target = pedalAt(level, targetPos);
-        if (target != null)
-            target.removeInput(pedal.getBlockPos());
+        if ((target != null) && pedal.getBlockPos().equals(target.getInput()))
+            target.setInput(null);
+    }
+    private static void unplugInput(final Level level, final PedalBlockEntity pedal) {
+        final BlockPos sourcePos = pedal.getInput();
+        pedal.setInput(null);
+        if (sourcePos == null)
+            return;
+
+        final PedalBlockEntity source = pedalAt(level, sourcePos);
+        if ((source != null) && pedal.getBlockPos().equals(source.getOutput()))
+            source.setOutput(null);
     }
 
     /**
-     * @param depth How many pedals were already counted after this one, so a loop can't recurse forever
-     * @return How many pedals the longest chain into (and including) the given one has
+     * @return How many pedals are chained into (and including) the given one
      */
-    private static int longestUpstream(final Level level, final PedalBlockEntity pedal, final int depth) {
-        // One past the limit is enough to know it's too long
-        if (depth > PedalChain.MAX_LENGTH)
-            return 1;
-
-        int longest = 0;
-        for (final BlockPos inputPos : pedal.getInputs()) {
-            if (!isLinked(level, inputPos, pedal.getBlockPos()))
-                continue;
-            longest = Math.max(longest, longestUpstream(level, pedalAt(level, inputPos), depth + 1));
-        }
-        return 1 + longest;
+    private static int upstreamCount(final Level level, final PedalBlockEntity pedal) {
+        int count = 0;
+        // One past the limit is enough to know it's too long, and stops a loop
+        for (PedalBlockEntity current = pedal; (current != null) && (count <= PedalChain.MAX_LENGTH); count++)
+            current = upstreamOf(level, current);
+        return count;
     }
     /**
      * @return The positions of the pedals validly chained from (and including) the given one
@@ -169,6 +173,15 @@ public final class PedalLinks {
             pedal = downstreamOf(level, pedal);
         }
         return effects.isEmpty() ? PedalChain.NONE : new PedalChain(effects);
+    }
+
+    /**
+     * @return The positions of the pedals an instrument plugged into the given pedal plays through, in signal order,
+     * bypassed ones included: that pedal, then each one after it
+     */
+    public static List<BlockPos> resolvePath(final Level level, final PedalBlockEntity first) {
+        final List<BlockPos> pedals = pedalsFrom(level, first);
+        return (pedals.size() > PedalChain.MAX_LENGTH) ? pedals.subList(0, PedalChain.MAX_LENGTH) : pedals;
     }
 
     /**

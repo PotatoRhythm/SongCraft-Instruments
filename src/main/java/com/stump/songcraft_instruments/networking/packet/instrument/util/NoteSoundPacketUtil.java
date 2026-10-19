@@ -5,6 +5,7 @@ import com.stump.songcraft_instruments.networking.packet.instrument.NoteSoundMet
 import com.stump.songcraft_instruments.networking.packet.instrument.s2c.S2CNoteSoundPacket;
 import com.stump.songcraft_instruments.pedal.InstrumentPedals;
 import com.stump.songcraft_instruments.pedal.PedalChain;
+import com.stump.songcraft_instruments.pedal.PedalPulses;
 import com.stump.songcraft_instruments.pedal.TapeDecks;
 import com.stump.songcraft_instruments.sound.NoteSound;
 import com.stump.songcraft_instruments.sound.held.InitiatorID;
@@ -48,8 +49,10 @@ public class NoteSoundPacketUtil {
         // Through the pedals of the instrument it's played on, wherever it's heard
         final PedalChain pedalChain = (initiator instanceof Player player)
             ? InstrumentPedals.chainOfOpenInstrument(player) : PedalChain.NONE;
-        if (initiator instanceof Player player)
+        if (initiator instanceof Player player) {
             TapeDecks.onPlayerNote(player, pedalChain, soundMeta.volume(), null, null);
+            PedalPulses.onPlayerNote(player, soundMeta.particleColor());
+        }
 
         final S2CNotePacketDelegate<NoteSound, S2CNoteSoundPacket> withPedals = (initiatorID, packetSound, meta) ->
             new S2CNoteSoundPacket(initiatorID, Optional.empty(), packetSound, meta, pedalChain);

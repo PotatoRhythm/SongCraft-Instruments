@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -57,6 +58,17 @@ public final class InstrumentPedals {
             return false;
         modTag.remove(PEDAL_TAG);
         return true;
+    }
+
+    /**
+     * Only reads the tag, so it's safe on the client too, which shows a held instrument's chain
+     * @return The position of the pedal the instrument is plugged into, or null if it isn't plugged into one
+     * in the given level's dimension. Whether a pedal there is still the same one is up to {@link #isPluggedInto}.
+     */
+    @Nullable
+    public static BlockPos pluggedPedalPos(final CompoundTag modTag, final Level level) {
+        final Link link = read(modTag);
+        return ((link != null) && link.dimension().equals(dimensionOf(level))) ? link.pos() : null;
     }
 
     public static boolean isPluggedInto(final CompoundTag modTag, final PedalBlockEntity pedal) {
@@ -124,26 +136,37 @@ public final class InstrumentPedals {
      */
     @Nullable
     public static UUID tapeOfOpenInstrument(final Player player) {
+        final CompoundTag modTag = openInstrumentTag(player);
+        final PedalBlockEntity pedal = (modTag == null) ? null : pluggedPedal(player.level(), modTag);
+        return (pedal == null) ? null : PedalLinks.findTape(player.level(), pedal);
+    }
+
+    /**
+     * @return The positions of the pedals the instrument the player has open plays through, in signal order,
+     * bypassed ones included (see {@link PedalLinks#resolvePath}). Empty if it isn't plugged in.
+     */
+    public static List<BlockPos> pedalPathOfOpenInstrument(final Player player) {
+        final CompoundTag modTag = openInstrumentTag(player);
+        final PedalBlockEntity pedal = (modTag == null) ? null : pluggedPedal(player.level(), modTag);
+        return (pedal == null) ? List.of() : PedalLinks.resolvePath(player.level(), pedal);
+    }
+
+    /**
+     * @return The mod tag of the instrument the player has open (held or block), or null if there's none
+     */
+    @Nullable
+    private static CompoundTag openInstrumentTag(final Player player) {
         if (!InstrumentOpenProvider.isOpen(player))
             return null;
-        final Level level = player.level();
 
-        final CompoundTag modTag;
         if (InstrumentOpenProvider.isItem(player)) {
             final InteractionHand hand = InstrumentOpenProvider.getHand(player);
-            if (hand == null)
-                return null;
-            modTag = SCInstrumentMod.modTag(player.getItemInHand(hand));
-        } else {
-            final BlockPos instrumentPos = InstrumentOpenProvider.getBlockPos(player);
-            final BlockEntity instrument = (instrumentPos == null) ? null : level.getBlockEntity(instrumentPos);
-            if (instrument == null)
-                return null;
-            modTag = SCInstrumentMod.modTag(instrument);
+            return (hand == null) ? null : SCInstrumentMod.modTag(player.getItemInHand(hand));
         }
 
-        final PedalBlockEntity pedal = pluggedPedal(level, modTag);
-        return (pedal == null) ? null : PedalLinks.findTape(level, pedal);
+        final BlockPos instrumentPos = InstrumentOpenProvider.getBlockPos(player);
+        final BlockEntity instrument = (instrumentPos == null) ? null : player.level().getBlockEntity(instrumentPos);
+        return (instrument == null) ? null : SCInstrumentMod.modTag(instrument);
     }
 
     public static PedalChain chainOf(final Level level, final BlockEntity instrument) {
