@@ -106,8 +106,13 @@ public class Gw2BassPlaying {
      * Lower strings swing wider and slower, and ring for longer.
      * The strings are only about 0.2 pixels apart, so swinging any wider would have them blur into each other.
      */
-    private static final float[] STRING_SWING = {0.1325f, 0.1175f, 0.1025f, 0.0875f}, STRING_RATE = {11, 13, 15.5f, 18};
+    private static final float[] STRING_SWING = {0.056f, 0.049f, 0.043f, 0.0375f}, STRING_RATE = {11, 13, 15.5f, 18};
     private static final double[] STRING_RING_TIME = {1.0, 0.9, 0.8, 0.7};
+    /**
+     * How long a string takes to die down once another is plucked.
+     * The bass plays one note at a time, so the last string is damped as the next one rings out.
+     */
+    private static final double STRING_DAMP_TIME = 0.04;
 
     /** The beat players groove to before they've played enough notes to tell, and the range beats are folded into */
     private static final double DEFAULT_BEAT = 0.6, SHORTEST_BEAT = 0.4, LONGEST_BEAT = 0.9;
@@ -173,12 +178,14 @@ public class Gw2BassPlaying {
         /** Which finger plucks, 1 or -1 */
         int finger = 1;
 
-        /** When each string was last plucked, and how hard */
+        /** When each string was last plucked, how hard, and when it was damped by another string being plucked */
         final double[] stringPluckedAt = new double[STRINGS];
         final float[] stringStrength = new float[STRINGS];
+        final double[] stringDampedAt = new double[STRINGS];
 
         Playing() {
             Arrays.fill(stringPluckedAt, Double.NEGATIVE_INFINITY);
+            Arrays.fill(stringDampedAt, Double.POSITIVE_INFINITY);
         }
 
         // Worked out as the player is rendered, for their model to be posed by
@@ -219,6 +226,12 @@ public class Gw2BassPlaying {
         final int string = Math.min((int) (playing.fretTo * STRINGS), STRINGS - 1);
         playing.stringPluckedAt[string] = now;
         playing.stringStrength[string] = event.volume();
+        playing.stringDampedAt[string] = Double.POSITIVE_INFINITY;
+
+        // Damp whichever strings are still ringing, keeping when they were first damped so it isn't drawn out
+        for (int other = 0; other < STRINGS; other++)
+            if (other != string)
+                playing.stringDampedAt[other] = Math.min(playing.stringDampedAt[other], now);
     }
 
     /**
@@ -429,8 +442,11 @@ public class Gw2BassPlaying {
         if (playing == null)
             return 0;
 
-        final double time = now() - playing.stringPluckedAt[string];
-        final double ring = playing.stringStrength[string] * Math.exp(-time / STRING_RING_TIME[string]);
+        final double now = now();
+        final double time = now - playing.stringPluckedAt[string];
+        final double damped = Math.max(now - playing.stringDampedAt[string], 0);
+        final double ring = playing.stringStrength[string]
+            * Math.exp(-time / STRING_RING_TIME[string] - damped / STRING_DAMP_TIME);
         if (ring < 0.01)
             return 0;
 

@@ -15,6 +15,7 @@ import com.stump.songcraft_instruments.networking.packet.instrument.util.HeldSou
 import com.stump.songcraft_instruments.sound.SCSounds;
 import com.stump.songcraft_instruments.sound.held.HeldNoteSound;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.HumanoidModel.ArmPose;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -22,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -41,6 +43,7 @@ import java.util.UUID;
  * Sways players gently from side to side while they're singing into a microphone, be it held or on a stand.
  * The sway settles back to standing still once they've stopped singing for a moment.
  * <p>When singing with Sky's Aurora voice, players also raise their free arm out to the side, like Aurora does.</p>
+ * <p>When singing as the Meatball Man, players flail both arms about over their head, microphone and all.</p>
  */
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(bus = Bus.FORGE, modid = SCInstrumentMod.MODID, value = Dist.CLIENT)
@@ -68,11 +71,31 @@ public class MicrophoneSway {
     private static final double ARM_RAISE_TIME = 0.35;
     /** How long the arm takes to lower back down after players stop singing, in seconds */
     private static final double ARM_LOWER_TIME = 0.9;
+    /** How far the raised arm's shoulder is lifted, in model pixels, so it meets the body a touch higher */
+    private static final float ARM_SHOULDER_LIFT = 0.5f;
+
+    /** How high players hold their arms up while flailing as the Meatball Man, in radians forward from hanging down */
+    private static final float FLAIL_RAISE_ANGLE = 2.8f;
+    /** How far each arm swings forward and back while flailing, in radians */
+    private static final float FLAIL_SWING_ANGLE = 0.4f;
+    /** How far out to the side the arms are held while flailing, and how far they flap in and out, in radians */
+    private static final float FLAIL_SPREAD_ANGLE = 0.6f, FLAIL_FLAP_ANGLE = 0.2f;
+    /** How many times a second each arm swings */
+    private static final float FLAIL_RATE = 2.8f;
+    /** How long the arms take to start flailing as players start singing, and to settle after they stop, in seconds */
+    private static final double FLAIL_START_TIME = 0.35, FLAIL_STOP_TIME = 0.7;
+    /**
+     * How far the shoulders are lifted while flailing, in model pixels.
+     * Arms turn about a point below the top of the shoulders, so held up they'd otherwise look to start too low.
+     */
+    private static final float FLAIL_SHOULDER_LIFT = 2f;
 
     /** How much each player is swaying: 0 standing still and 1 swaying fully */
     private static final Map<UUID, Fade> FADES = new HashMap<>();
     /** How far each player has raised their arm: 0 lowered and 1 raised fully */
     private static final Map<UUID, Fade> ARM_FADES = new HashMap<>();
+    /** How much each player is flailing their arms: 0 not at all and 1 fully */
+    private static final Map<UUID, Fade> FLAIL_FADES = new HashMap<>();
     /** The notes each player is singing into a microphone */
     private static final Map<UUID, Singing> SINGING = new HashMap<>();
 
@@ -80,6 +103,14 @@ public class MicrophoneSway {
     private static boolean swayed;
     /** How far the player being rendered has their arm raised, and their age in ticks, for their arm to be posed by */
     private static float renderedArmRaise, renderedAge;
+    /** How much the player being rendered is flailing their arms, for their arms to be posed by */
+    private static float renderedFlail;
+    /** The player being rendered, if they're raising or flailing their arms, for their shoulders to be lifted */
+    private static Player liftedPlayer;
+    /** Which arm the player being rendered has raised as Aurora, or null if neither */
+    private static HumanoidArm raisedArm;
+    /** The poses the arms of the player being rendered would have without flailing, for the flailing to blend from */
+    private static ArmPose rightBasePose = ArmPose.EMPTY, leftBasePose = ArmPose.EMPTY;
 
     private static final class Fade {
         double amount, updatedAt = now();
@@ -92,6 +123,8 @@ public class MicrophoneSway {
         double lastNoteAt = now();
         /** Whether the last held note was sung with Sky's Aurora voice */
         boolean aurora;
+        /** Whether the last held note was sung with the Meatball Man's voice */
+        boolean meatballMan;
     }
 
 
@@ -110,6 +143,7 @@ public class MicrophoneSway {
 
             singing.lastNoteAt = now();
             singing.aurora = isAurora(event.sound());
+            singing.meatballMan = isMeatballMan(event.sound());
         });
     }
 
@@ -132,6 +166,10 @@ public class MicrophoneSway {
         return SCSounds.SKY_AURORA[0].baseSoundLocation().equals(sound.baseSoundLocation());
     }
 
+    private static boolean isMeatballMan(final HeldNoteSound sound) {
+        return SCSounds.MICROPHONE_MEATBALL_MAN[0].baseSoundLocation().equals(sound.baseSoundLocation());
+    }
+
 
     // Lowest priority, so that no other listener cancels the render after it was swayed
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -143,14 +181,26 @@ public class MicrophoneSway {
         renderedArmRaise = ease(updateFade(ARM_FADES, player,
             singing && SINGING.get(player.getUUID()).aurora, ARM_RAISE_TIME, ARM_LOWER_TIME));
 
-        // Arm poses are set before this event and applied once the model is posed for rendering after it
-        if (renderedArmRaise > 0) {
-            final PlayerModel<AbstractClientPlayer> model = event.getRenderer().getModel();
+        renderedFlail = ease(updateFade(FLAIL_FADES, player,
+            singing && SINGING.get(player.getUUID()).meatballMan, FLAIL_START_TIME, FLAIL_STOP_TIME));
 
-            if (getFreeArm(player) == HumanoidArm.RIGHT)
+        // Arm poses are set before this event and applied once the model is posed for rendering after it
+        final PlayerModel<AbstractClientPlayer> model = event.getRenderer().getModel();
+        liftedPlayer = (renderedFlail > 0 || renderedArmRaise > 0) ? player : null;
+        raisedArm = null;
+        if (renderedArmRaise > 0) {
+            raisedArm = getFreeArm(player);
+            if (raisedArm == HumanoidArm.RIGHT)
                 model.rightArmPose = ModArmPose.AURORA_RAISED;
             else
                 model.leftArmPose = ModArmPose.AURORA_RAISED;
+        }
+
+        if (renderedFlail > 0) {
+            // Both arms, even the one holding the microphone, blending from whatever they'd be doing otherwise
+            rightBasePose = model.rightArmPose;
+            leftBasePose = model.leftArmPose;
+            model.rightArmPose = model.leftArmPose = ModArmPose.MEATBALL_MAN_FLAIL;
         }
 
         final double fade = updateFade(FADES, player, singing, FADE_IN_TIME, FADE_OUT_TIME);
@@ -175,6 +225,8 @@ public class MicrophoneSway {
 
     @SubscribeEvent
     public static void onPostRenderPlayer(final RenderPlayerEvent.Post event) {
+        liftedPlayer = null;
+
         if (!swayed)
             return;
 
@@ -186,6 +238,8 @@ public class MicrophoneSway {
     public static void onLevelUnload(final LevelEvent.Unload event) {
         FADES.clear();
         ARM_FADES.clear();
+        FLAIL_FADES.clear();
+        liftedPlayer = null;
         SINGING.clear();
     }
 
@@ -204,6 +258,65 @@ public class MicrophoneSway {
         arm.xRot = Mth.lerp(renderedArmRaise, arm.xRot, -ARM_FORWARD_ANGLE);
         arm.yRot = Mth.lerp(renderedArmRaise, arm.yRot, 0);
         arm.zRot = Mth.lerp(renderedArmRaise, arm.zRot, (ARM_RAISE_ANGLE + wave) * outwards);
+    }
+
+    /**
+     * Flails an arm of the player being rendered while singing as the Meatball Man about over their head,
+     * swinging out of step with the other arm.
+     * While the flailing fades in or out, the arm blends from the pose it would have otherwise,
+     * like holding the microphone up or being raised as Aurora.
+     * @param side Which of the player's arms is flailed
+     */
+    public static void flailArm(final HumanoidModel<?> model, final LivingEntity entity, final HumanoidArm side) {
+        final ModelPart arm = (side == HumanoidArm.RIGHT) ? model.rightArm : model.leftArm;
+        poseBaseArm(model, entity, side, arm);
+        // The roll is applied after the arm is raised, so with the arm pointing up it rolls the other way to go out
+        final float outwards = (side == HumanoidArm.RIGHT) ? -1 : 1;
+
+        final float phase = renderedAge / 20f * FLAIL_RATE * Mth.TWO_PI + ((side == HumanoidArm.RIGHT) ? 0 : Mth.PI);
+        final float swing = Mth.sin(phase) * FLAIL_SWING_ANGLE;
+        // Flaps at an odd rate to the swing, so the flailing never quite repeats
+        final float flap = Mth.sin(phase * 1.7f + 0.8f) * FLAIL_FLAP_ANGLE;
+
+        arm.xRot = Mth.lerp(renderedFlail, arm.xRot, -FLAIL_RAISE_ANGLE + swing);
+        arm.yRot = Mth.lerp(renderedFlail, arm.yRot, 0);
+        arm.zRot = Mth.lerp(renderedFlail, arm.zRot, (FLAIL_SPREAD_ANGLE + flap) * outwards);
+    }
+
+    /**
+     * Poses an arm of the player being rendered the way it would be without flailing
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void poseBaseArm(final HumanoidModel<?> model, final LivingEntity entity, final HumanoidArm side,
+                                    final ModelPart arm) {
+        final ArmPose pose = (side == HumanoidArm.RIGHT) ? rightBasePose : leftBasePose;
+
+        switch (pose) {
+            case EMPTY -> arm.yRot = 0;
+            // Holding the cooked beef, like vanilla
+            case ITEM -> {
+                arm.xRot = arm.xRot * 0.5f - Mth.PI / 10;
+                arm.yRot = 0;
+            }
+            default -> {
+                if (pose != ModArmPose.MEATBALL_MAN_FLAIL)
+                    pose.applyTransform((HumanoidModel) model, entity, side);
+            }
+        }
+    }
+
+    /**
+     * Lifts the shoulders of the player being rendered while they're raising an arm or flailing,
+     * so their raised arms meet the body higher up.
+     * Called once their model has been posed for rendering, as vanilla sets where the arms sit only after posing them.
+     */
+    public static void liftShoulders(final HumanoidModel<?> model, final LivingEntity entity) {
+        if (entity != liftedPlayer)
+            return;
+
+        final float raisedLift = renderedArmRaise * ARM_SHOULDER_LIFT;
+        model.rightArm.y -= Mth.lerp(renderedFlail, (raisedArm == HumanoidArm.RIGHT) ? raisedLift : 0, FLAIL_SHOULDER_LIFT);
+        model.leftArm.y -= Mth.lerp(renderedFlail, (raisedArm == HumanoidArm.LEFT) ? raisedLift : 0, FLAIL_SHOULDER_LIFT);
     }
 
     /**

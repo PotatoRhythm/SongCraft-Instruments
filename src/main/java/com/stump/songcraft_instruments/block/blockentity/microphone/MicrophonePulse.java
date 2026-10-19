@@ -10,7 +10,7 @@ public class MicrophonePulse {
     // All timings are in seconds
 
     /** How long the mic takes to swell up when a note starts */
-    private static final double SWELL_TIME = 0.08;
+    private static final double SWELL_TIME = 0.14;
     /** How long the mic takes to ease back to rest after the last note ends */
     private static final double RELEASE_TIME = 0.3;
     /** How long the pop of a new note lasts */

@@ -18,7 +18,7 @@ public final class MicrophonePulseAnimator {
     /** How much bigger the mic gets while notes are held */
     private static final float SWELL_SCALE = 0.015f;
     /** How much bigger the mic gets at the peak of a new note's pop, on top of its swell */
-    private static final float POP_SCALE = 0.008f;
+    private static final float POP_SCALE = 0.004f;
 
     /** How much the mic throbs while notes are held, like a singer's vibrato */
     private static final float THROB_SCALE = 0.002f;
@@ -26,7 +26,7 @@ public final class MicrophonePulseAnimator {
     private static final double THROB_RATE = 5.5;
 
     /** How far the mic nods at the peak of a new note's pop, in radians */
-    private static final float POP_NOD_ANGLE = (float) Math.toRadians(1.5);
+    private static final float POP_NOD_ANGLE = (float) Math.toRadians(0.8);
 
     private MicrophonePulseAnimator() {}
 
