@@ -239,11 +239,10 @@ public abstract class InstrumentMidiReceiver {
 
 
     /**
-     * @return Whether both this instrument and the client agrees
-     * that this instrument may be overflown
+     * @return Whether this instrument may be overflown
      */
     protected boolean canMidiOverflow() {
-        return allowMidiOverflow() && ModClientConfigs.EXTEND_OCTAVES.get();
+        return allowMidiOverflow();
     }
 
     /**

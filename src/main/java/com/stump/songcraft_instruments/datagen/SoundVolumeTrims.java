@@ -308,7 +308,7 @@ final class SoundVolumeTrims {
                 "4.stereo=-1.8 5=-3.4 5.stereo=-2.4 6=-5.9 6.stereo=-4.1 7=-1.6 7.stereo=-3.9 8=-2.0 " +
                 "8.stereo=-4.2 9=-6.6 9.stereo=-3.8 10=-3.4 10.stereo=-5.0 11.stereo=-6.3 12=-3.4 12.stereo=-1.0 " +
                 "13=-6.6 13.stereo=-4.7");
-        add("heartopia_lunghe",
+        add("heartopia_lute",
                 "0=-2.4 0.stereo=-3.3 1=-2.4 1.stereo=-3.3 2=-1.2 2.stereo=-1.1 3=-2.4 3.stereo=-2.3 4=-2.4 " +
                 "4.stereo=-3.1 5=-2.4 5.stereo=-3.7 6.stereo=-3.9 7=-2.4 7.stereo=-2.8 8=-2.4 8.stereo=-2.7 " +
                 "9=-2.4 9.stereo=-2.6 10=-2.4 10.stereo=-3.0 11=-4.9 11.stereo=-4.2 12=-0.2 12.stereo=-1.5 " +

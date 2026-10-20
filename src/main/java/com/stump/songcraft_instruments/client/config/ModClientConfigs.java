@@ -42,7 +42,7 @@ public class ModClientConfigs {
     public static final BooleanValue
         STOP_MUSIC_ON_PLAY, SHARED_INSTRUMENT,
         RENDER_BACKGROUND, ACCEPTED_DISCLAIMER, ACCURATE_NOTES,
-        MIDI_ENABLED, EXTEND_OCTAVES, FIXED_TOUCH, ACCEPT_ALL_CHANNELS,
+        MIDI_ENABLED, FIXED_TOUCH, ACCEPT_ALL_CHANNELS,
         SERVER_AUDIO, SOUND_PHYSICS_ENABLED
     ;
 
@@ -161,9 +161,6 @@ public class ModClientConfigs {
         MIDI_DEVICE_INDEX = configBuilder.defineInRange("midi_device_index", -1, -1, Integer.MAX_VALUE);
         MIDI_IN_SENSITIVITY = configBuilder.defineInRange("midi_in_sensitivity", .8, 0, 1);
 
-        EXTEND_OCTAVES = configBuilder.comment(
-            "When a note that is higher/lower than the usual octave range is played, will automatically adjust the pitch to match your playings. Can only extend up to 1 octave per side: high and low C."
-        ).define("extend_octaves", true);
         FIXED_TOUCH = configBuilder.comment(
             "Defines whether the velocity of a note press will not affect the instrument's volume"
         ).define("fixed_touch", false);

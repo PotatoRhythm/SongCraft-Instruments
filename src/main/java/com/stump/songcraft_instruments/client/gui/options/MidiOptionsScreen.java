@@ -127,22 +127,8 @@ public class MidiOptionsScreen extends AbstractInstrumentOptionsScreen {
     }
         
     protected void initThatOtherSection(final GridLayout grid, final RowHelper rowHelper) {
-        final boolean canInstrumentOverflow = instrumentScreen.map((screen) -> screen.midiReceiver.allowMidiOverflow())
-            .orElse(false);
-
-        if (canInstrumentOverflow) {
-            final CycleButton<Boolean> extendOctaves = CycleButton.booleanBuilder(CommonComponents.OPTION_ON, CommonComponents.OPTION_OFF)
-                .withInitialValue(ModClientConfigs.EXTEND_OCTAVES.get())
-                .withTooltip((value) -> Tooltip.create(Component.translatable("button.songcraft_instruments.extendOctaves.tooltip")))
-                .create(0, 0,
-                    getSmallButtonWidth(), getButtonHeight(),
-                    Component.translatable("button.songcraft_instruments.extendOctaves"), this::onExtendOctavesChanged
-                );
-            rowHelper.addChild(extendOctaves);
-        }
-
         final SliderButton octaveShift = new SliderButton(
-            canInstrumentOverflow ? getSmallButtonWidth() : getBigButtonWidth(),
+            getBigButtonWidth(),
             ModClientConfigs.OCTAVE_SHIFT.get(), MIN_OCTAVE_SHIFT, MAX_OCTAVE_SHIFT) {
 
                 @Override
@@ -157,7 +143,7 @@ public class MidiOptionsScreen extends AbstractInstrumentOptionsScreen {
                     onOctaveShiftChanged(this, (int) getValueClamped());
                 }
         };
-        rowHelper.addChild(octaveShift, canInstrumentOverflow ? 1 : 2);
+        rowHelper.addChild(octaveShift, 2);
 
 
         final SliderButton midiChannel = new SliderButton(getSmallButtonWidth(),
@@ -222,9 +208,6 @@ public class MidiOptionsScreen extends AbstractInstrumentOptionsScreen {
     }
 
     
-    protected void onExtendOctavesChanged(final CycleButton<Boolean> button, final boolean value) {
-        ModClientConfigs.EXTEND_OCTAVES.set(value);
-    }
     protected void onOctaveShiftChanged(final AbstractSliderButton button, final int value) {
         if (ModClientConfigs.OCTAVE_SHIFT.get() != value)
             ModClientConfigs.OCTAVE_SHIFT.set(value);

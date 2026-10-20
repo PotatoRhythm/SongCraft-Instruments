@@ -13,7 +13,7 @@ public enum GuitarSoundType implements LayoutSoundType {
     STEEL(3, () -> new SoundOption(SCSounds.GUITAR_STEEL)),
     SKY_GUITAR(2, () -> new SoundOption(SCSounds.SKY_GUITAR)),
     SKY_TOY_UKULELE(2, () -> new SoundOption(SCSounds.SKY_TOY_UKULELE)),
-    HATO_LUNGHE(2, () -> new SoundOption(SCSounds.HEARTOPIA_LUNGHE)),
+    HATO_LUTE(2, () -> new SoundOption(SCSounds.HEARTOPIA_LUTE)),
     FF14_LUTE(3, () -> new SoundOption(SCSounds.FF14_LUTE));
 
     private final int rows;

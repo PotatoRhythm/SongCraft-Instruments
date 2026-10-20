@@ -74,7 +74,7 @@ public class SoundJsonGenerator extends SoundDefinitionsProvider {
         registerInstrument("heartopia_hang", 13, 0.878f, false, true);
         registerInstrument("heartopia_acoustic_bass", 13, 1f, false, true);
         registerInstrument("heartopia_concertina", 13, 1f, true, true);
-        registerInstrument("heartopia_lunghe", 13, 0.759f, false, true);
+        registerInstrument("heartopia_lute", 13, 0.759f, false, true);
         registerInstrument("heartopia_xiao", 13, 1f, true, true);
         registerInstrument("heartopia_bagpipes", 13, 1f, true, true);
         registerInstrument("heartopia_cello", 13, 1f, true, true);

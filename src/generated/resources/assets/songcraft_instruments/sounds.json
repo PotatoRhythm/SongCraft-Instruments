@@ -23796,240 +23796,240 @@
       }
     ]
   },
-  "heartopia_lunghe_note_0": {
+  "heartopia_lute_note_0": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/0",
+        "name": "songcraft_instruments:heartopia_lute/0",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_0_stereo": {
+  "heartopia_lute_note_0_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/0.stereo",
+        "name": "songcraft_instruments:heartopia_lute/0.stereo",
         "volume": 0.519089
       }
     ]
   },
-  "heartopia_lunghe_note_1": {
+  "heartopia_lute_note_1": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/1",
+        "name": "songcraft_instruments:heartopia_lute/1",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_10": {
+  "heartopia_lute_note_10": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/10",
+        "name": "songcraft_instruments:heartopia_lute/10",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_10_stereo": {
+  "heartopia_lute_note_10_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/10.stereo",
+        "name": "songcraft_instruments:heartopia_lute/10.stereo",
         "volume": 0.53733087
       }
     ]
   },
-  "heartopia_lunghe_note_11": {
+  "heartopia_lute_note_11": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/11",
+        "name": "songcraft_instruments:heartopia_lute/11",
         "volume": 0.43175936
       }
     ]
   },
-  "heartopia_lunghe_note_11_stereo": {
+  "heartopia_lute_note_11_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/11.stereo",
+        "name": "songcraft_instruments:heartopia_lute/11.stereo",
         "volume": 0.46799564
       }
     ]
   },
-  "heartopia_lunghe_note_12": {
+  "heartopia_lute_note_12": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/12",
+        "name": "songcraft_instruments:heartopia_lute/12",
         "volume": 0.74172306
       }
     ]
   },
-  "heartopia_lunghe_note_12_stereo": {
+  "heartopia_lute_note_12_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/12.stereo",
+        "name": "songcraft_instruments:heartopia_lute/12.stereo",
         "volume": 0.6386189
       }
     ]
   },
-  "heartopia_lunghe_note_13": {
+  "heartopia_lute_note_13": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/13",
+        "name": "songcraft_instruments:heartopia_lute/13",
         "volume": 0.70023173
       }
     ]
   },
-  "heartopia_lunghe_note_13_stereo": {
+  "heartopia_lute_note_13_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/13.stereo",
+        "name": "songcraft_instruments:heartopia_lute/13.stereo",
         "volume": 0.5311801
       }
     ]
   },
-  "heartopia_lunghe_note_1_stereo": {
+  "heartopia_lute_note_1_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/1.stereo",
+        "name": "songcraft_instruments:heartopia_lute/1.stereo",
         "volume": 0.519089
       }
     ]
   },
-  "heartopia_lunghe_note_2": {
+  "heartopia_lute_note_2": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/2",
+        "name": "songcraft_instruments:heartopia_lute/2",
         "volume": 0.66106135
       }
     ]
   },
-  "heartopia_lunghe_note_2_stereo": {
+  "heartopia_lute_note_2_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/2.stereo",
+        "name": "songcraft_instruments:heartopia_lute/2.stereo",
         "volume": 0.6687161
       }
     ]
   },
-  "heartopia_lunghe_note_3": {
+  "heartopia_lute_note_3": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/3",
+        "name": "songcraft_instruments:heartopia_lute/3",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_3_stereo": {
+  "heartopia_lute_note_3_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/3.stereo",
+        "name": "songcraft_instruments:heartopia_lute/3.stereo",
         "volume": 0.5824274
       }
     ]
   },
-  "heartopia_lunghe_note_4": {
+  "heartopia_lute_note_4": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/4",
+        "name": "songcraft_instruments:heartopia_lute/4",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_4_stereo": {
+  "heartopia_lute_note_4_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/4.stereo",
+        "name": "songcraft_instruments:heartopia_lute/4.stereo",
         "volume": 0.5311801
       }
     ]
   },
-  "heartopia_lunghe_note_5": {
+  "heartopia_lute_note_5": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/5",
+        "name": "songcraft_instruments:heartopia_lute/5",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_5_stereo": {
+  "heartopia_lute_note_5_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/5.stereo",
+        "name": "songcraft_instruments:heartopia_lute/5.stereo",
         "volume": 0.49572608
       }
     ]
   },
-  "heartopia_lunghe_note_6": {
+  "heartopia_lute_note_6": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/6",
+        "name": "songcraft_instruments:heartopia_lute/6",
         "volume": 0.759
       }
     ]
   },
-  "heartopia_lunghe_note_6_stereo": {
+  "heartopia_lute_note_6_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/6.stereo",
+        "name": "songcraft_instruments:heartopia_lute/6.stereo",
         "volume": 0.48444197
       }
     ]
   },
-  "heartopia_lunghe_note_7": {
+  "heartopia_lute_note_7": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/7",
+        "name": "songcraft_instruments:heartopia_lute/7",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_7_stereo": {
+  "heartopia_lute_note_7_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/7.stereo",
+        "name": "songcraft_instruments:heartopia_lute/7.stereo",
         "volume": 0.5498469
       }
     ]
   },
-  "heartopia_lunghe_note_8": {
+  "heartopia_lute_note_8": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/8",
+        "name": "songcraft_instruments:heartopia_lute/8",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_8_stereo": {
+  "heartopia_lute_note_8_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/8.stereo",
+        "name": "songcraft_instruments:heartopia_lute/8.stereo",
         "volume": 0.5562138
       }
     ]
   },
-  "heartopia_lunghe_note_9": {
+  "heartopia_lute_note_9": {
     "sounds": [
       {
         "attenuation_distance": 32,
-        "name": "songcraft_instruments:heartopia_lunghe/9",
+        "name": "songcraft_instruments:heartopia_lute/9",
         "volume": 0.57576036
       }
     ]
   },
-  "heartopia_lunghe_note_9_stereo": {
+  "heartopia_lute_note_9_stereo": {
     "sounds": [
       {
-        "name": "songcraft_instruments:heartopia_lunghe/9.stereo",
+        "name": "songcraft_instruments:heartopia_lute/9.stereo",
         "volume": 0.5626545
       }
     ]

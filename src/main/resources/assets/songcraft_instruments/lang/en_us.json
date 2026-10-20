@@ -70,8 +70,6 @@
     "button.songcraft_instruments.fixedTouch.tooltip": "Defines whether the velocity of a note press will not affect the instrument's volume",
     "button.songcraft_instruments.inputSensitivity": "Sensitivity",
 
-    "button.songcraft_instruments.extendOctaves": "Extend Octaves",
-    "button.songcraft_instruments.extendOctaves.tooltip": "When a note that is higher/lower than the usual octave range is played, will automatically adjust the pitch to match your playings. Can only extend up to 1 octave per side: high and low C.\nBlame Minecraft.",
 
     "button.songcraft_instruments.midiOctaveShift": "Octave Shift",
     "button.songcraft_instruments.midiChannel": "MIDI Channel",
@@ -129,7 +127,7 @@
     "button.songcraft_instruments.guitar.soundType.steel": "Steel",
     "button.songcraft_instruments.guitar.soundType.sky_guitar": "Guitar (Sky)",
     "button.songcraft_instruments.guitar.soundType.sky_toy_ukulele": "Toy Ukulele (Sky)",
-    "button.songcraft_instruments.guitar.soundType.hato_lunghe": "Lunghe (Hato)",
+    "button.songcraft_instruments.guitar.soundType.hato_lute": "Lute (Hato)",
     "button.songcraft_instruments.guitar.soundType.ff14_lute": "Lute (FF)",
 
     "button.songcraft_instruments.electric_guitar.soundType": "Sound",

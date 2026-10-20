@@ -196,6 +196,10 @@ public abstract class GridInstrumentScreen extends InstrumentScreen implements I
      * @return The corresponding note button
      */
     public NoteButton getNoteButtonByMIDINote(final int note) {
+        // A negative note would give a negative column
+        if (note < 0)
+            return null;
+
         final int column = note % columns();
         final int row = note / columns();
 

@@ -43,7 +43,7 @@ public class SCSounds {
         HEARTOPIA_LYRE = nsr(loc("heartopia_lyre")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         HEARTOPIA_HANG = nsr(loc("heartopia_hang")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         HEARTOPIA_ACOUSTIC_BASS = nsr(loc("heartopia_acoustic_bass")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
-        HEARTOPIA_LUNGHE = nsr(loc("heartopia_lunghe")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
+        HEARTOPIA_LUTE = nsr(loc("heartopia_lute")).stereo().registerGrid(GridInstrumentScreen.DEF_COLUMNS, 2),
         HEARTOPIA_CAJON = nsr(loc("heartopia_cajon")).stereo().registerGrid(2, 4),
         HEARTOPIA_CONGA_BONGOS = nsr(loc("heartopia_conga_bongos")).stereo().registerGrid(2, 4),
 

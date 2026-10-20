@@ -37,7 +37,7 @@ Sound types are listed in the order they appear in game.
 - **Guitar (EMI)** — From the [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). Original samples by the [Philharmonia Orchestra](https://github.com/skratchdot/philharmonia-samples), licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
 - **Steel** — Made from the Steel Guitar preset of the [GeneralUser GS](https://schristiancollins.com/generaluser.php) soundfont by S. Christian Collins, licensed under the [GeneralUser GS License v2.0](https://github.com/mrbumpy409/GeneralUser-GS/blob/main/documentation/LICENSE.txt). Rendered into individual notes for this mod.
 - **Guitar (Sky)**, **Toy Ukulele (Sky)** — See [Sky](#sky) under Game Sounds.
-- **Lunghe (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
+- **Lute (Hato)** — See [Heartopia](#heartopia) under Game Sounds.
 - **Lute (FF)** — See [Final Fantasy XIV](#final-fantasy-xiv) under Game Sounds.
 
 ### Trombone
@@ -234,7 +234,7 @@ Sound types are listed in the order they appear in game.
 
 - Keyboard — Piano (Hato)
 - Violin — Violin (Hato)
-- Guitar — Lunghe (Hato)
+- Guitar — Lute (Hato)
 - Saxophone — Sax (Hato)
 - Harp — Harp (Hato), Lyre (Hato)
 - Cello — Cello (Hato)
