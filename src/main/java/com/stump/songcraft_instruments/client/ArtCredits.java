@@ -13,7 +13,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +26,8 @@ import java.util.Map;
 public class ArtCredits {
     private static final int SOLFIST_RED = 0xFF5555;
     private static final int APOLLO_PINK = 0xFFB3D9;
+    /** For artists whose colour preference isn't known */
+    private static final int WHITE = 0xFFFFFF;
 
     private enum ArtType {
         MODEL, SPRITE;
@@ -40,27 +44,47 @@ public class ArtCredits {
         }
     }
 
-    private static Map<Item, Credit> credits;
+    private static Map<Item, List<Credit>> credits;
 
-    private static Map<Item, Credit> credits() {
+    private static Map<Item, List<Credit>> credits() {
         // Items only exist after registration, so the map is built on first use
         if (credits == null) {
             credits = new HashMap<>();
-            credits.put(ModItems.GW2_BASS.get(), new Credit(ArtType.MODEL, "Solfist", SOLFIST_RED));
-            credits.put(ModItems.MICROPHONE.get(), new Credit(ArtType.MODEL, "Apollo", APOLLO_PINK));
-            credits.put(ModItems.MICROPHONE_STAND.get(), new Credit(ArtType.MODEL, "Apollo", APOLLO_PINK));
-            credits.put(ModItems.DRUMSET.get(), new Credit(ArtType.MODEL, "Apollo", APOLLO_PINK));
+            credit(ModItems.GW2_BASS.get(), ArtType.MODEL, "Solfist", SOLFIST_RED);
+            credit(ModItems.MICROPHONE.get(), ArtType.MODEL, "Apollo", APOLLO_PINK);
+            credit(ModItems.MICROPHONE_STAND.get(), ArtType.MODEL, "Apollo", APOLLO_PINK);
+            credit(ModItems.DRUMSET.get(), ArtType.MODEL, "Apollo", APOLLO_PINK);
+
+            // From Genshin Instruments and Even More Instruments!
+            for (Item item : List.of(ModItems.WINDSONG_LYRE.get(), ModItems.VINTAGE_LYRE.get(),
+                    ModItems.FLORAL_ZITHER.get(), ModItems.GLORIOUS_DRUM.get(), ModItems.NIGHTWIND_HORN.get(),
+                    ModItems.UKULELE.get(), ModItems.DJEM_DJEM_DRUM.get(), ModItems.VIOLIN.get(),
+                    ModItems.VIOLIN_BOW.get(), ModItems.GUITAR.get(), ModItems.PIPA.get(), ModItems.BACHI.get(),
+                    ModItems.SHAMISEN.get(), ModItems.NOTE_BLOCK_INSTRUMENT.get()))
+                credit(item, ArtType.SPRITE, "Gen", WHITE);
+            for (Item item : List.of(ModItems.NIGHTWIND_HORN.get(), ModItems.KEYBOARD.get(),
+                    ModItems.KEYBOARD_STAND.get(), ModItems.KOTO.get(), ModItems.TROMBONE.get(),
+                    ModItems.SAXOPHONE.get()))
+                credit(item, ArtType.MODEL, "StavWasPlayZ", WHITE);
+            for (Item item : List.of(ModItems.LOOPER_ADAPTER.get(), ModItems.RECORD_WRITABLE.get()))
+                credit(item, ArtType.SPRITE, "StavWasPlayZ", WHITE);
         }
         return credits;
     }
 
+    private static void credit(Item item, ArtType type, String artist, int color) {
+        credits.computeIfAbsent(item, (key) -> new ArrayList<>()).add(new Credit(type, artist, color));
+    }
+
     @SubscribeEvent
     public static void onItemTooltip(final ItemTooltipEvent event) {
-        final Credit credit = credits().get(event.getItemStack().getItem());
-        if (credit == null)
+        final List<Credit> itemCredits = credits().get(event.getItemStack().getItem());
+        if (itemCredits == null)
             return;
 
         // Index 0 is the item's name
-        event.getToolTip().add(Math.min(1, event.getToolTip().size()), credit.toComponent());
+        final int index = Math.min(1, event.getToolTip().size());
+        for (int i = 0; i < itemCredits.size(); i++)
+            event.getToolTip().add(index + i, itemCredits.get(i).toComponent());
     }
 }

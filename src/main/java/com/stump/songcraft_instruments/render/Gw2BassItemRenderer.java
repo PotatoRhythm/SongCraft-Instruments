@@ -11,9 +11,11 @@ import net.minecraft.core.Direction;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.cache.object.GeoCube;
 import software.bernie.geckolib.cache.object.GeoQuad;
+import software.bernie.geckolib.cache.object.GeoVertex;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
 import software.bernie.geckolib.util.RenderUtils;
 
@@ -22,6 +24,8 @@ public class Gw2BassItemRenderer extends GeoItemRenderer<Gw2BassItem> {
     private static final String STRING_BONE_PREFIX = "String ";
     /** Which way the strings swing across the fretboard, as a bone position per pixel */
     private static final float ACROSS_X = -0.612f, ACROSS_Z = -0.791f;
+    /** The centre of a texel in the middle of a string's texture, in the strings' usual silver */
+    private static final float STRING_TEXEL_U = 211.5f / 256, STRING_TEXEL_V = 90.5f / 256;
 
     /** Whether the bone being rendered is a string */
     private boolean renderingString;
@@ -70,9 +74,18 @@ public class Gw2BassItemRenderer extends GeoItemRenderer<Gw2BassItem> {
         final Matrix4f poseState = poseStack.last().pose();
         final Vector3f normal = normalisedPoseState.transform(new Vector3f(Direction.UP.step()));
 
+        // Every face is also coloured from the same texel, so that the strings are one flat colour rather than speckled
         for (GeoQuad quad : cube.quads()) {
-            if (quad != null)
-                createVerticesOfQuad(quad, poseState, normal, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+            if (quad == null)
+                continue;
+
+            for (GeoVertex vertex : quad.vertices()) {
+                final Vector3f position = vertex.position();
+                final Vector4f transformed = poseState.transform(new Vector4f(position.x(), position.y(), position.z(), 1));
+
+                buffer.vertex(transformed.x(), transformed.y(), transformed.z(), red, green, blue, alpha,
+                    STRING_TEXEL_U, STRING_TEXEL_V, packedOverlay, packedLight, normal.x(), normal.y(), normal.z());
+            }
         }
     }
 }
