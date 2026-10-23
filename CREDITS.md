@@ -19,13 +19,13 @@ Artists are also credited in game, in each item's tooltip.
 
 - **Solfist** — GW2 Bass.
 - **Apollo** — Microphone, Microphone Stand, Drumset.
-- **StavWasPlayZ** — Nightwind Horn, Keyboard, Keyboard Stand, Koto, Trombone, Saxophone. From the original mods; the Keyboard, Koto and Trombone were converted for this mod's animations.
+- **StavWasPlayZ** ([Modrinth](https://modrinth.com/user/StavWasPlayZ)) — Nightwind Horn, Keyboard, Keyboard Stand, Koto, Trombone, Saxophone. From the original mods; the Keyboard, Koto and Trombone were converted for this mod's animations.
 
 ### Sprites and Textures
 
-- **Gen** ([PlanetMinecraft](https://www.planetminecraft.com/member/gen/), [Modrinth](https://modrinth.com/user/GenMode)) — Windsong Lyre, Vintage Lyre, Floral Zither, Glorious Drum, Nightwind Horn, Ukulele, Djem Djem Drum, Violin, Violin Bow, Guitar, Pipa, Bachi, Shamisen, Note Block Instrument. Made for the original mods.
+- **GenMode** ([Modrinth](https://modrinth.com/user/GenMode)) — Windsong Lyre, Vintage Lyre, Floral Zither, Glorious Drum, Nightwind Horn, Ukulele, Djem Djem Drum, Violin, Violin Bow, Guitar, Pipa, Bachi, Shamisen, Note Block Instrument. Made for the original mods.
 - **Apollo** — Keyboard (new texture for StavWasPlayZ's model).
-- **StavWasPlayZ** — Looper Adapter, Writable Record and the Looper's block textures. From the original mods.
+- **StavWasPlayZ** ([Modrinth](https://modrinth.com/user/StavWasPlayZ)) — Looper Adapter, Writable Record and the Looper's block textures. From the original mods.
 
 ---
 

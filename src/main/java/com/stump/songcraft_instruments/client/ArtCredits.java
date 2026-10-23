@@ -61,7 +61,7 @@ public class ArtCredits {
                     ModItems.UKULELE.get(), ModItems.DJEM_DJEM_DRUM.get(), ModItems.VIOLIN.get(),
                     ModItems.VIOLIN_BOW.get(), ModItems.GUITAR.get(), ModItems.PIPA.get(), ModItems.BACHI.get(),
                     ModItems.SHAMISEN.get(), ModItems.NOTE_BLOCK_INSTRUMENT.get()))
-                credit(item, ArtType.SPRITE, "Gen", WHITE);
+                credit(item, ArtType.SPRITE, "GenMode", WHITE);
             for (Item item : List.of(ModItems.NIGHTWIND_HORN.get(), ModItems.KEYBOARD.get(),
                     ModItems.KEYBOARD_STAND.get(), ModItems.KOTO.get(), ModItems.TROMBONE.get(),
                     ModItems.SAXOPHONE.get()))

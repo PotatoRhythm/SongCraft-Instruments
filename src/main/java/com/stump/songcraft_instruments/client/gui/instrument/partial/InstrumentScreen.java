@@ -12,6 +12,7 @@ import com.stump.songcraft_instruments.client.gui.options.partial.AbstractInstru
 import com.stump.songcraft_instruments.client.gui.options.partial.InstrumentOptionsScreen;
 import com.stump.songcraft_instruments.client.gui.widget.IconToggleButton;
 import com.stump.songcraft_instruments.client.gui.widget.SliderButton;
+import com.stump.songcraft_instruments.client.gui.widget.SoundLabel;
 import com.stump.songcraft_instruments.client.keyMaps.InstrumentKeyMappings;
 import com.stump.songcraft_instruments.client.midi.InstrumentMidiReceiver;
 import com.stump.songcraft_instruments.event.InstrumentPlayedEvent;
@@ -43,6 +44,8 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -356,6 +359,12 @@ public abstract class InstrumentScreen extends Screen {
             AbstractButton soundTypeButton = createSoundTypeButton(soundTypeOption, 100);
             soundTypeButton.setPosition(btn.getX() + btn.getWidth() + 6, btn.getY());
             addRenderableWidget(soundTypeButton);
+        } else {
+            final SoundLabel soundLabel = createSoundLabel(100);
+            if (soundLabel != null) {
+                soundLabel.setPosition(btn.getX() + btn.getWidth() + 6, btn.getY());
+                addRenderableWidget(soundLabel);
+            }
         }
 
         return btn;
@@ -845,6 +854,8 @@ public abstract class InstrumentScreen extends Screen {
 
     private SoundType preferredSoundType;
 
+    private static final String SOUND_LABEL_KEY = "button." + SCInstrumentMod.MODID + ".sound";
+
     /**
      * @return The sound type currently chosen for this instrument, or null if it has no {@link #soundTypeOption sound types}
      */
@@ -875,6 +886,7 @@ public abstract class InstrumentScreen extends Screen {
         return CycleButton.<T>builder((soundType) ->
                 Component.translatable(option.buttonKey() + "." + soundType.getName()))
                 .withValues(option.values()).withInitialValue((T) getPreferredSoundType())
+                .withTooltip((soundType) -> creditTooltip(option.buttonKey() + "." + soundType.getName()))
                 .create(0, 0, width, optionsScreen.getButtonHeight(),
                         Component.translatable(option.buttonKey()),
                         (btn, soundType) -> {
@@ -882,6 +894,30 @@ public abstract class InstrumentScreen extends Screen {
                             optionsScreen.queueToSave(getInstrumentId().getPath() + "_sound_type", () -> option.config().set(soundType));
                         }
                 );
+    }
+
+    /**
+     * @return A label naming this instrument's only sound, in place of a sound type button,
+     * or null if it has no name for its sound in the translation files
+     */
+    private @Nullable SoundLabel createSoundLabel(final int width) {
+        final String key = "button." + getInstrumentId().getNamespace() + "." + getInstrumentId().getPath() + ".sound";
+        if (!I18n.exists(key))
+            return null;
+
+        final SoundLabel label = new SoundLabel(0, 0, width, optionsScreen.getButtonHeight(),
+            CommonComponents.optionNameValue(Component.translatable(SOUND_LABEL_KEY), Component.translatable(key)));
+        label.setTooltip(creditTooltip(key));
+        return label;
+    }
+
+    /**
+     * @param soundKey The translation key of a sound's name
+     * @return A tooltip crediting where the sound is from, or null if it has no credit in the translation files
+     */
+    private static @Nullable Tooltip creditTooltip(final String soundKey) {
+        final String key = soundKey + ".credit";
+        return I18n.exists(key) ? Tooltip.create(Component.translatable(key)) : null;
     }
 
     //#endregion
