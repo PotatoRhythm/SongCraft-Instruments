@@ -84,7 +84,7 @@ Sound types are listed in the order they appear in game.
 
 ### Shamisen
 
-- **Shamisen (EMI)** — From the [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html).
+- **Shamisen (EMI)** — From the [Even More Instruments!](https://github.com/StavWasPlayZ/Even-More-Instruments) mod by StavWasPlayZ, licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html). Original samples from the Roland SC-88 sound module by Roland.
 
 ### Koto
 
